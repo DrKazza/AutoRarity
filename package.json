@@ -1,0 +1,23 @@
+{
+  "name": "autorarity",
+  "version": "1.0.0",
+  "description": "Autolevelling for the Rarity NFTs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DrKazza/AutoRarity.git"
+  },
+  "author": "DrKazza",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DrKazza/AutoRarity/issues"
+  },
+  "homepage": "https://github.com/DrKazza/AutoRarity#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "web3": "^1.5.2"
+  }
+}
