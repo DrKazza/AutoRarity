@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/DrKazza/AutoRarity#readme",
   "dependencies": {
+    "@ethersproject/providers": "^5.4.5",
     "dotenv": "^10.0.0",
+    "ethers": "^5.4.6",
     "web3": "^1.5.2"
   }
 }
