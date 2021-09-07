@@ -11,10 +11,12 @@
 // and the numbers and make sure you have the quote marks
 
 const liveTrading = false;
+const maxGasPx = 250 // usually 50, sometimes this spikes to nearly 200
+var dummyTokenIds = '111,222,333';
+
 
 require("dotenv").config();
 var myTokenIds = [];
-var dummyTokenIds = '111,222,333';
 
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
@@ -38,7 +40,6 @@ const provider = new JsonRpcProvider(url);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(provider);
 
-const maxGasPx = 100 // usually 50, sometimes this spikes to nearly 200
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 const totalGasLimit = 75000 // 65,000 seems sensible for general xping up
 
@@ -87,12 +88,11 @@ const getXP = async (tokenIDvalue) => {
 
 const readyForAdventuring = async (tokenIDvalue) => {
     readytime = await getXP(tokenIDvalue)
-    if (Date.now() > readytime[4]) {
+    if ((Date.now()/1000) > readytime[4]) {
         return (true)
     } else {return (false)}
 
 }
-
 
 const earnXP = async (tokenIDvalue)  => {
     let contract = new ethers.Contract(rarityManifested, manifestABI, account);
@@ -101,8 +101,8 @@ const earnXP = async (tokenIDvalue)  => {
         console.log(`Gas Price too high`)
         return [false, tokenIDvalue, 'gas']
     } else {
-        console.log(`Gas Price = ${thisGas}`)
-        if (readyForAdventuring(tokenIDvalue)) {
+//        console.log(`Gas Price = ${thisGas}`)
+        if (await readyForAdventuring(tokenIDvalue)) {
             if (liveTrading) {
                 let approveResponse = await contract.adventure(
                     tokenIDvalue,
@@ -117,7 +117,7 @@ const earnXP = async (tokenIDvalue)  => {
                 return [true, tokenIDvalue, 0];
             }
         } else {
-            console.log(`Too early for this one to level up`)
+//            console.log(`Too early for this one to level up`)
             return [false, tokenIDvalue, 'timing']
         }
     }
@@ -163,13 +163,11 @@ const init = async () => {
         console.log(`\n`)
     }
 
-/*
+
     for (const tokenID of myTokenIds) {
         result = await getXP(tokenID)
         console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, Log_id ${result[4]}\n`);
     }
-    console.log(`Date Now = `+Date.now())
-*/
 }
 
 init();
