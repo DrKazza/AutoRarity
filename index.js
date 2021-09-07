@@ -18,15 +18,15 @@ var dummyTokenIds = '111,222,333';
 
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
-const imporedTokenIds = process.env.TOKENIDS;
+const importedTokenIds = process.env.TOKENIDS;
 
-if (imporedTokenIds === undefined) {
+if (importedTokenIds === undefined) {
     // no imported TokenIds so use the default ones above
     // this just splits a text input into an array
-    myTokenIds = process.env.dummyTokenIds.split(",");
+    myTokenIds = dummyTokenIds.split(",");
 } else {
     // this just splits a text input into an array
-    myTokenIds = process.env.TOKENIDS.split(",");
+    myTokenIds = importedTokenIds.split(",");
 }
 
 const Web3 = require('web3');
@@ -38,7 +38,7 @@ const provider = new JsonRpcProvider(url);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(provider);
 
-const maxGasPx = 65 // usually 50, sometimes this spikes to nearly 200
+const maxGasPx = 100 // usually 50, sometimes this spikes to nearly 200
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 const totalGasLimit = 75000 // 65,000 seems sensible for general xping up
 
@@ -72,7 +72,7 @@ var classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Mo
 // WRITING FUNCTIONS: summon(class) mint a token
 
 
-async function getXP(tokenIDvalue) {
+const getXP = async (tokenIDvalue) => {
     let contract = new web3.eth.Contract(manifestABI, rarityManifested);
     summoner = await contract.methods.summoner(tokenIDvalue).call();
     cur_xp = summoner[0]
@@ -82,29 +82,43 @@ async function getXP(tokenIDvalue) {
     xp_req = await contract.methods.xp_required(level).call()
     cur_xp = cur_xp / (10**18);
     xp_req = xp_req / (10**18);
-    return [level, cur_xp, xp_req, charclass];
+    return [level, cur_xp, xp_req, charclass, log_id];
 } 
+
+const readyForAdventuring = async (tokenIDvalue) => {
+    readytime = await getXP(tokenIDvalue)
+    if (Date.now() > readytime[4]) {
+        return (true)
+    } else {return (false)}
+
+}
+
 
 const earnXP = async (tokenIDvalue)  => {
     let contract = new ethers.Contract(rarityManifested, manifestABI, account);
     let thisGas = await calculateGasPrice()
     if (thisGas === -1) {
         console.log(`Gas Price too high`)
-        return [false, tokenIDvalue]
+        return [false, tokenIDvalue, 'gas']
     } else {
         console.log(`Gas Price = ${thisGas}`)
-        if (liveTrading) {
-            let approveResponse = await contract.adventure(
-                tokenIDvalue,
-                {
-                    gasLimit: totalGasLimit, 
-                    gasPrice: thisGas
-                });
-            console.log(approveResponse);
-            return [true, tokenIDvalue];
+        if (readyForAdventuring(tokenIDvalue)) {
+            if (liveTrading) {
+                let approveResponse = await contract.adventure(
+                    tokenIDvalue,
+                    {
+                        gasLimit: totalGasLimit, 
+                        gasPrice: thisGas
+                    });
+                console.log(approveResponse);
+                return [true, tokenIDvalue, 0];
+            } else {
+                console.log(`Live trading disabled - adventuring NOT submitted.`)
+                return [true, tokenIDvalue, 0];
+            }
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
-            return [true, tokenIDvalue];
+            console.log(`Too early for this one to level up`)
+            return [false, tokenIDvalue, 'timing']
         }
     }
 }
@@ -112,10 +126,14 @@ const earnXP = async (tokenIDvalue)  => {
 const init = async () => {
     var successTokens = [];
     var failTokens = [];
+    var tooEarlyTokens = [];
+
     for (var tokenID of myTokenIds) {
         var tmp = await earnXP(tokenID);
         if (tmp[0]) {
             successTokens.push(tokenID);
+        } else if (tmp[2] === 'timing') {
+            tooEarlyTokens.push(tokenID);            
         } else {
             failTokens.push(tokenID);
         }
@@ -123,6 +141,11 @@ const init = async () => {
     if (successTokens.length != 0) {
         console.log(`Successfully adventured:`)
         for (var thistok of successTokens) {console.log(thistok)}
+        console.log(`\n`)
+    }
+    if (tooEarlyTokens.length != 0) {
+        console.log(`Too Early to Level:`)
+        for (var thistok of tooEarlyTokens) {console.log(thistok)}
         console.log(`\n`)
     }
     
@@ -143,8 +166,9 @@ const init = async () => {
 /*
     for (const tokenID of myTokenIds) {
         result = await getXP(tokenID)
-        console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level\n`);
+        console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, Log_id ${result[4]}\n`);
     }
+    console.log(`Date Now = `+Date.now())
 */
 }
 
