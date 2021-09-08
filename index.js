@@ -103,7 +103,7 @@ const readyForAdventuring = async (tokenIDvalue) => {
 
 }
 
-const earnXP = async (tokenIDvalue)  => {
+const earnXP = async (tokenIDvalue, nonceToUse)  => {
     let contract = new ethers.Contract(rarityManifested, manifestABI, account);
     let thisGas = await calculateGasPrice()
     if (thisGas === -1) {
@@ -113,13 +113,12 @@ const earnXP = async (tokenIDvalue)  => {
 //        console.log(`Gas Price = ${thisGas}`)
         if (await readyForAdventuring(tokenIDvalue)) {
             if (liveTrading) {
-                let latestNonce = await nonceVal();
                 let approveResponse = await contract.adventure(
                     tokenIDvalue,
                     {
                         gasLimit: totalGasLimit, 
                         gasPrice: thisGas,
-                        nonce: latestNonce
+                        nonce: nonceToUse
                     });
                 console.log(approveResponse);
                 return [true, tokenIDvalue, 0];
@@ -147,14 +146,25 @@ const sayTime = (timestamp) => {
 }
 
 const init = async () => {
+    for (const tokenID of myTokenIds) {
+        result = await getXP(tokenID)
+        let timeleft = sayTime(result[4])
+        if (timeleft[0] < 0 ) {
+            console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, READY TO GAIN XP`);
+        } else {
+            console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, Time before next xp ${timeleft[0]}h${timeleft[1]}m`);
+        }
+    }
     var successTokens = [];
     var failTokens = [];
     var tooEarlyTokens = [];
+    let latestNonce = await nonceVal();
 
     for (var tokenID of myTokenIds) {
-        var tmp = await earnXP(tokenID);
+        var tmp = await earnXP(tokenID, latestNonce);
         if (tmp[0]) {
             successTokens.push(tokenID);
+            latestNonce++;
         } else if (tmp[2] === 'timing') {
             tooEarlyTokens.push(tokenID);            
         } else {
@@ -184,15 +194,6 @@ const init = async () => {
         }
         console.log(textstring)
         console.log(`\n`)
-    }
-    for (const tokenID of myTokenIds) {
-        result = await getXP(tokenID)
-        let timeleft = sayTime(result[4])
-        if (timeleft[0] > 0 ) {
-            console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, Time before next xp ${timeleft[0]}h${timeleft[1]}m`);
-        } else {
-            console.log(`${classes[result[3]]} (Token:${tokenID}) is Level ${result[0]} and has ${result[1]}XP, ${result[2]}XP needed to next level, READY TO GAIN XP`);
-        }
     }
 }
 
