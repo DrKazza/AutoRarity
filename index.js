@@ -10,14 +10,24 @@
 // the third is the ids of your rarity tokens, do not put a space between the commas 
 // and the numbers and make sure you have the quote marks
 
+
+// THESE ARE THE IMPORTANT VARIABLES
 const liveTrading = false;
-const maxGasPx = 250 // usually 50, sometimes this spikes to nearly 200
+const autoLevelUp = true;
+const maxGasPx = 200 // usually 50, sometimes this spikes to nearly 200
 var dummyTokenIds = '111,222,333';
+
+
+// These aren't very important to worry about
+var xpRetryDelay = 24 * 60 * 60 // 1 day in seconds - try to level up every 24hrs
+var gasRetryDelay = 5 * 60 // if gas is too expenive then try again in 5 mins
+var xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
+var minimumDelay = 60 // don't repeat too often
+// Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
 
 
 require("dotenv").config();
 var myTokenIds = [];
-
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
 const importedTokenIds = process.env.TOKENIDS;
@@ -44,8 +54,6 @@ const account = wallet.connect(provider);
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 const totalGasLimit = 75000 // 65,000 seems sensible for general xping up
 
-var xpRetryDelay = 24 * 60 * 60 // 1 day in seconds
-var gasRetryDelay = 5 * 60 // if gas is too much then try again in 5 mins
 
 
 const calculateGasPrice = async () => {
@@ -86,11 +94,31 @@ const getXP = async (tokenIDvalue) => {
     return [level, cur_xp, xp_req, charclass, log_id];
 } 
 
+const getStats = async (tokenIDvalue) => {
+    let contract = new web3.eth.Contract(manifestABI, rarityManifested);
+    summoner = await contract.methods.summoner(tokenIDvalue).call();
+    summoner.push(await contract.methods.xp_required(summoner[3]).call());
+    // summoner will be [currentxp, time of next xpgain, char class, level xp to next level]
+    return summoner;
+} 
+
+
+
+
+
 const readyForAdventuring = async (tokenIDvalue) => {
     readytime = await getXP(tokenIDvalue)
     if ((Date.now()/1000) > readytime[4]) {
         return (true)
     } else {return (false)}
+
+}
+
+const readyForLvlUp = async (tokenIDvalue) => {
+    tokenData = await getXP(tokenIDvalue)
+    if (tokenData[1] < readytime[2]) {
+        return (false)
+    } else {return (true)}
 
 }
 
@@ -124,6 +152,37 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
     }
 }
 
+const lvlUp = async (tokenIDvalue, nonceToUse)  => {
+    let contract = new ethers.Contract(rarityManifested, manifestABI, account);
+    let thisGas = await calculateGasPrice()
+    if (thisGas === -1) {
+        console.log(`Gas Price too high`)
+        return [false, tokenIDvalue, 'gas']
+    } else {
+        if (await readyForLvlUp(tokenIDvalue) && autoLevelUp) {
+            if (liveTrading) {
+                let approveResponse = await contract.level_up(
+                    tokenIDvalue,
+                    {
+                        gasLimit: totalGasLimit, 
+                        gasPrice: thisGas,
+                        nonce: nonceToUse
+                    });
+                console.log(approveResponse);
+                return [true, tokenIDvalue, 0];
+            } else {
+                console.log(`Levelling up disabled - NOT submitted.`)
+                return [true, tokenIDvalue, 0];
+            }
+        } else {
+//            console.log(`Too early for this one to level up`)
+            return [false, tokenIDvalue, 'timing']
+        }
+    }
+}
+
+
+
 const sayTime = (timestamp) => {
     let rightNow = Date.now()/1000
     let timeleft = timestamp - rightNow
@@ -137,6 +196,27 @@ const sayTime = (timestamp) => {
 }
 
 const checkTokens = async () => {
+    let latestNonce = await nonceVal();
+    let delayToUse = xpRetryDelay;
+    for (var tokenID of myTokenIds) {
+        tokenStats = await getStats(tokenID);
+        xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
+        xpPending = 0
+        if (xpCountdown < 0) {
+            xpEarnAttempt = await earnXP(tokenID, latestNonce)
+            // if this is a success we need to change
+            //xpPending to 250 and up the nonce
+        } else {
+            delayToUse = Math.max(Math.min(xpCountdown, delayToUse), minimumDelay)
+        }
+        if (tokenStats[4] <= (xpPending + tokenStats[0])) {
+            delayToUse = Math.max(Math.min(xpPendingDelay, delayToUse), minimumDelay)
+        }
+    }
+}
+
+
+const checkTokens2 = async () => {
     let delayToUse = xpRetryDelay;
     for (const tokenID of myTokenIds) {
         result = await getXP(tokenID)
@@ -171,7 +251,7 @@ const checkTokens = async () => {
         console.log(`\n`)
     }
     if (tooEarlyTokens.length != 0) {
-        console.log(`Too Early to Level:`)
+        console.log(`Too Early to adventure:`)
         for (var thistok of tooEarlyTokens) {console.log(thistok)}
         console.log(`\n`)
     }
@@ -189,7 +269,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 const init = async () => {
     while (true) {
-        thisLoopDelay = Math.floor(await checkTokens())
+        thisLoopDelay = Math.floor(await checkTokens2())
         console.log(`time delay = ${thisLoopDelay}`)
         await delay(thisLoopDelay*1000);
     }
@@ -201,13 +281,13 @@ init();
 
 
 
-// Manifested READING FUNCTIONS: summoner(tokenid) just returns the level, current experience, xp for next level, the character class and the time when new experience can be gained
+// Manifested READING FUNCTIONS: summoner(tokenid) just returns the currentxp, time of next xpgain, char class, level xp to next level
 // Manifested READING FUNCTIONS: id(classnumber) returns the class of the rarity - same as the array above.
 // Manifested READING FUNCTIONS: xp_required(current level) returns the total xp needed to level up (=curlvl*1000).
 // Manifested READING FUNCTIONS: tokenURI(tokenID) returns a load of stuff... loads of it!
 
 // Manifested WRITING FUNCTIONS: adventure(tokenid) gain XP per day
-// Manifested WRITING FUNCTIONS: spend_xp(tokenid, xp) spend xp (remember to multiply by 10e18)
+// Manifested WRITING FUNCTIONS: spend_xp(tokenid, xp) spend xp (remember to multiply by 10e18) - not sure this gains anything though! BE CAREFUL
 // Manifested WRITING FUNCTIONS: level_up(tokenid) lose XP to gain a level
 // Manifested WRITING FUNCTIONS: summon(class) mint a token
 
