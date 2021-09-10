@@ -1,9 +1,11 @@
 // YOU NEED TO CREATE A FILE CALLED .env
-// it needs to have 3 variables
+// it needs to have 5 variables
 //
 // WALLETADDRESS = '0xcABC123ABC123ABC123'
 // SECRETKEY = 'house cards bakery muppet grizzly head tyre back face'
 // TOKENIDS = '444,555,666'
+// LIVETRADING = 'false'   change this to LIVETRADING = 'true' when you're ready to run
+// MAXGAS = '250'  this defaults to 250 if you've not specified it
 //
 // the first is obviously your wallet
 // the secret key is your phrase for your wallet so you can pay for gas
@@ -11,36 +13,36 @@
 // and the numbers and make sure you have the quote marks
 
 
-// THESE ARE THE IMPORTANT VARIABLES
-const liveTrading = true;
 const autoLevelUp = true; // you may not want to automatically level up your char
-const maxGasPx = 150 // usually 50-100, sometimes this spikes to nearly 200
-var dummyTokenIds = '111,222,333';
-
-
-// These aren't very important to worry about
+const defaultMaxGasPx = 250 // usually 50-100, sometimes this spikes to nearly 200
+var dummyTokenIds = '111,222,333'; // just in case you forget to specify
 const xpRetryDelay = 24 * 60 * 60 // 1 day in seconds - try to level up every 24hrs
 const gasRetryDelay = 5 * 60 // if gas is too expenive then try again in 5 mins
 const xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
 const minimumDelay = 60 // don't repeat too often
 // Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
 const totalGasLimit = 75000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling
-
+const parseBool = (val) => {return val === true || val === 'true'}
 
 
 require("dotenv").config();
 var myTokenIds = [];
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
+
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
-    // no imported TokenIds so use the default ones above
-    // this just splits a text input into an array
     myTokenIds = dummyTokenIds.split(",");
-} else {
-    // this just splits a text input into an array
-    myTokenIds = importedTokenIds.split(",");
-}
+    console.log(`Did you forget to specify your tokens in the .env file?`)
+    process.exit(0)
+} else {myTokenIds = importedTokenIds.split(",");}
+
+const liveTradingVar = process.env.LIVETRADING;
+if (liveTradingVar === undefined){liveTrading = false} else {liveTrading = parseBool(liveTradingVar)}
+
+const maxGasPxVar = process.env.MAXGAS;
+if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = number(maxGasPxVar)}
+
 
 const Web3 = require('web3');
 const ethers = require('ethers');
