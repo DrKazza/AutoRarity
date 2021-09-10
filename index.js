@@ -21,7 +21,7 @@ const gasRetryDelay = 5 * 60 // if gas is too expenive then try again in 5 mins
 const xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
 const minimumDelay = 60 // don't repeat too often
 // Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
-const totalGasLimit = 75000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling
+const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
 const parseBool = (val) => {return val === true || val === 'true'}
 
 
