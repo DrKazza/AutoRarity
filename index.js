@@ -156,7 +156,7 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
             console.log(approveResponse);
             return [true, 'success'];
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            console.log(`Live trading disabled - levelling NOT submitted.`)
             return [false, 'not live'];
         }
     }
