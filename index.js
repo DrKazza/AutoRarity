@@ -41,7 +41,7 @@ const liveTradingVar = process.env.LIVETRADING;
 if (liveTradingVar === undefined){liveTrading = false} else {liveTrading = parseBool(liveTradingVar)}
 
 const maxGasPxVar = process.env.MAXGAS;
-if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = number(maxGasPxVar)}
+if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
 
 
 const Web3 = require('web3');
@@ -59,7 +59,7 @@ const calculateGasPrice = async () => {
     let spotPx = await web3.eth.getGasPrice();
     let spotPxBN = ethers.BigNumber.from(spotPx.toString())
     if (spotPxBN.gte(maxGasPrice)) {
-        return -1
+        return -(Math.floor(spotPx/(10**9)))
     } else {
         return spotPxBN
     }
@@ -76,6 +76,9 @@ const manifestABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType"
 const rarityAttributes = '0xB5F5AF1087A8DA62A23b08C00C6ec9af21F397a1'; // the contract to increase attributes
 const attributesABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":false,"internalType":"uint256","name":"summoner","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"strength","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"dexterity","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"constitution","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"intelligence","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"wisdom","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"charisma","type":"uint32"}],"name":"Created","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"leveler","type":"address"},{"indexed":false,"internalType":"uint256","name":"summoner","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"strength","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"dexterity","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"constitution","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"intelligence","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"wisdom","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"charisma","type":"uint32"}],"name":"Leveled","type":"event"},{"inputs":[{"internalType":"uint256","name":"current_level","type":"uint256"}],"name":"abilities_by_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"ability_scores","outputs":[{"internalType":"uint32","name":"strength","type":"uint32"},{"internalType":"uint32","name":"dexterity","type":"uint32"},{"internalType":"uint32","name":"constitution","type":"uint32"},{"internalType":"uint32","name":"intelligence","type":"uint32"},{"internalType":"uint32","name":"wisdom","type":"uint32"},{"internalType":"uint32","name":"charisma","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"score","type":"uint256"}],"name":"calc","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"_str","type":"uint256"},{"internalType":"uint256","name":"_dex","type":"uint256"},{"internalType":"uint256","name":"_const","type":"uint256"},{"internalType":"uint256","name":"_int","type":"uint256"},{"internalType":"uint256","name":"_wis","type":"uint256"},{"internalType":"uint256","name":"_cha","type":"uint256"}],"name":"calculate_point_buy","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"character_created","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_charisma","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_constitution","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_dexterity","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_intelligence","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_strength","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"increase_wisdom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"level_points_spent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"},{"internalType":"uint32","name":"_str","type":"uint32"},{"internalType":"uint32","name":"_dex","type":"uint32"},{"internalType":"uint32","name":"_const","type":"uint32"},{"internalType":"uint32","name":"_int","type":"uint32"},{"internalType":"uint32","name":"_wis","type":"uint32"},{"internalType":"uint32","name":"_cha","type":"uint32"}],"name":"point_buy","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}];
 
+const rarityGold = '0x2069b76afe6b734fb65d1d099e7ec64ee9cc76b2' // contract you claim gold from
+const goldABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"from","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"to","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"from","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"to","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"from","type":"uint256"},{"internalType":"uint256","name":"spender","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"summoner","type":"uint256"}],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"summoner","type":"uint256"}],"name":"claimable","outputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"claimed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"from","type":"uint256"},{"internalType":"uint256","name":"to","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"executor","type":"uint256"},{"internalType":"uint256","name":"from","type":"uint256"},{"internalType":"uint256","name":"to","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"level","type":"uint256"}],"name":"wealth_by_level","outputs":[{"internalType":"uint256","name":"wealth","type":"uint256"}],"stateMutability":"pure","type":"function"}]
+
 const classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rouge', 'Sorcerer', 'Wizard']; // yes I know I spelled it Rouge - GFY
 
 // Function descriptions at the bottom
@@ -87,6 +90,12 @@ const getStats = async (tokenIDvalue) => {
     // tokenStats will return [currentxp, time of next xpgain, char class, level, xp to next level]
     return tokenStats;
 } 
+
+const claimableGold = async (tokenIDvalue) => {
+    let contract = new web3.eth.Contract(goldABI, rarityGold);
+    let claimable = await contract.methods.claimable(tokenIDvalue).call();
+    return (claimable > 0);
+}
 
 const timeLeft = (timestamp) => {
     let rightNow = Date.now()/1000
@@ -107,8 +116,8 @@ const secsToText = (secs) => {
 
 const earnXP = async (tokenIDvalue, nonceToUse)  => {
     let thisGas = await calculateGasPrice()
-    if (thisGas === -1) {
-        console.log(`Gas Price too high`)
+    if (thisGas < 0) {
+        console.log(`Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (liveTrading) {
@@ -131,8 +140,8 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
 
 const earnLevel = async (tokenIDvalue, nonceToUse)  => {
     let thisGas = await calculateGasPrice()
-    if (thisGas === -1) {
-        console.log(`Gas Price too high`)
+    if (thisGas < 0) {
+        console.log(`Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (liveTrading) {
@@ -153,11 +162,37 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
     }
 }
 
+const earnGold = async (tokenIDvalue, nonceToUse)  => {
+    let thisGas = await calculateGasPrice()
+    if (thisGas < 0) {
+        console.log(`Gas Price too high: ${-thisGas}`)
+        return [false, 'high gas']
+    } else {
+        if (liveTrading) {
+            let contract = new ethers.Contract(rarityGold, goldABI, account);
+            let approveResponse = await contract.claim(
+                tokenIDvalue,
+                {
+                    gasLimit: totalGasLimit, 
+                    gasPrice: thisGas,
+                    nonce: nonceToUse
+                });
+            console.log(approveResponse);
+            return [true, 'success'];
+        } else {
+            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            return [false, 'not live'];
+        }
+    }
+}
+
+
 const checkTokens = async () => {
     let latestNonce = await nonceVal();
     let delayToUse = xpRetryDelay;
     var xpGains = [];
     var levelGains = [];
+    var goldGains = [];
     for (var tokenID of myTokenIds) {
         tokenStats = await getStats(tokenID);
         xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
@@ -190,7 +225,7 @@ const checkTokens = async () => {
                     if (lvlEarnAttempt[0]) {
                         levelGains.push(tokenID);
                         latestNonce++;
-                    } else if (xpEarnAttempt[1] === 'high gas') {
+                    } else if (lvlEarnAttempt[1] === 'high gas') {
                         // fail due to high gas price
                         delayToUse = Math.max(Math.min(gasRetryDelay, delayToUse), minimumDelay)
                     } else {
@@ -201,8 +236,20 @@ const checkTokens = async () => {
                 // not ready to level up - do nothing
             }
         }
+        if (await claimableGold(tokenID)) {
+            let goldEarnAttempt = await earnGold(tokenID, latestNonce)
+            if (goldEarnAttempt[0]) {
+                goldGains.push(tokenID);
+                latestNonce++;
+            } else if (goldEarnAttempt[1] === 'high gas') {
+                // fail due to high gas price
+                delayToUse = Math.max(Math.min(gasRetryDelay, delayToUse), minimumDelay)
+            } else {
+                console.log(`Live trading off - token ${tokenID} did not claim gold`)
+            }    
+        }
     }
-    return [delayToUse, xpGains, levelGains];
+    return [delayToUse, xpGains, levelGains, goldGains];
 }
 
 const tokenStatus = async () => {
@@ -231,6 +278,11 @@ const init = async () => {
             console.log(`Successfully Levelled:`)
             for (let thistok of tokenCheck[2]) {console.log(thistok)}
         }
+        if (tokenCheck[3].length != 0) {
+            transactionPerformed = true;
+            console.log(`Successfully Claimed Gold:`)
+            for (let thistok of tokenCheck[3]) {console.log(thistok)}
+        }
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         textTimeleft = secsToText(tokenCheck[0])
         console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`)
@@ -248,8 +300,20 @@ init();
 // Manifested READING FUNCTIONS: xp_required(current level) returns the total xp needed to level up (=curlvl*1000).
 // Manifested READING FUNCTIONS: tokenURI(tokenID) returns a load of stuff... loads of it!
 
-// Manifested WRITING FUNCTIONS: adventure(tokenid) gain XP per day
+// Manifested WRITING FUNCTIONS: adventure(tokenid) gain XP per day - ~50k gas
 // Manifested WRITING FUNCTIONS: spend_xp(tokenid, xp) spend xp (remember to multiply by 10e18) - not sure this gains anything though! BE CAREFUL
-// Manifested WRITING FUNCTIONS: level_up(tokenid) lose XP to gain a level
+// Manifested WRITING FUNCTIONS: level_up(tokenid) lose XP to gain a level - ~30k gas
 // Manifested WRITING FUNCTIONS: summon(class) mint a token
+
+// Abilities READING FUNCTIONS: abilities_by_level(current level) just current level / 4
+// Abilities READING FUNCTIONS: ability_scores(tokenid) returns all the stats: str, dex, const, int, wis, char
+// Abilities READING FUNCTIONS: calc(score) some kind of increasing value starting from score 9 = 1 and increasing 
+// Abilities READING FUNCTIONS: calculate_point_buy(str, dex, const, int, wis, char) sum of these calc() needs to be 32 - i.e. attributes get more expensive
+// Abilities READING FUNCTIONS: character_created(tokenid) have you created the character or not
+
+// Abilities WRITING FUNCTIONS: increase_strength(tokenid)... ditto dex, const, int, wis, char
+// Abilities WRITING FUNCTIONS: point_buy(tokenid) mint a token
+
+
+
 
