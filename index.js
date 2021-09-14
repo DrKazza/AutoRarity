@@ -21,15 +21,14 @@ require("dotenv").config();
 
 const ethers = require('ethers');
 const constVal = require('./const');
-
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const summary = require('./summary.js');
 const {contractAddresses} = require('./contractAddresses.js');
 const {getTokenList, updateDotEnvFile} = require('./tokenIdGetter.js');
 const dungeons = require('./dungeons');
-const utils = require('./utils')
+const utils = require('./utils');
 
-const earnXP = async (tokenIDvalue, nonceToUse)  => {
+const earnXP = async (tokenID, nonceToUse)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`Gas Price too high: ${-thisGas}`)
@@ -38,7 +37,7 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
         if (constVal.liveTrading) {
             let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
             let approveResponse = await contract.adventure(
-                tokenIDvalue,
+                tokenID,
                 {
                     gasLimit: constVal.totalGasLimit,
                     gasPrice: thisGas,
@@ -53,7 +52,7 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
     }
 }
 
-const earnLevel = async (tokenIDvalue, nonceToUse)  => {
+const earnLevel = async (tokenID, nonceToUse)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`Gas Price too high: ${-thisGas}`)
@@ -62,7 +61,7 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
         if (constVal.liveTrading) {
             let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
             let approveResponse = await contract.level_up(
-                tokenIDvalue,
+                tokenID,
                 {
                     gasLimit: constVal.totalGasLimit,
                     gasPrice: thisGas,
@@ -102,7 +101,7 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
 }
 
 const checkTokens = async () => {
-    let latestNonce = await nonceVal();
+    let latestNonce = await utils.nonceVal();
     let delayToUse = constVal.xpRetryDelay;
     let xpGains = [];
     let levelGains = [];

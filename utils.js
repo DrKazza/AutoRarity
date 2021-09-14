@@ -39,13 +39,11 @@ const nonceVal = async () => {
     return await constVal.jsonRpcProvider.getTransactionCount(constVal.walletAddress, "pending")
 }
 
-const parseBool = (val) => {return val === true || val === 'true'}
 
 module.exports = {
     secsToText,
     timeLeft,
     calculateGasPrice,
     nonceVal,
-    parseBool,
     web3
 }
