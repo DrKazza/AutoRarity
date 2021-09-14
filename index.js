@@ -148,10 +148,11 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
 const scoutDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress) => {
     let contract = new web3.eth.Contract(dungeonABI, dungeonAddress);
     let lootgained = await contract.methods.scout(tokenIDvalue).call();
-    return lootgained
+    let cooldowntime = await contract.methods.adventurers_log(tokenIDvalue).call();
+    return [lootgained, cooldowntime] 
 }
 
-const runDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress) => {
+const runDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress, nonceToUse) => {
     let thisGas = await calculateGasPrice()
     if (thisGas < 0) {
         console.log(`Gas Price too high: ${-thisGas}`)
@@ -173,42 +174,49 @@ const runDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress) => {
             return [false, 'not live'];
         }
     }
-    
-
-
-
-
 }
 
-const checkAndRunDungeon = async (dungeon) => {
+const checkAndRunDungeon = async (dungeon, latestNonce) => {
     dungeon = dungeon.toLowerCase();
+    let dungeonRuns = []
     let dungeonABI = contractAddresses[(dungeon+'ABI')];
     let dungeonAddress = contractAddresses[('rarity'+ dungeon[0].toUpperCase() + dungeon.substring(1))];
-    let lootgained = await scoutDungeon(tokenID, dungeonABI, dungeonAddress)
-    if (lootgained > 0) {
-
-    } else {
-        //not strong enough to run the dungeon
+    for (var tokenID of myTokenIds) {
+        let lootgained = await scoutDungeon(tokenID, dungeonABI, dungeonAddress)
+        if (lootgained[0] > 0) {
+            let dungeonCountdown = Math.floor(lootgained[1] - Date.now() / 1000)
+            if (dungeonCountdown < 0) {
+                let dungeonAttempt = await runDungeon(tokenID, dungeonABI, dungeonAddress, latestNonce)
+                if (dungeonAttempt[0]) {
+                    latestNonce++;
+                    dungeonRuns.push(tokenID)
+                }
+            }   
+        } else {
+            //not strong enough to run the dungeon
+        }
     }
-
-
-
-
-
-
-
-
+    if (dungeonRuns.length != 0) {
+        console.log(`Successfully Dungeoned:`)
+        for (let thistok of dungeonRuns) {console.log(thistok)}
+    }
 }
 
 
 
 
-const checkTokens = async () => {
+const checkTokens = async (dungeon) => {
     let latestNonce = await nonceVal();
     let delayToUse = xpRetryDelay;
     var xpGains = [];
     var levelGains = [];
     var goldGains = [];
+    let dungeonRuns = [];
+
+    dungeon = dungeon.toLowerCase();
+    let dungeonABI = contractAddresses[(dungeon+'ABI')];
+    let dungeonAddress = contractAddresses[('rarity'+ dungeon[0].toUpperCase() + dungeon.substring(1))];
+
     for (var tokenID of myTokenIds) {
         tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
         xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
@@ -264,14 +272,27 @@ const checkTokens = async () => {
                 console.log(`Live trading off - token ${tokenID} did not claim gold`)
             }    
         }
+        let lootgained = await scoutDungeon(tokenID, dungeonABI, dungeonAddress)
+        if (lootgained[0] > 0) {
+            let dungeonCountdown = Math.floor(lootgained[1] - Date.now() / 1000)
+            if (dungeonCountdown < 0) {
+                let dungeonAttempt = await runDungeon(tokenID, dungeonABI, dungeonAddress, latestNonce)
+                if (dungeonAttempt[0]) {
+                    latestNonce++;
+                    dungeonRuns.push(tokenID)
+                }
+            } else {
+                delayToUse = Math.max(Math.min(dungeonCountdown, delayToUse), minimumDelay)
+            }   
+        }
     }
-    return [delayToUse, xpGains, levelGains, goldGains];
+    return [delayToUse, xpGains, levelGains, goldGains, dungeonRuns];
 }
 
-const autoRun = async (repeater) => {
+const autoRun = async (repeater, dungeon) => {
     while (true) {
         transactionPerformed = false;
-        tokenCheck = await checkTokens()
+        tokenCheck = await checkTokens(dungeon)
         if (tokenCheck[1].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully adventured:`)
@@ -287,6 +308,12 @@ const autoRun = async (repeater) => {
             console.log(`Successfully Claimed Gold:`)
             for (let thistok of tokenCheck[3]) {console.log(thistok)}
         }
+        if (tokenCheck[4].length != 0) {
+            transactionPerformed = true;
+            console.log(`Successfully Ran Dungeons:`)
+            for (let thistok of tokenCheck[4]) {console.log(thistok)}
+        }
+
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         textTimeleft = summary.secsToText(tokenCheck[0])
         if (repeater) {
@@ -311,13 +338,14 @@ const init = async () => {
                 summary.charSummary(myTokenIds, contractAddresses);
                 break;
             case 'xp':
-                autoRun(false);
+                autoRun(false, 'cellar');
                 break;
             case 'auto':
-                autoRun(true);
+                autoRun(true, 'cellar');
                 break;
             case 'cellar':
-                scout('cellar')
+                let latestNonce = await nonceVal();
+                checkAndRunDungeon('cellar', latestNonce);
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
@@ -347,7 +375,3 @@ init();
 
 // Abilities WRITING FUNCTIONS: increase_strength(tokenid)... ditto dex, const, int, wis, char
 // Abilities WRITING FUNCTIONS: point_buy(tokenid) mint a token
-
-
-
-
