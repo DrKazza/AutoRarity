@@ -17,7 +17,7 @@
 
 const autoLevelUp = true; // you may not want to automatically level up your char
 const defaultMaxGasPx = 250 // usually 50-100, sometimes this spikes to nearly 200
-var dummyTokenIds = '111,222,333'; // just in case you forget to specify
+let dummyTokenIds = '111,222,333'; // just in case you forget to specify
 const xpRetryDelay = 24 * 60 * 60 // 1 day in seconds - try to level up every 24hrs
 const gasRetryDelay = 5 * 60 // if gas is too expenive then try again in 5 mins
 const xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
@@ -28,7 +28,7 @@ const parseBool = (val) => {return val === true || val === 'true'}
 
 
 require("dotenv").config();
-var myTokenIds = [];
+let myTokenIds = [];
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
 
@@ -47,16 +47,19 @@ if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Numb
 
 const Web3 = require('web3');
 const ethers = require('ethers');
-var url = 'https://rpc.ftm.tools/'; 
-var web3 = new Web3(url);
+const {fantomRpcUrl} = require('./const');
+let web3 = new Web3(fantomRpcUrl);
 const {JsonRpcProvider} = require("@ethersproject/providers");
-const provider = new JsonRpcProvider(url);
+const provider = new JsonRpcProvider(fantomRpcUrl);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(provider);
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const summary = require('./summary.js');
 const {contractAddresses} = require('./contractAddresses.js');
+const {getTokenList, updateDotEnvFile} = require('./tokenIdGetter.js');
+const dungeons = require('./dungeons');
+const {secsToText} = require('./utils')
 
 const calculateGasPrice = async () => {
     let spotPx = await web3.eth.getGasPrice();
@@ -69,8 +72,7 @@ const calculateGasPrice = async () => {
 }
 
 const nonceVal = async () => {
-    baseNonce = await provider.getTransactionCount(walletAddress, "pending");
-    return baseNonce
+    return await provider.getTransactionCount(walletAddress, "pending")
 }
 
 const earnXP = async (tokenIDvalue, nonceToUse)  => {
@@ -84,7 +86,7 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
             let approveResponse = await contract.adventure(
                 tokenIDvalue,
                 {
-                    gasLimit: totalGasLimit, 
+                    gasLimit: totalGasLimit,
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
@@ -108,7 +110,7 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
             let approveResponse = await contract.level_up(
                 tokenIDvalue,
                 {
-                    gasLimit: totalGasLimit, 
+                    gasLimit: totalGasLimit,
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
@@ -132,7 +134,7 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
             let approveResponse = await contract.claim(
                 tokenIDvalue,
                 {
-                    gasLimit: totalGasLimit, 
+                    gasLimit: totalGasLimit,
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
@@ -148,13 +150,13 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
 const checkTokens = async () => {
     let latestNonce = await nonceVal();
     let delayToUse = xpRetryDelay;
-    var xpGains = [];
-    var levelGains = [];
-    var goldGains = [];
-    for (var tokenID of myTokenIds) {
-        tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
-        xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
-        xpPending = 0
+    let xpGains = [];
+    let levelGains = [];
+    let goldGains = [];
+    for (let tokenID of myTokenIds) {
+        let tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
+        let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
+        let xpPending = 0
         if (xpCountdown < 0) {
             let xpEarnAttempt = await earnXP(tokenID, latestNonce)
             if (xpEarnAttempt[0]) {
@@ -204,7 +206,7 @@ const checkTokens = async () => {
                 delayToUse = Math.max(Math.min(gasRetryDelay, delayToUse), minimumDelay)
             } else {
                 console.log(`Live trading off - token ${tokenID} did not claim gold`)
-            }    
+            }
         }
     }
     return [delayToUse, xpGains, levelGains, goldGains];
@@ -212,25 +214,25 @@ const checkTokens = async () => {
 
 const autoRun = async (repeater) => {
     while (true) {
-        transactionPerformed = false;
-        tokenCheck = await checkTokens()
-        if (tokenCheck[1].length != 0) {
+        let transactionPerformed = false;
+        let tokenCheck = await checkTokens()
+        if (tokenCheck[1].length !== 0) {
             transactionPerformed = true;
             console.log(`Successfully adventured:`)
             for (let thistok of tokenCheck[1]) {console.log(thistok)}
         }
-        if (tokenCheck[2].length != 0) {
+        if (tokenCheck[2].length !== 0) {
             transactionPerformed = true;
             console.log(`Successfully Levelled:`)
             for (let thistok of tokenCheck[2]) {console.log(thistok)}
         }
-        if (tokenCheck[3].length != 0) {
+        if (tokenCheck[3].length !== 0) {
             transactionPerformed = true;
             console.log(`Successfully Claimed Gold:`)
             for (let thistok of tokenCheck[3]) {console.log(thistok)}
         }
         if (!transactionPerformed){console.log(`Nothing to do...`)}
-        textTimeleft = summary.secsToText(tokenCheck[0])
+        let textTimeleft = secsToText(tokenCheck[0])
         if (repeater) {
             console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
             await delay(tokenCheck[0]*1000);
@@ -240,26 +242,69 @@ const autoRun = async (repeater) => {
     }
 }
 
+const displayAvailableDungeons = () => {
+    console.log('Available dungeon:');
+    let dgList = dungeons.getAvailableDungeons();
+    for (let dg of dgList){
+        console.log(` - ${dg}`);
+    }
+}
+
 const init = async () => {
-    if (process.argv[2] == undefined || process.argv[2] == 'help') {
+    if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
-        node index.js summary    - gives a summary of your characters
-        node index.js xp         - claim xp/level up/gold collection/dungeoneering - one off
-        node index.js auto       - automatic repeating xp/levelling/gold collection/[dungeoneering]
-        node index.js cellar     - run the cellar dungeon only. (not working yet!)`)
+    node index.js summary               - gives a summary of your characters
+    node index.js xp                    - claim xp/level up/gold collection/dungeoneering - one off
+    node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
+    node index.js updateTokenList       - update the token id list in .env file
+    node index.js dgList                - get list of available dungeon
+    node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
+    node index.js cellar                - run the cellar dungeon only. (not working yet!)`)
     } else {
         switch (process.argv[2]) {
             case 'summary':
-                summary.charSummary(myTokenIds, contractAddresses);
+                await summary.charSummary(myTokenIds, contractAddresses);
                 break;
             case 'xp':
-                autoRun(false);
+                await autoRun(false);
                 break;
             case 'auto':
-                autoRun(true);
+                await autoRun(true);
                 break;
             case 'cellar':
                 //do stuff
+                break;
+            case 'updateTokenList':
+                let tokens = await getTokenList(walletAddress);
+                await updateDotEnvFile(tokens);
+                break;
+            case 'dgList':
+                displayAvailableDungeons();
+                break;
+            case 'scout':
+                if (typeof process.argv[3] === 'undefined'){
+                    console.log('You have to select a dungeon to scout');
+                    displayAvailableDungeons();
+                } else {
+                    let dungeonName = process.argv[3];
+                    if (!dungeons.isDungeonAvailable(dungeonName)) {
+                        console.log(`This dungeon is not implemented yet [${dungeonName}]`);
+                        displayAvailableDungeons();
+                    } else {
+                        if (typeof process.argv[4] === 'undefined'){
+                            for (let token of myTokenIds){
+                                await dungeons.scoutDungeon(dungeonName, token);
+                            }
+                        } else {
+                            let token = process.argv[4];
+                            if (!myTokenIds.includes(token)){
+                                console.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
+                            } else {
+                                await dungeons.scoutDungeon(dungeonName, token);
+                            }
+                        }
+                    }
+                }
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
