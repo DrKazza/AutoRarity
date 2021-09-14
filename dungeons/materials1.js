@@ -33,7 +33,7 @@ const run = async (tokenID) => {
                     gasPrice: thisGas,
                     nonce: utils.nonceVal()
                 });
-            console.log(approveResponse);
+            //console.log(approveResponse);
             console.log(`tokenID => success, loot => ${loot}`);
             return [true, `success, loot => ${loot}`];
         } else {

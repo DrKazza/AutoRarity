@@ -43,7 +43,7 @@ const earnXP = async (tokenID, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+            //console.log(approveResponse);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
@@ -67,7 +67,7 @@ const earnLevel = async (tokenID, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+            //console.log(approveResponse);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - levelling NOT submitted.`)
@@ -91,7 +91,7 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+            //console.log(approveResponse);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
