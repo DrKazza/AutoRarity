@@ -145,6 +145,64 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
     }
 }
 
+const scoutDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress) => {
+    let contract = new web3.eth.Contract(dungeonABI, dungeonAddress);
+    let lootgained = await contract.methods.scout(tokenIDvalue).call();
+    return lootgained
+}
+
+const runDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress) => {
+    let thisGas = await calculateGasPrice()
+    if (thisGas < 0) {
+        console.log(`Gas Price too high: ${-thisGas}`)
+        return [false, 'high gas']
+    } else {
+        if (liveTrading) {
+            let contract = new ethers.Contract(dungeonAddress, dungeonABI, account);
+            let approveResponse = await contract.adventure(
+                tokenIDvalue,
+                {
+                    gasLimit: totalGasLimit, 
+                    gasPrice: thisGas,
+                    nonce: nonceToUse
+                });
+            console.log(approveResponse);
+            return [true, 'success'];
+        } else {
+            console.log(`Live trading disabled - dungeoneering NOT submitted.`)
+            return [false, 'not live'];
+        }
+    }
+    
+
+
+
+
+}
+
+const checkAndRunDungeon = async (dungeon) => {
+    dungeon = dungeon.toLowerCase();
+    let dungeonABI = contractAddresses[(dungeon+'ABI')];
+    let dungeonAddress = contractAddresses[('rarity'+ dungeon[0].toUpperCase() + dungeon.substring(1))];
+    let lootgained = await scoutDungeon(tokenID, dungeonABI, dungeonAddress)
+    if (lootgained > 0) {
+
+    } else {
+        //not strong enough to run the dungeon
+    }
+
+
+
+
+
+
+
+
+}
+
+
+
+
 const checkTokens = async () => {
     let latestNonce = await nonceVal();
     let delayToUse = xpRetryDelay;
@@ -259,7 +317,7 @@ const init = async () => {
                 autoRun(true);
                 break;
             case 'cellar':
-                //do stuff
+                scout('cellar')
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
