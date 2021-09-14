@@ -341,8 +341,9 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
 
         console.log("Updating token list...")
         await updateTokenList();
+    } else {
+        return result.success;
     }
-    return result.success;
 }
 
 const displayAvailableClasses = () => {
