@@ -1,36 +1,67 @@
 const ethers = require('ethers');
 const {contractAddresses} = require('../contractAddresses');
 const utils = require('../utils');
+const constVal = require('../const');
 
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 const recommendedClass = [1,5,7];
 
-const doIt = async (tokenID, account, totalGasLimit, thisGas, nonceToUse) => {
-    console.log('Not Implemented');
-    /*
-    let contract = new ethers.Contract(address, abi, account);
-    let approveResponse = await contract.adventure(
-        tokenID,
-        {
-            gasLimit: totalGasLimit,
-            gasPrice: thisGas,
-            nonce: nonceToUse
-        });
-    console.log(approveResponse);
-     */
+const run = async (tokenID) => {
+    let thisGas = await utils.calculateGasPrice()
+    let loot;
+    if ((loot = await getLoot(tokenID)) === 0){
+        console.log(`tokenID => no loot`);
+        return [false, 'no loot']
+    }
+    let time = await getTimeUntilAvailable(tokenID);
+    let timeLeft = utils.timeLeft(time);
+    if (timeLeft[0] !== -1){
+        console.log(`tokenID => not available => ${timeLeft[0]}h${timeLeft[1]}m`);
+        return [false, `not available => ${timeLeft[0]}h${timeLeft[1]}m`]
+    }
+    if (thisGas < 0) {
+        console.log(`tokenID => Gas Price too high: ${-thisGas}`)
+        return [false, 'high gas']
+    } else {
+        if (constVal.liveTrading) {
+            let contract = new ethers.Contract(address, abi, constVal.account);
+            let approveResponse = await contract.adventure(
+                tokenID,
+                {
+                    gasLimit: constVal.totalGasLimit,
+                    gasPrice: thisGas,
+                    nonce: utils.nonceVal()
+                });
+            console.log(approveResponse);
+            console.log(`tokenID => success, loot => ${loot}`);
+            return [true, `success, loot => ${loot}`];
+        } else {
+            console.log(`Live trading disabled - dungeoneering NOT submitted.`)
+            return [false, 'not live'];
+        }
+    }
 }
 
 const scout = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    let approveResponse = await contract.methods.scout(tokenID).call();
-    if (approveResponse > 0){
+    let loot = await getLoot(tokenID);
+    if (loot > 0){
         let time = await getTimeUntilAvailable(tokenID);
         let textTimeleft = utils.timeLeft(time);
-        console.log(`${tokenID} => ${approveResponse} => time left ${textTimeleft[0]}h${textTimeleft[1]}m`);
+        if (textTimeleft[0] !== -1){
+            console.log(`${tokenID} => ${loot} => time left ${textTimeleft[0]}h${textTimeleft[1]}m`);
+        } else {
+            console.log(`${tokenID} => ${loot} => ready`);
+
+        }
     } else {
-        console.log(`${tokenID} => ${approveResponse}`);
+        console.log(`${tokenID} => ${loot}`);
     }
+}
+
+const getLoot = async (tokenID) => {
+    let contract = new utils.web3.eth.Contract(abi, address);
+    return await contract.methods.scout(tokenID).call();
 }
 
 const getTimeUntilAvailable = async (tokenID) => {
@@ -40,6 +71,6 @@ const getTimeUntilAvailable = async (tokenID) => {
 
 module.exports = {
     recommendedClass,
-    doIt,
+    run,
     scout
 }

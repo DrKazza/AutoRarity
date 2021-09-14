@@ -222,6 +222,25 @@ const scout = async (dungeonName, token) => {
     }
 }
 
+const dungeon = async (dungeonName, token) => {
+    if (!dungeons.isDungeonAvailable(dungeonName)) {
+        console.log(`This dungeon is not implemented yet [${dungeonName}]`);
+        displayAvailableDungeons();
+    } else {
+        if (typeof token === 'undefined'){
+            for (let token of constVal.myTokenIds){
+                await dungeons.runDungeon(dungeonName, token);
+            }
+        } else {
+            if (!constVal.myTokenIds.includes(token)){
+                console.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
+            } else {
+                await dungeons.runDungeon(dungeonName, token);
+            }
+        }
+    }
+}
+
 const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
@@ -231,6 +250,7 @@ const init = async () => {
     node index.js updateTokenList       - update the token id list in .env file
     node index.js dgList                - get list of available dungeon
     node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
+    node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
     node index.js cellar                - run the cellar dungeon only. (not working yet!)`)
     } else {
         switch (process.argv[2]) {
@@ -261,6 +281,16 @@ const init = async () => {
                     let dungeonName = process.argv[3];
                     let token = process.argv[4];
                     await scout(dungeonName, token);
+                }
+                break;
+            case 'dg':
+                if (typeof process.argv[3] === 'undefined'){
+                    console.log('You have to select a dungeon to go');
+                    displayAvailableDungeons();
+                } else {
+                    let dungeonName = process.argv[3];
+                    let token = process.argv[4];
+                    await dungeon(dungeonName, token);
                 }
                 break;
             default:

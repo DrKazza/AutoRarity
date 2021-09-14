@@ -15,13 +15,8 @@ const isDungeonAvailable  = (dungeonName) => {
     return typeof dungeons[dungeonName] !== 'undefined';
 }
 
-const doDungeons = () => {
-    for (const dungeonName in dungeons) {
-        dungeons[dungeonName].doIt();
-    }
-}
-
-const doDungeon = (dungeonName, token, config) => {
+const runDungeon = async (dungeonName, token) => {
+    await dungeons[dungeonName].run(token);
 }
 
 const scoutDungeon = async (dungeonName, token) => {
@@ -30,8 +25,7 @@ const scoutDungeon = async (dungeonName, token) => {
 
 module.exports = {
     getAvailableDungeons,
-    doDungeons,
-    doDungeon,
+    runDungeon,
     scoutDungeon,
     isDungeonAvailable
 }
