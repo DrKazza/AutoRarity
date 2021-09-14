@@ -28,6 +28,10 @@ const getTokenList = async function (owner) {
     return tokenList;
 }
 
+const getTokenCount = async (owner) => {
+    return (await getTokenList(owner)).length;
+}
+
 const updateDotEnvFile = async function (tokens){
     const newTokenLine = `TOKENIDS = '${tokens.join(',')}'`;
     const file = '.env';
@@ -61,4 +65,8 @@ const updateDotEnvFile = async function (tokens){
     });
 }
 
-module.exports = {getTokenList, updateDotEnvFile};
+module.exports = {
+    getTokenList,
+    updateDotEnvFile,
+    getTokenCount
+};

@@ -24,7 +24,7 @@ const constVal = require('./const');
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const summary = require('./summary.js');
 const {contractAddresses} = require('./contractAddresses.js');
-const {getTokenList, updateDotEnvFile} = require('./tokenIdGetter.js');
+const {getTokenList, updateDotEnvFile, getTokenCount} = require('./tokenIdGetter.js');
 const dungeons = require('./dungeons');
 const utils = require('./utils');
 
@@ -241,6 +241,123 @@ const dungeon = async (dungeonName, token) => {
     }
 }
 
+const summon = async (classToSummon, nonceVal) => {
+    if (typeof nonceVal === 'undefined'){
+        nonceVal = utils.nonceVal()
+    }
+    let thisGas = await utils.calculateGasPrice()
+    if (thisGas < 0) {
+        console.log(`Gas Price too high: ${-thisGas}`)
+        return false;
+    } else {
+        if (constVal.liveTrading) {
+            try {
+
+                let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
+                let approveResponse = await contract.summon(
+                    classToSummon,
+                    {
+                        gasLimit: constVal.totalGasLimit,
+                        gasPrice: utils.calculateGasPrice(),
+                        nonce: nonceVal
+                    });
+                console.log(`transaction hash => ${approveResponse.hash}`);
+                return true;
+            } catch (error) {
+                console.log(error);
+                return false;
+            }
+        }else {
+            console.log(`Live trading disabled - summoning NOT submitted.`)
+            return true;
+        }
+    }
+}
+
+const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, nonce) => {
+    let result;
+    let newToken = 0;
+    let originalTokenCount = await getTokenCount(constVal.walletAddress);
+    if (classToSummon !== "all"){
+        let classId = constVal.classes.indexOf(classToSummon);
+        if (classId === -1 || classId === 0){
+            console.log(`Unknown class [${classToSummon}]`);
+            return;
+        }
+        if (typeof nonce === 'undefined'){
+            nonce = {
+                value : await utils.nonceVal()
+            };
+        }
+        result = {
+            success: 0,
+            fail: 0
+        };
+        let i = 0;
+        console.log(`Start summoning of ${quantity} ${classToSummon}`);
+        while (i < quantity) {
+            console.log(`#${i+1} => summoning...`);
+            let res = await summon(classId, nonce.value);
+            if (res){
+                result.success++;
+                console.log(`#${i+1} => summon success`);
+            } else {
+                result.fail++;
+                console.log(`#${i+1} => summon fail`);
+            }
+            await utils.sleep(1000);
+            nonce.value++;
+            i++;
+        }
+    } else {
+        console.log(`Start summoning ${quantity} of each classes`)
+        nonce = {
+            value : await utils.nonceVal()
+        };
+        for (let cl of constVal.classes){
+            if (cl !== 'noClass'){
+                newToken += await massSummon(cl, quantity, true, nonce);
+            }
+        }
+    }
+    if (typeof result !== "undefined"){
+        console.log(`Result Class [${classToSummon}] | Quantity [${quantity}]:`)
+        console.log(` - success : ${result.success}`)
+        console.log(` - fail : ${result.fail}`)
+    }
+
+    if (!isMass){
+        let newTotal = classToSummon === "all" ? (originalTokenCount + newToken) : (originalTokenCount + result.success);
+        let currentCount = 0;
+        do {
+            if (currentCount !== 0){
+                console.log("Waiting a bit to let the transaction spread...")
+                await utils.sleep(10000);
+            }
+            console.log("Fetching token count...")
+            currentCount = await getTokenCount(constVal.walletAddress);
+            console.log(`CurrentCount => ${currentCount} of ${newTotal}`)
+        } while (currentCount < newTotal)
+
+        console.log("Updating token list...")
+        await updateTokenList();
+    }
+    return result.success;
+}
+
+const displayAvailableClasses = () => {
+    console.log('Available classes:');
+    for (let cl of constVal.classes){
+        if (cl !== 'noClass')
+            console.log(` - ${cl}`);
+    }
+}
+
+const updateTokenList = async () => {
+    let tokens = await getTokenList(constVal.walletAddress);
+    await updateDotEnvFile(tokens);
+}
+
 const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
@@ -249,8 +366,10 @@ const init = async () => {
     node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
     node index.js updateTokenList       - update the token id list in .env file
     node index.js dgList                - get list of available dungeon
+    node index.js classList             - get list of available class
     node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
+    node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]
     node index.js cellar                - run the cellar dungeon only. (not working yet!)`)
     } else {
         switch (process.argv[2]) {
@@ -267,8 +386,7 @@ const init = async () => {
                 //do stuff
                 break;
             case 'updateTokenList':
-                let tokens = await getTokenList(constVal.walletAddress);
-                await updateDotEnvFile(tokens);
+                await updateTokenList();
                 break;
             case 'dgList':
                 displayAvailableDungeons();
@@ -292,6 +410,14 @@ const init = async () => {
                     let token = process.argv[4];
                     await dungeon(dungeonName, token);
                 }
+                break;
+            case 'classList':
+                displayAvailableClasses();
+                break;
+            case 'sm':
+                let className = typeof process.argv[3] === 'undefined' ? "all" : process.argv[3];
+                let quantity = typeof process.argv[4] === 'undefined' ? 1 : process.argv[4];
+                await massSummon(className, quantity);
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
