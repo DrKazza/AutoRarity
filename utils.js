@@ -36,7 +36,7 @@ const calculateGasPrice = async () => {
 }
 
 const nonceVal = async () => {
-    return await jsonRpcProvider.getTransactionCount(walletAddress, "pending")
+    return await constVal.jsonRpcProvider.getTransactionCount(constVal.walletAddress, "pending")
 }
 
 module.exports = {
