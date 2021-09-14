@@ -241,13 +241,13 @@ const dungeon = async (dungeonName, token) => {
     }
 }
 
-const summon = async (classToSummon, nonceVal) => {
+const summon = async (classToSummon, nonceVal, i = 0) => {
     if (typeof nonceVal === 'undefined'){
         nonceVal = utils.nonceVal()
     }
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
+        console.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
         return false;
     } else {
         if (constVal.liveTrading) {
@@ -261,14 +261,14 @@ const summon = async (classToSummon, nonceVal) => {
                         gasPrice: utils.calculateGasPrice(),
                         nonce: nonceVal
                     });
-                console.log(`transaction hash => ${approveResponse.hash}`);
+                console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;
             } catch (error) {
                 console.log(error);
                 return false;
             }
         }else {
-            console.log(`Live trading disabled - summoning NOT submitted.`)
+            console.log(`#${i+1} => Live trading disabled - summoning NOT submitted.`)
             return true;
         }
     }
@@ -297,7 +297,7 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
         console.log(`Start summoning of ${quantity} ${classToSummon}`);
         while (i < quantity) {
             console.log(`#${i+1} => summoning...`);
-            let res = await summon(classId, nonce.value);
+            let res = await summon(classId, nonce.value, i);
             if (res){
                 result.success++;
                 console.log(`#${i+1} => summon success`);
