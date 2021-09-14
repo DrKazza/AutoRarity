@@ -106,7 +106,7 @@ const checkTokens = async () => {
     let xpGains = [];
     let levelGains = [];
     let goldGains = [];
-    for (let tokenID of myTokenIds) {
+    for (let tokenID of constVal.myTokenIds) {
         let tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
         let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
         let xpPending = 0
