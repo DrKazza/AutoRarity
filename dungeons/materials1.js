@@ -10,18 +10,18 @@ const recommendedClass = [1,5,7];
 const run = async (tokenID) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
-    if ((loot = await getLoot(tokenID)) === 0){
-        console.log(`tokenID => no loot`);
+    if ((loot = await getLoot(tokenID)) < 1){
+        console.log(`${tokenID} => no loot`);
         return [false, 'no loot']
     }
     let time = await getTimeUntilAvailable(tokenID);
     let timeLeft = utils.timeLeft(time);
     if (timeLeft[0] !== -1){
-        console.log(`tokenID => not available => ${timeLeft[0]}h${timeLeft[1]}m`);
+        console.log(`${tokenID} => not available => ${timeLeft[0]}h${timeLeft[1]}m`);
         return [false, `not available => ${timeLeft[0]}h${timeLeft[1]}m`]
     }
     if (thisGas < 0) {
-        console.log(`tokenID => Gas Price too high: ${-thisGas}`)
+        console.log(`${tokenID} => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -34,7 +34,7 @@ const run = async (tokenID) => {
                     nonce: utils.nonceVal()
                 });
             //console.log(approveResponse);
-            console.log(`tokenID => success, loot => ${loot}`);
+            console.log(`${tokenID} => success, loot => ${loot}`);
             return [true, `success, loot => ${loot}`];
         } else {
             console.log(`Live trading disabled - dungeoneering NOT submitted.`)
