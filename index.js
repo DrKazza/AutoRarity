@@ -13,13 +13,11 @@
 // and the numbers and make sure you have the quote marks
 
 const autoLevelUp = true; // you may not want to automatically level up your char
-const parseBool = (val) => {return val === true || val === 'true'}
 
 require("dotenv").config();
 
 
-const liveTradingVar = process.env.LIVETRADING;
-if (liveTradingVar === undefined){liveTrading = false} else {liveTrading = parseBool(liveTradingVar)}
+
 
 const ethers = require('ethers');
 const constVal = require('./const');
@@ -37,8 +35,8 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
         console.log(`Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
-        if (liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, account);
+        if (constVal.liveTrading) {
+            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
             let approveResponse = await contract.adventure(
                 tokenIDvalue,
                 {
@@ -56,13 +54,13 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
 }
 
 const earnLevel = async (tokenIDvalue, nonceToUse)  => {
-    let thisGas = await calculateGasPrice()
+    let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
-        if (liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, account);
+        if (constVal.liveTrading) {
+            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
             let approveResponse = await contract.level_up(
                 tokenIDvalue,
                 {
@@ -80,13 +78,13 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
 }
 
 const earnGold = async (tokenIDvalue, nonceToUse)  => {
-    let thisGas = await calculateGasPrice()
+    let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
-        if (liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityGold, contractAddresses.goldABI, account);
+        if (constVal.liveTrading) {
+            let contract = new ethers.Contract(contractAddresses.rarityGold, contractAddresses.goldABI, constVal.account);
             let approveResponse = await contract.claim(
                 tokenIDvalue,
                 {

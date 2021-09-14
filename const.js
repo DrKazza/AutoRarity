@@ -1,5 +1,6 @@
 const {JsonRpcProvider} = require("@ethersproject/providers");
 const ethers = require("ethers");
+const utils = require("./utils");
 
 const fantomRpcUrl = 'https://rpc.ftm.tools/';
 const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
@@ -28,6 +29,15 @@ const jsonRpcProvider = new JsonRpcProvider(fantomRpcUrl);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(jsonRpcProvider);
 
+let liveTrading;
+const liveTradingVar = process.env.LIVETRADING;
+if (liveTradingVar === undefined) {
+    liveTrading = false
+}
+else {
+    liveTrading = utils.parseBool(liveTradingVar)
+}
+
 module.exports = {
     fantomRpcUrl,
     totalGasLimit,
@@ -40,5 +50,6 @@ module.exports = {
     walletAddress,
     myTokenIds,
     account,
-    classes
+    classes,
+    liveTrading
 }
