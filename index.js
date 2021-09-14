@@ -369,8 +369,7 @@ const init = async () => {
     node index.js classList             - get list of available class
     node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
-    node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]
-    node index.js cellar                - run the cellar dungeon only. (not working yet!)`)
+    node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]`)
     } else {
         switch (process.argv[2]) {
             case 'summary':
@@ -381,9 +380,6 @@ const init = async () => {
                 break;
             case 'auto':
                 await autoRun(true);
-                break;
-            case 'cellar':
-                //do stuff
                 break;
             case 'updateTokenList':
                 await updateTokenList();
