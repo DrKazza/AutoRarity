@@ -20,13 +20,13 @@ require("dotenv").config();
 
 
 const ethers = require('ethers');
-const constVal = require('./const');
+const constVal = require('./shared/const');
 const delay = ms => new Promise(res => setTimeout(res, ms));
-const summary = require('./summary.js');
-const {contractAddresses} = require('./contractAddresses.js');
-const {getTokenList, updateDotEnvFile, getTokenCount} = require('./tokenIdGetter.js');
+const summary = require('./base/summary.js');
+const {contractAddresses} = require('./shared/contractAddresses.js');
+const {getTokenList, updateDotEnvFile, getTokenCount} = require('./shared/tokenIdGetter.js');
 const dungeons = require('./dungeons');
-const utils = require('./utils');
+const utils = require('./shared/utils');
 
 const earnXP = async (tokenID, nonceToUse)  => {
     let thisGas = await utils.calculateGasPrice()

@@ -1,5 +1,5 @@
 const Ability = require('./ability');
-const constVal = require('../../const');
+const constVal = require('../../shared/const');
 
 class Token {
     id = 0;

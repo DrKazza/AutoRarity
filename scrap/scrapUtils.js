@@ -1,5 +1,5 @@
-const utils = require('../utils');
-const {contractAddresses} = require('../contractAddresses');
+const utils = require('../shared/utils');
+const {contractAddresses} = require('../shared/contractAddresses');
 
 //TOKEN RELATED
 const getNextTokenId = async () => {
