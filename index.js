@@ -365,9 +365,9 @@ const init = async () => {
     node index.js summary               - gives a summary of your characters
     node index.js xp                    - claim xp/level up/gold collection/dungeoneering - one off
     node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
-    node index.js updateTokenList       - update the token id list in .env file
-    node index.js dgList                - get list of available dungeon
-    node index.js classList             - get list of available class
+    node index.js utl/updateTokenList   - update the token id list in .env file
+    node index.js dgl/dgList            - get list of available dungeon
+    node index.js cl/classList          - get list of available class
     node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
     node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]`)
@@ -383,9 +383,11 @@ const init = async () => {
                 await autoRun(true);
                 break;
             case 'updateTokenList':
+            case 'utl':
                 await updateTokenList();
                 break;
             case 'dgList':
+            case 'dgl':
                 displayAvailableDungeons();
                 break;
             case 'scout':
@@ -409,6 +411,7 @@ const init = async () => {
                 }
                 break;
             case 'classList':
+            case 'cl':
                 displayAvailableClasses();
                 break;
             case 'sm':
