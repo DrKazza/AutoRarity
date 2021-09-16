@@ -30,6 +30,11 @@ const getInventory = async (tokenIDvalue, abi, address) => {
     return (materialsHeld)
 }
 
+const getNames = async (tokenIDvalue, abi, address) => {
+    let contract = new web3.eth.Contract(abi, address);
+    let characterName = await contract.methods.summoner_name(tokenIDvalue).call();    
+    return (characterName)
+}
 
 const timeLeft = (timestamp) => {
     let rightNow = Date.now()/1000
@@ -48,19 +53,24 @@ const secsToText = (secs) => {
     return [hrs, mins]
 }
 
-
 const charSummary = async (tokenArray, contractAddresses) => {
     for (var tokenID of tokenArray) {
         let tokenStats = await getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested)
         let timeleft = timeLeft(tokenStats[1])
         console.log(`*****************`)
+        let charName = await getNames(tokenID, contractAddresses.namesABI, contractAddresses.rarityNames);
+        if (charName != '') {
+            console.log(`${classes[tokenStats[2]]}: ${charName}`)
+        } else {
+            console.log(`Unnamed ${classes[tokenStats[2]]}.`)
+        }
         if (timeleft[0] < 0) {
             console.log(`Token: ${tokenID}, ${classes[tokenStats[2]]} Lvl ${tokenStats[3]}, currentXP ${Math.floor(tokenStats[0]/10**18)}/${Math.floor(tokenStats[4]/10**18)} - Ready to get XP`)
-        } else {
-            console.log(`Token: ${tokenID}, ${classes[tokenStats[2]]} Lvl ${tokenStats[3]}, currentXP ${Math.floor(tokenStats[0]/10**18)}/${Math.floor(tokenStats[4]/10**18)}, next XP in ${timeleft[0]}h${timeleft[1]}m`)
+        } else {    
+            console.log(`TokenID: ${tokenID}, Lvl ${tokenStats[3]}, currentXP ${Math.floor(tokenStats[0]/10**18)}/${Math.floor(tokenStats[4]/10**18)}, next XP in ${timeleft[0]}h${timeleft[1]}m`)
         }
         let attribs = await getAttributes(tokenID, contractAddresses.attributesABI, contractAddresses.rarityAttributes);
-        console.log(`Str: ${attribs[0]}, Dex: ${attribs[1]}, Const: ${attribs[2]}, Int: ${attribs[3]}, Wisdom: ${attribs[4]}, Charisma: ${attribs[5]}`)
+        console.log(`Str: ${attribs[0]}, Dex: ${attribs[1]}, Const: ${attribs[2]}, Int: ${attribs[3]}, Wisdom: ${attribs[4]}, Charisma: ${attribs[5]}`)        
         let goldStats = await getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold);
         let goldtext = ''
         if (goldStats[0] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}
@@ -72,7 +82,4 @@ const charSummary = async (tokenArray, contractAddresses) => {
     console.log(`*****************`)
 }
 
-
 module.exports = {charSummary, getStats, getGoldStats, secsToText};
-
-
