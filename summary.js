@@ -82,4 +82,4 @@ const charSummary = async (tokenArray, contractAddresses) => {
     console.log(`*****************`)
 }
 
-module.exports = {charSummary, getStats, getGoldStats, secsToText};
+module.exports = {charSummary, getStats, getGoldStats, secsToText, getNames};

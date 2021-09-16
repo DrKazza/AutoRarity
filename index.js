@@ -202,8 +202,14 @@ const checkAndRunDungeon = async (dungeon, latestNonce) => {
     }
 }
 
-
-
+const nameOrToken = async (thistok) => {
+    let charName = await summary.getNames(tokenID, contractAddresses.namesABI, contractAddresses.rarityNames)
+    if (charName == '') {
+        return thistok
+    } else {
+        return (`${charName} (${thistok})`)
+    }
+}
 
 const checkTokens = async (dungeon) => {
     let latestNonce = await nonceVal();
@@ -296,22 +302,22 @@ const autoRun = async (repeater, dungeon) => {
         if (tokenCheck[1].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully adventured:`)
-            for (let thistok of tokenCheck[1]) {console.log(thistok)}
+            for (let thistok of tokenCheck[1]) {console.log(nameOrToken(thistok))}
         }
         if (tokenCheck[2].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Levelled:`)
-            for (let thistok of tokenCheck[2]) {console.log(thistok)}
+            for (let thistok of tokenCheck[2]) {console.log(nameOrToken(thistok))}
         }
         if (tokenCheck[3].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Claimed Gold:`)
-            for (let thistok of tokenCheck[3]) {console.log(thistok)}
+            for (let thistok of tokenCheck[3]) {console.log(nameOrToken(thistok))}
         }
         if (tokenCheck[4].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Ran Dungeons:`)
-            for (let thistok of tokenCheck[4]) {console.log(thistok)}
+            for (let thistok of tokenCheck[4]) {console.log(nameOrToken(thistok))}
         }
 
         if (!transactionPerformed){console.log(`Nothing to do...`)}
