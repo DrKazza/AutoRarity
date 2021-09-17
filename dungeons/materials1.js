@@ -25,17 +25,26 @@ const run = async (tokenID) => {
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
-            let contract = new ethers.Contract(address, abi, constVal.account);
-            let approveResponse = await contract.adventure(
-                tokenID,
-                {
-                    gasLimit: constVal.totalGasLimit,
-                    gasPrice: thisGas,
-                    nonce: utils.nonceVal()
-                });
-            //console.log(approveResponse);
-            console.log(`${tokenID} => success, loot => ${loot}`);
-            return [true, `success, loot => ${loot}`];
+            let nonce = utils.nonceVal();
+            try {
+                let contract = new ethers.Contract(address, abi, constVal.account);
+                let approveResponse = await contract.adventure(
+                    tokenID,
+                    {
+                        gasLimit: constVal.totalGasLimit,
+                        gasPrice: thisGas,
+                        nonce: nonce
+                    });
+                //console.log(approveResponse);
+                console.log(`${tokenID} => success, loot => ${loot}`);
+                return [true, `success, loot => ${loot}`];
+            } catch (e) {
+                console.log("ERROR");
+                console.log(`gasLimit: ${constVal.totalGasLimit}`)
+                console.log(`gasPrice: ${thisGas}`)
+                console.log(`nonce: ${nonce}`)
+                return [false, 'ERROR'];
+            }
         } else {
             console.log(`Live trading disabled - dungeoneering NOT submitted.`)
             return [false, 'not live'];
