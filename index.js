@@ -302,22 +302,22 @@ const autoRun = async (repeater, dungeon) => {
         if (tokenCheck[1].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully adventured:`)
-            for (let thistok of tokenCheck[1]) {console.log(nameOrToken(thistok))}
+            for (let thistok of tokenCheck[1]) {console.log(await nameOrToken(thistok))}
         }
         if (tokenCheck[2].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Levelled:`)
-            for (let thistok of tokenCheck[2]) {console.log(nameOrToken(thistok))}
+            for (let thistok of tokenCheck[2]) {console.log(await nameOrToken(thistok))}
         }
         if (tokenCheck[3].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Claimed Gold:`)
-            for (let thistok of tokenCheck[3]) {console.log(nameOrToken(thistok))}
+            for (let thistok of tokenCheck[3]) {console.log(await nameOrToken(thistok))}
         }
         if (tokenCheck[4].length != 0) {
             transactionPerformed = true;
             console.log(`Successfully Ran Dungeons:`)
-            for (let thistok of tokenCheck[4]) {console.log(nameOrToken(thistok))}
+            for (let thistok of tokenCheck[4]) {console.log(await nameOrToken(thistok))}
         }
 
         if (!transactionPerformed){console.log(`Nothing to do...`)}
