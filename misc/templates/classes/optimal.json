@@ -1,0 +1,112 @@
+{
+    "Barbarian": {
+        "attributes": {
+            "str":16,
+            "dex":16,
+            "const":16,
+            "int":8,
+            "wis":10,
+            "cha":8
+        }
+    },
+    "Bard": {
+        "attributes": {
+            "str":8,
+            "dex":14,
+            "const":10,
+            "int":15,
+            "wis":14,
+            "cha":16
+        }
+    },
+    "Cleric": {
+        "attributes": {
+            "str":13,
+            "dex":13,
+            "const":14,
+            "int":8,
+            "wis":18,
+            "cha":8
+        }
+    },
+    "Druid": {
+        "attributes": {
+            "str":8,
+            "dex":12,
+            "const":16,
+            "int":9,
+            "wis":18,
+            "cha":9
+        }
+    },
+    "Fighter": {
+        "attributes": {
+            "str":17,
+            "dex":9,
+            "const":16,
+            "int":8,
+            "wis":15,
+            "cha":8
+        }
+    },
+    "Monk": {
+        "attributes": {
+            "str":8,
+            "dex":18,
+            "const":15,
+            "int":7,
+            "wis":15,
+            "cha":8
+        }
+    },
+    "Paladin": {
+        "attributes": {
+            "str":16,
+            "dex":10,
+            "const":16,
+            "int":10,
+            "wis":10,
+            "cha":14
+        }
+    },
+    "Ranger": {
+        "attributes": {
+            "str":8,
+            "dex":18,
+            "const":15,
+            "int":8,
+            "wis":15,
+            "cha":8
+        }
+    },
+    "Rogue": {
+        "attributes": {
+            "str":8,
+            "dex":16,
+            "const":14,
+            "int":14,
+            "wis":12,
+            "cha":14
+        }
+    },
+    "Sorcerer": {
+        "attributes": {
+            "str":9,
+            "dex":15,
+            "const":15,
+            "int":9,
+            "wis":9,
+            "cha":17
+        }
+    },
+    "Wizard": {
+        "attributes": {
+            "str":8,
+            "dex":14,
+            "const":15,
+            "int":17,
+            "wis":13,
+            "cha":8
+        }
+    }
+}
