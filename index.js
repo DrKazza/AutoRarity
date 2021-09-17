@@ -362,7 +362,7 @@ const updateTokenList = async () => {
 const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
-    node index.js summary               - gives a summary of your characters
+    node index.js sum/summary           - gives a summary of your characters
     node index.js xp                    - claim xp/level up/gold collection/dungeoneering - one off
     node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
     node index.js utl/updateTokenList   - update the token id list in .env file
@@ -374,6 +374,7 @@ const init = async () => {
     } else {
         switch (process.argv[2]) {
             case 'summary':
+            case 'sum':
                 await summary.charSummary();
                 break;
             case 'xp':
@@ -418,6 +419,20 @@ const init = async () => {
                 let className = typeof process.argv[3] === 'undefined' ? "all" : process.argv[3];
                 let quantity = typeof process.argv[4] === 'undefined' ? 1 : process.argv[4];
                 await massSummon(className, quantity);
+                break;
+            case 'testScrap':
+                await require('./scrap').scrapData();
+                break;
+            case 'testData':
+                let data = require('./scrap/JsonUtils').getDataFromFile();
+                let acc = []
+                data.accounts.forEach(value => {
+                    acc.push({addr : value.address, count:value.tokens.length});
+                });
+                acc.sort((a,b) => a.count - b.count );
+                for (let ac of acc){
+                    console.log(ac);
+                }
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)

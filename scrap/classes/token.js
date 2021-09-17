@@ -2,6 +2,10 @@ const Ability = require('./ability');
 const constVal = require('../../shared/const');
 
 class Token {
+    constructor(id) {
+        this.id = id;
+    }
+
     id = 0;
     owner = "";
     xp = 0;
