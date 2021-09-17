@@ -203,7 +203,7 @@ const checkAndRunDungeon = async (dungeon, latestNonce) => {
 }
 
 const nameOrToken = async (thistok) => {
-    let charName = await summary.getNames(tokenID, contractAddresses.namesABI, contractAddresses.rarityNames)
+    let charName = await summary.getNames(thistok, contractAddresses.namesABI, contractAddresses.rarityNames)
     if (charName == '') {
         return thistok
     } else {
