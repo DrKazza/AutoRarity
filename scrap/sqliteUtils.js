@@ -18,7 +18,7 @@ const insertToken = (id, owner) => {
 const getNumberOfTokenByAddress = (minCount = -1) => {
     initDb();
     if (minCount !== -1){
-        return db.prepare(`SELECT owner, count(*) as 'token' FROM token GROUP BY owner HAVING token > ${minCount} ORDER BY count(*)`).all();
+        return db.prepare(`SELECT owner, count(*) as 'token' FROM token GROUP BY owner HAVING token >= ${minCount} ORDER BY count(*)`).all();
     }else {
         return db.prepare(`SELECT owner, count(*) as 'token' FROM token GROUP BY owner ORDER BY count(*)`).all();
     }
