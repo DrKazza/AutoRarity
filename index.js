@@ -57,36 +57,34 @@ const checkTokens = async () => {
             if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
                 somethingDone = true;
                 if (tokenStats[0] < tokenStats[4]) {
-                    console.log('wait a bit before levelup to let the transaction to be confirmed after xp claim');
-                    await delay(30*1000);
+                    delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                } else {
+                    // try to levelup
+                    let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
+                    if (lvlEarnAttempt[0]) {
+                        levelGains.push(tokenID);
+                        latestNonce++;
+                        levelUpDone = true;
+                    } else if (lvlEarnAttempt[1] === 'high gas') {
+                        // fail due to high gas price
+                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                    }
                 }
-                // try to levelup
-                let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
-                if (lvlEarnAttempt[0]) {
-                    levelGains.push(tokenID);
-                    latestNonce++;
-                    levelUpDone = true;
-                } else if (lvlEarnAttempt[1] === 'high gas') {
-                    // fail due to high gas price
-                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                }
-            } else {
-                // not ready to level up - do nothing
             }
         }
         if (levelUpDone){
-            console.log('wait a bit before check gold stats to let the transaction to be confirmed after level up');
-            await delay(30*1000);
-        }
-        if ((await gold.getStats(tokenID))[1] > 0) {
-            somethingDone = true;
-            let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
-            if (goldEarnAttempt[0]) {
-                goldGains.push(tokenID);
-                latestNonce++;
-            } else if (goldEarnAttempt[1] === 'high gas') {
-                // fail due to high gas price
-                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+        } else {
+            if ((await gold.getStats(tokenID))[1] > 0) {
+                somethingDone = true;
+                let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
+                if (goldEarnAttempt[0]) {
+                    goldGains.push(tokenID);
+                    latestNonce++;
+                } else if (goldEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                }
             }
         }
         if (!somethingDone){
