@@ -24,6 +24,7 @@ const summary = require('./base/summary');
 const dungeon = require('./base/dungeon');
 const core = require('./base/core');
 const gold = require('./base/gold');
+const materials1 = require('./base/material_1');
 
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
@@ -130,6 +131,7 @@ const autoRun = async (repeater) => {
         }
     }
 }
+
 const displayAvailableClasses = () => {
     console.log('Available classes:');
     for (let cl of constVal.classes){
@@ -138,10 +140,24 @@ const displayAvailableClasses = () => {
     }
 }
 
+const getGlobalStats = async () => {
+    let totalGold = 0;
+    let totalMaterials1 = 0;
+    for (let tokenID of constVal.myTokenIds) {
+        totalMaterials1 += parseInt(await materials1.getInventory(tokenID), 10);
+        let goldStats = await gold.getStats(tokenID);
+        totalGold += goldStats[0];
+    }
+    console.log(`Global Stats:
+     - gold => ${totalGold}
+     - materials1 => ${totalMaterials1}`);
+}
+
 const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
     node index.js sum/summary           - gives a summary of your characters
+    node index.js gl/globalStats        - gives global stats (gold/materials1)
     node index.js xp                    - claim xp/level up/gold collection/dungeoneering - one off
     node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
     node index.js utl/updateTokenList   - update the token id list in .env file
@@ -210,8 +226,9 @@ const init = async () => {
                     console.log(dat);
                 }
                 break;
-            case 'test':
-                console.log(1000000000000000000000 <= 1500000000000000000000 )
+            case 'globalStats':
+            case 'gs':
+                await getGlobalStats();
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
