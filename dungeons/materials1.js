@@ -7,7 +7,14 @@ const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 const recommendedClass = [1,5,7];
 
-const run = async (tokenID) => {
+const getNonce = async (nonce) => {
+    if (typeof nonce === 'undefined'){
+        nonce = await utils.nonceVal();
+    }
+    return nonce;
+}
+
+const run = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
     if ((loot = await getLoot(tokenID)) < 1){
@@ -25,7 +32,7 @@ const run = async (tokenID) => {
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
-            let nonce = utils.nonceVal();
+            nonce = await getNonce(nonce);
             try {
                 let contract = new ethers.Contract(address, abi, constVal.account);
                 let approveResponse = await contract.adventure(
@@ -39,10 +46,8 @@ const run = async (tokenID) => {
                 console.log(`${tokenID} => success, loot => ${loot}`);
                 return [true, `success, loot => ${loot}`];
             } catch (e) {
-                console.log("ERROR");
-                console.log(`gasLimit: ${constVal.totalGasLimit}`)
-                console.log(`gasPrice: ${thisGas}`)
-                console.log(`nonce: ${nonce}`)
+                console.log(`${tokenID} => error`);
+                console.log(e);
                 return [false, 'ERROR'];
             }
         } else {

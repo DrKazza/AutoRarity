@@ -16,89 +16,14 @@ const autoLevelUp = true; // you may not want to automatically level up your cha
 
 require("dotenv").config();
 
-
-
-
-const ethers = require('ethers');
 const constVal = require('./shared/const');
-const delay = ms => new Promise(res => setTimeout(res, ms));
-const summary = require('./base/summary');
-const {contractAddresses} = require('./shared/contractAddresses.js');
-const {getTokenList, updateDotEnvFile, getTokenCount} = require('./shared/tokenIdGetter.js');
-const dungeons = require('./dungeons');
 const utils = require('./shared/utils');
 
-const earnXP = async (tokenID, nonceToUse)  => {
-    let thisGas = await utils.calculateGasPrice()
-    if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
-        return [false, 'high gas']
-    } else {
-        if (constVal.liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
-            let approveResponse = await contract.adventure(
-                tokenID,
-                {
-                    gasLimit: constVal.totalGasLimit,
-                    gasPrice: thisGas,
-                    nonce: nonceToUse
-                });
-            //console.log(approveResponse);
-            return [true, 'success'];
-        } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
-            return [false, 'not live'];
-        }
-    }
-}
-
-const earnLevel = async (tokenID, nonceToUse)  => {
-    let thisGas = await utils.calculateGasPrice()
-    if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
-        return [false, 'high gas']
-    } else {
-        if (constVal.liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
-            let approveResponse = await contract.level_up(
-                tokenID,
-                {
-                    gasLimit: constVal.totalGasLimit,
-                    gasPrice: thisGas,
-                    nonce: nonceToUse
-                });
-            //console.log(approveResponse);
-            return [true, 'success'];
-        } else {
-            console.log(`Live trading disabled - levelling NOT submitted.`)
-            return [false, 'not live'];
-        }
-    }
-}
-
-const earnGold = async (tokenIDvalue, nonceToUse)  => {
-    let thisGas = await utils.calculateGasPrice()
-    if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
-        return [false, 'high gas']
-    } else {
-        if (constVal.liveTrading) {
-            let contract = new ethers.Contract(contractAddresses.rarityGold, contractAddresses.goldABI, constVal.account);
-            let approveResponse = await contract.claim(
-                tokenIDvalue,
-                {
-                    gasLimit: constVal.totalGasLimit,
-                    gasPrice: thisGas,
-                    nonce: nonceToUse
-                });
-            //console.log(approveResponse);
-            return [true, 'success'];
-        } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
-            return [false, 'not live'];
-        }
-    }
-}
+const delay = ms => new Promise(res => setTimeout(res, ms));
+const summary = require('./base/summary');
+const dungeon = require('./base/dungeon');
+const core = require('./base/core');
+const gold = require('./base/gold');
 
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
@@ -107,14 +32,14 @@ const checkTokens = async () => {
     let levelGains = [];
     let goldGains = [];
     for (let tokenID of constVal.myTokenIds) {
-        let tokenStats = await summary.getStats(tokenID);
+        let tokenStats = await core.getStats(tokenID);
         let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
         let xpPending = 0
         if (xpCountdown < 0) {
-            let xpEarnAttempt = await earnXP(tokenID, latestNonce)
+            let xpEarnAttempt = await core.claimXp(tokenID, latestNonce)
             if (xpEarnAttempt[0]) {
                 // success
-                xpPending = 250;
+                xpPending = 250*10**18;
                 latestNonce++;
                 xpGains.push(tokenID)
             } else if (xpEarnAttempt[1] === 'high gas') {
@@ -126,31 +51,35 @@ const checkTokens = async () => {
         } else {
             delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
         }
+        let levelUpDone = false;
         if (autoLevelUp) {
-            if (tokenStats[4] <= (xpPending + tokenStats[0])) {
+            if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
                 if (tokenStats[0] < tokenStats[4]) {
-                    // so we can level up but only when the last adventuring has been registered
-                    // don't do anything but set a short delay to try again when xpPending is 0
-                    delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                    console.log('wait a bit before levelup to let the transaction to be confirmed after xp claim');
+                    await delay(20*1000);
+                }
+                // try to levelup
+                let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
+                if (lvlEarnAttempt[0]) {
+                    levelGains.push(tokenID);
+                    latestNonce++;
+                    levelUpDone = true;
+                } else if (lvlEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 } else {
-                    // try to levelup
-                    let lvlEarnAttempt = await earnLevel(tokenID, latestNonce)
-                    if (lvlEarnAttempt[0]) {
-                        levelGains.push(tokenID);
-                        latestNonce++;
-                    } else if (lvlEarnAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    } else {
-                        console.log(`Live trading off - token ${tokenID} was not levelled up`)
-                    }
+                    console.log(`Live trading off - token ${tokenID} was not levelled up`)
                 }
             } else {
                 // not ready to level up - do nothing
             }
         }
-        if ((await summary.getGoldStats(tokenID))[1] > 0) {
-            let goldEarnAttempt = await earnGold(tokenID, latestNonce)
+        if (levelUpDone){
+            console.log('wait a bit before check gold stats to let the transaction to be confirmed after level up');
+            await delay(20*1000);
+        }
+        if ((await gold.getStats(tokenID))[1] > 0) {
+            let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
             if (goldEarnAttempt[0]) {
                 goldGains.push(tokenID);
                 latestNonce++;
@@ -171,18 +100,24 @@ const autoRun = async (repeater) => {
         let tokenCheck = await checkTokens()
         if (tokenCheck[1].length !== 0) {
             transactionPerformed = true;
+            /*
             console.log(`Successfully adventured:`)
             for (let thistok of tokenCheck[1]) {console.log(thistok)}
+             */
         }
         if (tokenCheck[2].length !== 0) {
             transactionPerformed = true;
+            /*
             console.log(`Successfully Levelled:`)
             for (let thistok of tokenCheck[2]) {console.log(thistok)}
+             */
         }
         if (tokenCheck[3].length !== 0) {
             transactionPerformed = true;
+            /*
             console.log(`Successfully Claimed Gold:`)
             for (let thistok of tokenCheck[3]) {console.log(thistok)}
+             */
         }
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         let textTimeleft = utils.secsToText(tokenCheck[0])
@@ -194,169 +129,12 @@ const autoRun = async (repeater) => {
         }
     }
 }
-
-const displayAvailableDungeons = () => {
-    console.log('Available dungeon:');
-    let dgList = dungeons.getAvailableDungeons();
-    for (let dg of dgList){
-        console.log(` - ${dg}`);
-    }
-}
-
-const scout = async (dungeonName, token) => {
-    if (!dungeons.isDungeonAvailable(dungeonName)) {
-        console.log(`This dungeon is not implemented yet [${dungeonName}]`);
-        displayAvailableDungeons();
-    } else {
-        if (typeof token === 'undefined'){
-            for (let token of constVal.myTokenIds){
-                await dungeons.scoutDungeon(dungeonName, token);
-            }
-        } else {
-            if (!constVal.myTokenIds.includes(token)){
-                console.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
-            } else {
-                await dungeons.scoutDungeon(dungeonName, token);
-            }
-        }
-    }
-}
-
-const dungeon = async (dungeonName, token) => {
-    if (!dungeons.isDungeonAvailable(dungeonName)) {
-        console.log(`This dungeon is not implemented yet [${dungeonName}]`);
-        displayAvailableDungeons();
-    } else {
-        if (typeof token === 'undefined'){
-            for (let token of constVal.myTokenIds){
-                await dungeons.runDungeon(dungeonName, token);
-            }
-        } else {
-            if (!constVal.myTokenIds.includes(token)){
-                console.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
-            } else {
-                await dungeons.runDungeon(dungeonName, token);
-            }
-        }
-    }
-}
-
-const summon = async (classToSummon, nonceVal, i = 0) => {
-    if (typeof nonceVal === 'undefined'){
-        nonceVal = utils.nonceVal()
-    }
-    let thisGas = await utils.calculateGasPrice()
-    if (thisGas < 0) {
-        console.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
-        return false;
-    } else {
-        if (constVal.liveTrading) {
-            try {
-
-                let contract = new ethers.Contract(contractAddresses.rarityManifested, contractAddresses.manifestABI, constVal.account);
-                let approveResponse = await contract.summon(
-                    classToSummon,
-                    {
-                        gasLimit: constVal.totalGasLimit,
-                        gasPrice: utils.calculateGasPrice(),
-                        nonce: nonceVal
-                    });
-                console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
-                return true;
-            } catch (error) {
-                console.log(error);
-                return false;
-            }
-        }else {
-            console.log(`#${i+1} => Live trading disabled - summoning NOT submitted.`)
-            return true;
-        }
-    }
-}
-
-const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, nonce) => {
-    let result;
-    let newToken = 0;
-    let originalTokenCount = await getTokenCount(constVal.walletAddress);
-    if (classToSummon !== "all"){
-        let classId = constVal.classes.indexOf(classToSummon);
-        if (classId === -1 || classId === 0){
-            console.log(`Unknown class [${classToSummon}]`);
-            return;
-        }
-        if (typeof nonce === 'undefined'){
-            nonce = {
-                value : await utils.nonceVal()
-            };
-        }
-        result = {
-            success: 0,
-            fail: 0
-        };
-        let i = 0;
-        console.log(`Start summoning of ${quantity} ${classToSummon}`);
-        while (i < quantity) {
-            console.log(`#${i+1} => summoning...`);
-            let res = await summon(classId, nonce.value, i);
-            if (res){
-                result.success++;
-                console.log(`#${i+1} => summon success`);
-            } else {
-                result.fail++;
-                console.log(`#${i+1} => summon fail`);
-            }
-            await utils.sleep(1000);
-            nonce.value++;
-            i++;
-        }
-    } else {
-        console.log(`Start summoning ${quantity} of each classes`)
-        nonce = {
-            value : await utils.nonceVal()
-        };
-        for (let cl of constVal.classes){
-            if (cl !== 'noClass'){
-                newToken += await massSummon(cl, quantity, true, nonce);
-            }
-        }
-    }
-    if (typeof result !== "undefined"){
-        console.log(`Result Class [${classToSummon}] | Quantity [${quantity}]:`)
-        console.log(` - success : ${result.success}`)
-        console.log(` - fail : ${result.fail}`)
-    }
-
-    if (!isMass){
-        let newTotal = classToSummon === "all" ? (originalTokenCount + newToken) : (originalTokenCount + result.success);
-        let currentCount = 0;
-        do {
-            if (currentCount !== 0){
-                console.log("Waiting a bit to let the transaction spread...")
-                await utils.sleep(10000);
-            }
-            console.log("Fetching token count...")
-            currentCount = await getTokenCount(constVal.walletAddress);
-            console.log(`CurrentCount => ${currentCount} of ${newTotal}`)
-        } while (currentCount < newTotal)
-
-        console.log("Updating token list...")
-        await updateTokenList();
-    } else {
-        return result.success;
-    }
-}
-
 const displayAvailableClasses = () => {
     console.log('Available classes:');
     for (let cl of constVal.classes){
         if (cl !== 'noClass')
             console.log(` - ${cl}`);
     }
-}
-
-const updateTokenList = async () => {
-    let tokens = await getTokenList(constVal.walletAddress);
-    await updateDotEnvFile(tokens);
 }
 
 const init = async () => {
@@ -385,30 +163,30 @@ const init = async () => {
                 break;
             case 'updateTokenList':
             case 'utl':
-                await updateTokenList();
+                await core.updateTokenList();
                 break;
             case 'dgList':
             case 'dgl':
-                displayAvailableDungeons();
+                dungeon.displayAvailableDungeons();
                 break;
             case 'scout':
                 if (typeof process.argv[3] === 'undefined'){
                     console.log('You have to select a dungeon to scout');
-                    displayAvailableDungeons();
+                    dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = process.argv[3];
                     let token = process.argv[4];
-                    await scout(dungeonName, token);
+                    await dungeon.scout(dungeonName, token);
                 }
                 break;
             case 'dg':
                 if (typeof process.argv[3] === 'undefined'){
                     console.log('You have to select a dungeon to go');
-                    displayAvailableDungeons();
+                    dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = process.argv[3];
                     let token = process.argv[4];
-                    await dungeon(dungeonName, token);
+                    await dungeon.doDungeon(dungeonName, token);
                 }
                 break;
             case 'classList':
@@ -418,7 +196,7 @@ const init = async () => {
             case 'sm':
                 let className = typeof process.argv[3] === 'undefined' ? "all" : process.argv[3];
                 let quantity = typeof process.argv[4] === 'undefined' ? 1 : process.argv[4];
-                await massSummon(className, quantity);
+                await core.massSummon(className, quantity);
                 break;
             case 'testScrap':
                 let resume = typeof process.argv[3] !== 'undefined';
@@ -430,6 +208,9 @@ const init = async () => {
                 for (let dat of data){
                     console.log(dat);
                 }
+                break;
+            case 'test':
+                console.log(1000000000000000000000 <= 1500000000000000000000 )
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)

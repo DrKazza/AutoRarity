@@ -23,7 +23,7 @@ const getNonce = (nonce) => {
 const claim = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
+        console.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -34,11 +34,13 @@ const claim = async (tokenID, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce()
+                        nonce: getNonce(nonce)
                     });
+                console.log(`${tokenID} => gold claimed`);
                 return [true, 'success'];
             } catch (e){
-                return [false, 'ERROR'];
+                console.log(`${tokenID} => gold error`);
+                return [false, 'error'];
             }
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
@@ -50,7 +52,7 @@ const claim = async (tokenID, nonce = undefined) => {
 const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
+        console.log(`${tokenFrom} > ${tokenTo} => transfer gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -62,7 +64,7 @@ const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce()
+                        nonce: getNonce(nonce)
                     });
                 return [true, 'success'];
             } catch (e){

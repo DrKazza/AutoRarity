@@ -30,9 +30,7 @@ const charSummary = async () => {
 
 
 module.exports = {
-    charSummary,
-    getStats : core.getStats,
-    getGoldStats: gold.getStats
+    charSummary
 };
 
 

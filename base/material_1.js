@@ -19,7 +19,7 @@ const getNonce = (nonce) => {
 const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`Gas Price too high: ${-thisGas}`)
+        console.log(`${tokenFrom} > ${tokenTo} => transfer material1 => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -31,11 +31,11 @@ const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce()
+                        nonce: getNonce(nonce)
                     });
                 return [true, 'success'];
             } catch (e){
-                return [false, 'ERROR'];
+                return [false, 'error'];
             }
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
