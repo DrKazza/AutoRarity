@@ -22,7 +22,7 @@ require("dotenv").config();
 const ethers = require('ethers');
 const constVal = require('./shared/const');
 const delay = ms => new Promise(res => setTimeout(res, ms));
-const summary = require('./base/summary.js');
+const summary = require('./base/summary');
 const {contractAddresses} = require('./shared/contractAddresses.js');
 const {getTokenList, updateDotEnvFile, getTokenCount} = require('./shared/tokenIdGetter.js');
 const dungeons = require('./dungeons');
@@ -107,7 +107,7 @@ const checkTokens = async () => {
     let levelGains = [];
     let goldGains = [];
     for (let tokenID of constVal.myTokenIds) {
-        let tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
+        let tokenStats = await summary.getStats(tokenID);
         let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
         let xpPending = 0
         if (xpCountdown < 0) {
@@ -149,7 +149,7 @@ const checkTokens = async () => {
                 // not ready to level up - do nothing
             }
         }
-        if ((await summary.getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold)[1] ) > 0) {
+        if ((await summary.getGoldStats(tokenID))[1] > 0) {
             let goldEarnAttempt = await earnGold(tokenID, latestNonce)
             if (goldEarnAttempt[0]) {
                 goldGains.push(tokenID);
@@ -421,7 +421,8 @@ const init = async () => {
                 await massSummon(className, quantity);
                 break;
             case 'testScrap':
-                await require('./scrap').scrapData();
+                let resume = typeof process.argv[3] !== 'undefined';
+                await require('./scrap').scrapData( resume ? require('./scrap/sqliteUtils').getMaxTokenId() : 0);
                 break;
             case 'testData':
                 let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress();

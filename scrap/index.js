@@ -2,9 +2,9 @@ const scrapUtil = require('./scrapUtils');
 const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
 
-const scrapData = async () => {
+const scrapData = async (start = 0) => {
     let maxId = await scrapUtil.getNextTokenId();
-    let tokenID = 0;
+    let tokenID = start;
     let request = 0;
     let lastId = tokenID;
     setTimeout(() => {

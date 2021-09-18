@@ -20,9 +20,16 @@ const getNumberOfTokenByAddress = () => {
     return db.prepare(`SELECT owner, count(*) as 'count' FROM token GROUP BY owner ORDER BY count(*)`).all();
 }
 
+const getMaxTokenId = () => {
+    initDb();
+    let res = db.prepare(`SELECT max(id) as 'id' FROM token`).get();
+    return res.id;
+}
+
 
 module.exports = {
     insertAddress,
     insertToken,
-    getNumberOfTokenByAddress
+    getNumberOfTokenByAddress,
+    getMaxTokenId
 };
