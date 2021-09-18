@@ -89,7 +89,7 @@ const checkTokens = async () => {
                 delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
             }
         }
-        if (somethingDone){
+        if (!somethingDone){
             console.log(`${tokenID} => nothing to do...`);
         }
     }
@@ -121,10 +121,11 @@ const autoRun = async (repeater) => {
             for (let thistok of tokenCheck[3]) {console.log(thistok)}
              */
         }
-        if (!transactionPerformed){console.log(`Nothing to do...`)}
+        //if (!transactionPerformed){console.log(`Nothing to do...`)}
         let textTimeleft = utils.secsToText(tokenCheck[0])
         if (repeater) {
-            console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
+            console.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime.toString()}`);
             await delay(tokenCheck[0]*1000);
         } else {
             break;
