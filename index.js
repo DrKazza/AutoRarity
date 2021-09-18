@@ -12,9 +12,15 @@
 // the third is the ids of your rarity tokens, do not put a space between the commas 
 // and the numbers and make sure you have the quote marks
 
-// SETTING UP TELEGRAM BOT
-// Join a chat with @autorarity_bot and once your index.js is running in auto mode send a /init command to your bot in Telegram
-// The bot should reply to the /init command to confirm that a comms channel has been established
+// SETTING UP YOUR TELEGRAM BOT
+// 1) In Telegram, open chat with @BotFather
+// 2) Create your new bot, give it a name and a handle - BotFather will give you the token
+// 3) Add a line to your .env file: TGTOKEN=<the token from BotFather>
+// 4) Join a chat with your bot 
+// 5) Make sure index.js is running in auto mode
+// 6) Send /init command from your bot. You should receive a reply that a comms channel has been setup and ready to go.
+// You only need to initialise once from each place you run index.js. 
+
 
 const autoLevelUp = true; // you may not want to automatically level up your char
 const defaultMaxGasPx = 250 // usually 50-100, sometimes this spikes to nearly 200
