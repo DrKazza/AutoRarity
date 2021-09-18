@@ -1,16 +1,10 @@
 const scrapUtil = require('./scrapUtils');
-const jsonUtil = require('./JsonUtils');
+const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
-const Account = require('./classes/account');
-const Token = require("./classes/token");
 
 const scrapData = async () => {
     let maxId = await scrapUtil.getNextTokenId();
     let tokenID = 0;
-    let data = {
-        accounts : []
-    };
-    let currentAccount;
     let request = 0;
     let lastId = tokenID;
     setTimeout(() => {
@@ -19,20 +13,13 @@ const scrapData = async () => {
     }, 10000);
     while (tokenID < maxId){
         let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
-        currentAccount = data.accounts.find((value) => {return value.address === ownerAddress;});
-        if (typeof currentAccount === 'undefined'){
-            currentAccount = new Account(ownerAddress);
-            data.accounts.push(currentAccount);
-        }
-        currentAccount.tokens.push(new Token(tokenID));
+        sqliteUtils.insertAddress(ownerAddress);
+        sqliteUtils.insertToken(tokenID, ownerAddress);
         if (tokenID%1000 === 0){
-            jsonUtil.writeToFile(data);
             writePercentage(tokenID, maxId, request);
         }
         tokenID++;
     }
-    jsonUtil.writeToFile(data);
-
 }
 
 const writePercentage = (current, max, request) => {

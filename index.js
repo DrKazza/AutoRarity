@@ -424,14 +424,9 @@ const init = async () => {
                 await require('./scrap').scrapData();
                 break;
             case 'testData':
-                let data = require('./scrap/JsonUtils').getDataFromFile();
-                let acc = []
-                data.accounts.forEach(value => {
-                    acc.push({addr : value.address, count:value.tokens.length});
-                });
-                acc.sort((a,b) => a.count - b.count );
-                for (let ac of acc){
-                    console.log(ac);
+                let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress();
+                for (let dat of data){
+                    console.log(dat);
                 }
                 break;
             default:
