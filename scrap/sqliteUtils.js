@@ -15,9 +15,13 @@ const insertToken = (id, owner) => {
     db.exec(`INSERT INTO token (id, owner) VALUES ('${id}', '${owner}') ON CONFLICT DO NOTHING;`);
 }
 
-const getNumberOfTokenByAddress = () => {
+const getNumberOfTokenByAddress = (minCount = -1) => {
     initDb();
-    return db.prepare(`SELECT owner, count(*) as 'count' FROM token GROUP BY owner ORDER BY count(*)`).all();
+    if (minCount !== -1){
+        return db.prepare(`SELECT owner, count(*) as 'token' FROM token GROUP BY owner HAVING token > ${minCount} ORDER BY count(*)`).all();
+    }else {
+        return db.prepare(`SELECT owner, count(*) as 'token' FROM token GROUP BY owner ORDER BY count(*)`).all();
+    }
 }
 
 const getMaxTokenId = () => {

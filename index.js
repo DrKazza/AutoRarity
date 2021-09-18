@@ -425,7 +425,8 @@ const init = async () => {
                 await require('./scrap').scrapData( resume ? require('./scrap/sqliteUtils').getMaxTokenId() : 0);
                 break;
             case 'testData':
-                let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress();
+                let minCount = typeof process.argv[3] === 'undefined' ? -1 : process.argv[3];
+                let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
                     console.log(dat);
                 }
