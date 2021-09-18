@@ -12,8 +12,9 @@
 // the third is the ids of your rarity tokens, do not put a space between the commas 
 // and the numbers and make sure you have the quote marks
 
-
-
+// SETTING UP TELEGRAM BOT
+// Join a chat with @autorarity_bot and once your index.js is running in auto mode send a /init command to your bot in Telegram
+// The bot should reply to the /init command to confirm that a comms channel has been established
 
 const autoLevelUp = true; // you may not want to automatically level up your char
 const defaultMaxGasPx = 250 // usually 50-100, sometimes this spikes to nearly 200
@@ -25,12 +26,39 @@ const minimumDelay = 60 // don't repeat too often
 // Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
 const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
 const parseBool = (val) => {return val === true || val === 'true'}
-
+const tgToken = '2047477301:AAFrkC92EJsm4ZxFiTbtV6rvLxsaJXvcXt8' // AutoRarity Bot identifier
 
 require("dotenv").config();
 var myTokenIds = [];
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
+
+// Telegram Bot -- OPTIONAL
+const TelegramBot = require('node-telegram-bot-api');
+const bot = new TelegramBot(tgToken, {polling: true});
+const fs = require('fs');
+var chatId = undefined;
+
+// Retrieve any previously set bot channel identifier
+try {
+    chatId = fs.readFileSync('.chatId','utf8')
+    console.log('AutoRarity TG bot resuming comms channel with user.')
+} catch (err) {
+    console.log('Unable to access existing TG bot setup.')
+}
+
+// Listen for initialisation message from bot user to establish comms channel
+bot.onText(/\/init/, (msg, match) => {
+  chatId = msg.chat.id;
+  // Store the chat ID across sessions
+  fs.writeFile(".chatId", JSON.stringify(chatId), function(err) {
+        if(err){
+            return console.log(err);
+        }
+        console.log("AutoRarity TG bot initialised by user.");
+  });
+  sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
+});
 
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
@@ -323,11 +351,18 @@ const autoRun = async (repeater, dungeon) => {
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         textTimeleft = summary.secsToText(tokenCheck[0])
         if (repeater) {
-            console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            console.log(`Retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            sendTelegram(`Waiting for ${textTimeleft[0]} hours ${textTimeleft[1]} minutes for next adventure.`);
             await delay(tokenCheck[0]*1000);
         } else {
             break;
         }
+    }
+}
+
+const sendTelegram = async (message) => {
+    if(chatId != undefined){
+        bot.sendMessage(chatId, message);
     }
 }
 
