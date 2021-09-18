@@ -44,7 +44,7 @@ const claimXp = async (tokenID, nonce)  => {
                 return [false, 'error'];
             }
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            console.log(`${tokenID} => Live trading disabled - claimXp NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -73,7 +73,7 @@ const levelUp = async (tokenID, nonce)  => {
                 return [false, 'error'];
             }
         } else {
-            console.log(`Live trading disabled - levelling NOT submitted.`)
+            console.log(`${tokenID} => Live trading disabled - levelUp NOT submitted.`)
             return [false, 'not live'];
         }
     }

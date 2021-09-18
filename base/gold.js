@@ -43,7 +43,7 @@ const claim = async (tokenID, nonce = undefined) => {
                 return [false, 'error'];
             }
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            console.log(`${tokenID} => Live trading disabled - gold claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -71,7 +71,7 @@ const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
                 return [false, 'ERROR'];
             }
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            console.log(`${tokenID} => Live trading disabled - transfer NOT submitted.`)
             return [false, 'not live'];
         }
     }
