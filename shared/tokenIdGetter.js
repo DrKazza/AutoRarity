@@ -7,8 +7,8 @@ const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
 
 const SUMMONERS = gql`
-    query getSummoners($owner: String!) {
-        summoners(first: 1000, where: { owner: $owner }) {
+    query getSummoners($owner: String!, $skip: Int!) {
+        summoners(skip: $skip first: 1000, where: { owner: $owner }) {
             id
             owner
             _class
@@ -19,12 +19,20 @@ const SUMMONERS = gql`
 
 const getTokenList = async function (owner) {
     let tokenList = [];
-    await request('https://api.rarity.game/subgraphs/name/rarity', SUMMONERS, {owner: owner})
-        .then((data) => {
-            data.summoners.forEach((elem) => {
-                tokenList.push(parseInt(elem.id, 16));
-            })
-        });
+    let skip = 0;
+    let currentResCount = 0;
+    do {
+        await request('https://api.rarity.game/subgraphs/name/rarity', SUMMONERS, {owner: owner, skip:skip})
+            .then((data) => {
+                data.summoners.forEach((elem) => {
+                    tokenList.push(parseInt(elem.id, 16));
+                })
+                currentResCount = data.summoners.length;
+            });
+        skip += 1000;
+    }
+    while (currentResCount !== 0)
+
     return tokenList;
 }
 
