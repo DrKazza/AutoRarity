@@ -7,7 +7,7 @@ const scrapData = async (start = 0) => {
     let tokenID = start;
     let request = 0;
     let lastId = tokenID;
-    setTimeout(() => {
+    setInterval(() => {
         request = ((tokenID-lastId)/10).toFixed(0);
         lastId = tokenID;
     }, 10000);
