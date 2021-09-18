@@ -32,10 +32,12 @@ const checkTokens = async () => {
     let levelGains = [];
     let goldGains = [];
     for (let tokenID of constVal.myTokenIds) {
+        let somethingDone = false;
         let tokenStats = await core.getStats(tokenID);
         let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
         let xpPending = 0
         if (xpCountdown < 0) {
+            somethingDone = true;
             let xpEarnAttempt = await core.claimXp(tokenID, latestNonce)
             if (xpEarnAttempt[0]) {
                 // success
@@ -45,8 +47,6 @@ const checkTokens = async () => {
             } else if (xpEarnAttempt[1] === 'high gas') {
                 // fail due to high gas price
                 delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-            } else {
-                console.log(`Live trading off - token ${tokenID} was not adventured`)
             }
         } else {
             delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
@@ -54,6 +54,7 @@ const checkTokens = async () => {
         let levelUpDone = false;
         if (autoLevelUp) {
             if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
+                somethingDone = true;
                 if (tokenStats[0] < tokenStats[4]) {
                     console.log('wait a bit before levelup to let the transaction to be confirmed after xp claim');
                     await delay(20*1000);
@@ -67,8 +68,6 @@ const checkTokens = async () => {
                 } else if (lvlEarnAttempt[1] === 'high gas') {
                     // fail due to high gas price
                     delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                } else {
-                    console.log(`Live trading off - token ${tokenID} was not levelled up`)
                 }
             } else {
                 // not ready to level up - do nothing
@@ -79,6 +78,7 @@ const checkTokens = async () => {
             await delay(20*1000);
         }
         if ((await gold.getStats(tokenID))[1] > 0) {
+            somethingDone = true;
             let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
             if (goldEarnAttempt[0]) {
                 goldGains.push(tokenID);
@@ -86,9 +86,10 @@ const checkTokens = async () => {
             } else if (goldEarnAttempt[1] === 'high gas') {
                 // fail due to high gas price
                 delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-            } else {
-                console.log(`Live trading off - token ${tokenID} did not claim gold`)
             }
+        }
+        if (somethingDone){
+            console.log(`${tokenID} => nothing to do...`);
         }
     }
     return [delayToUse, xpGains, levelGains, goldGains];
