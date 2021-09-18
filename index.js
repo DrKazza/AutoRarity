@@ -26,7 +26,6 @@ const minimumDelay = 60 // don't repeat too often
 // Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
 const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
 const parseBool = (val) => {return val === true || val === 'true'}
-const tgToken = '2047477301:AAFrkC92EJsm4ZxFiTbtV6rvLxsaJXvcXt8' // AutoRarity Bot identifier
 
 require("dotenv").config();
 var myTokenIds = [];
@@ -35,6 +34,7 @@ const walletAddress = process.env.WALLETADDRESS;
 
 // Telegram Bot -- OPTIONAL
 const TelegramBot = require('node-telegram-bot-api');
+const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
 const bot = new TelegramBot(tgToken, {polling: true});
 const fs = require('fs');
 var chatId = undefined;
