@@ -41,6 +41,7 @@ const claimXp = async (tokenID, nonce)  => {
                 return [true, 'success'];
             } catch (e) {
                 console.log(`${tokenID} => xp error`);
+                console.log(e);
                 return [false, 'error'];
             }
         } else {

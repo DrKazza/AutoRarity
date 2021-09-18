@@ -58,7 +58,7 @@ const checkTokens = async () => {
                 somethingDone = true;
                 if (tokenStats[0] < tokenStats[4]) {
                     console.log('wait a bit before levelup to let the transaction to be confirmed after xp claim');
-                    await delay(20*1000);
+                    await delay(30*1000);
                 }
                 // try to levelup
                 let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
@@ -76,7 +76,7 @@ const checkTokens = async () => {
         }
         if (levelUpDone){
             console.log('wait a bit before check gold stats to let the transaction to be confirmed after level up');
-            await delay(20*1000);
+            await delay(30*1000);
         }
         if ((await gold.getStats(tokenID))[1] > 0) {
             somethingDone = true;
@@ -125,7 +125,7 @@ const autoRun = async (repeater) => {
         let textTimeleft = utils.secsToText(tokenCheck[0])
         if (repeater) {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
-            console.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime.toString()}`);
+            console.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
             await delay(tokenCheck[0]*1000);
         } else {
             break;
