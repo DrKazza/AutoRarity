@@ -20,6 +20,7 @@
     "@ethersproject/providers": "^5.4.5",
     "dotenv": "^10.0.0",
     "ethers": "^5.4.6",
+    "fs": "0.0.1-security",
     "node-telegram-bot-api": "^0.54.0",
     "web3": "^1.5.2"
   }

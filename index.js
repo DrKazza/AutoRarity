@@ -6,6 +6,7 @@
 // TOKENIDS = '444,555,666'
 // LIVETRADING = 'false'   change this to LIVETRADING = 'true' when you're ready to run
 // MAXGAS = '250'  this defaults to 250 if you've not specified it
+// TGTOKEN = '???' this is to assist with telegram notifications
 //
 // the first is obviously your wallet
 // the secret key is your phrase for your wallet so you can pay for gas
@@ -47,19 +48,18 @@ const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
 var bot = {};
 
 if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
-
-// Listen for initialisation message from bot user to establish comms channel
-bot.onText(/\/init/, (msg, match) => {
-  chatId = msg.chat.id;
-  // Store the chat ID across sessions
-  fs.writeFile(".chatId", JSON.stringify(chatId), function(err) {
-        if(err){
-            return console.log(err);
-        }
-        console.log("AutoRarity TG bot initialised by user.");
-  });
-  sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
-});
+    // Listen for initialisation message from bot user to establish comms channel
+    bot.onText(/\/init/, (msg, match) => {
+    chatId = msg.chat.id;
+    // Store the chat ID across sessions
+    fs.writeFile(".chatId", JSON.stringify(chatId), function(err) {
+            if(err){
+                return console.log(err);
+            }
+            console.log("AutoRarity TG bot initialised by user.");
+    });
+    sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
+    });
 }
 
 // Retrieve any previously set bot channel identifier
@@ -372,6 +372,7 @@ const autoRun = async (repeater, dungeon) => {
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         let ftmBalance = (await getFTMBalance())/10**18
         if ( ftmBalance < lowFTM) {
+            sendTelegram(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
             console.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
         }
         textTimeleft = summary.secsToText(tokenCheck[0])
