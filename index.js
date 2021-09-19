@@ -152,14 +152,13 @@ const dropTransaction = async (nonce, count = 1) => {
             return;
         }
         try {
-            let transaction = await constVal.account.signTransaction({
+            await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
-                value: "0",
+                value: 0,
                 gasPrice: thisGas,
-                nonce: `${nonce}`
+                nonce: parseInt(nonce, 10)
             });
-            await constVal.account.sendSignedTransaction(transaction);
             nonce++;
             i++;
         } catch (e) {
