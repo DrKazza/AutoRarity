@@ -16,7 +16,7 @@ const charSummary = async () => {
             console.log(`Token: ${tokenID}, ${constVal.classes[tokenStats[2]]} Lvl ${tokenStats[3]}, currentXP ${Math.floor(tokenStats[0]/10**18)}/${Math.floor(tokenStats[4]/10**18)}, next XP in ${timeleft[0]}h${timeleft[1]}m`)
         }
         let attribs = await attribute.get(tokenID);
-        console.log(`Str: ${attribs[0]}, Dex: ${attribs[1]}, Const: ${attribs[2]}, Int: ${attribs[3]}, Wisdom: ${attribs[4]}, Charisma: ${attribs[5]}`)
+        console.log(`Str: ${attribs['strength']}, Dex: ${attribs['dexterity']}, Const: ${attribs['constitution']}, Int: ${attribs['intelligence']}, Wisdom: ${attribs['wisdom']}, Charisma: ${attribs['charisma']}`)
         let goldStats = await gold.getStats(tokenID);
         let goldtext = ''
         if (goldStats[0] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}

@@ -25,6 +25,7 @@ const dungeon = require('./base/dungeon');
 const core = require('./base/core');
 const gold = require('./base/gold');
 const materials1 = require('./base/material_1');
+const attribute = require('./base/attribute');
 
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
@@ -172,6 +173,7 @@ const init = async () => {
     node index.js utl/updateTokenList   - update the token id list in .env file
     node index.js dgl/dgList            - get list of available dungeon
     node index.js cl/classList          - get list of available class
+    node index.js tl/templateList       - get list of available template
     node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
     node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]`)
@@ -238,6 +240,21 @@ const init = async () => {
             case 'globalStats':
             case 'gs':
                 await getGlobalStats();
+                break;
+            case 'templateList':
+            case 'tl':
+                attribute.displayAvailableAttributeTemplate();
+                break;
+            case 'assignPoint':
+            case 'ap':
+                let template = process.argv[3];
+                let token = process.argv[4];
+                if (typeof template === 'undefined'){
+                    console.log('You have to select a template');
+                    attribute.displayAvailableAttributeTemplate();
+                } else {
+                    await attribute.massAssignPoint(template, token);
+                }
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)

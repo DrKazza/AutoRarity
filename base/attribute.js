@@ -1,5 +1,10 @@
 const {contractAddresses} = require('../shared/contractAddresses');
 const utils = require("../shared/utils");
+const constVal = require("../shared/const");
+const ethers = require("ethers");
+const core = require('./core');
+const fs = require("fs");
+const dungeons = require("../dungeons");
 const abi =contractAddresses.attributesABI;
 const address = contractAddresses.rarityAttributes;
 
@@ -7,6 +12,107 @@ const get = async (tokenID) => {
     let contract = new utils.web3.eth.Contract(abi, address);
     return await contract.methods.ability_scores(tokenID).call();
 }
+
+const getNonce = (nonce) => {
+    if (typeof nonce === 'undefined'){
+        nonce = utils.nonceVal();
+    }
+    return nonce;
+}
+
+const getAttributeTemplateList = () => {
+    let templates = [];
+    fs.readdirSync('./misc/templates/classes/').forEach(file => {
+        templates.push(file.substring(0, file.length - 5));
+    });
+    return templates;
+}
+
+const displayAvailableAttributeTemplate = () => {
+    console.log('Available template: ');
+    let templateList = getAttributeTemplateList();
+    templateList.forEach(name => {
+        console.log(`    - ${name}`);
+    });
+}
+
+const getAttributeTemplate = (templateName) => {
+    if (fs.existsSync(`./misc/templates/classes/${templateName}.json`)){
+        return JSON.parse(fs.readFileSync(`./misc/templates/classes/${templateName}.json`, 'utf-8'));
+    } else {
+        return false;
+    }
+}
+
+const buyPoint = async (tokenID, point, nonce) => {
+    let thisGas = await utils.calculateGasPrice()
+    if (thisGas < 0) {
+        console.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        return [false, 'high gas']
+    } else {
+        if (constVal.liveTrading) {
+            try {
+                let contract = new ethers.Contract(address, abi, constVal.account);
+                let approveResponse = await contract.point_buy(
+                    tokenID,
+                    point['str'],
+                    point['dex'],
+                    point['const'],
+                    point['int'],
+                    point['wis'],
+                    point['cha'],
+                    {
+                        gasLimit: constVal.totalGasLimit,
+                        gasPrice: thisGas,
+                        nonce: getNonce(nonce)
+                    });
+                console.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
+                return [true, 'success'];
+            } catch (e){
+                console.log(`${tokenID} => point error`);
+                return [false, 'error'];
+            }
+        } else {
+            console.log(`${tokenID} => Live trading disabled - point not submitted.`)
+            return [false, 'not live'];
+        }
+    }
+}
+
+const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined) => {
+    let attribs = await get(tokenID);
+    let tokenStats = await core.getStats(tokenID);
+    if (parseInt(attribs[0], 10) === 0) {
+        let className = constVal.classes[tokenStats[2]];
+        let template = getAttributeTemplate(templateName);
+        await buyPoint(tokenID, template[className].attributes, nonce);
+    } else {
+        console.log(`${tokenID} => point already bought`);
+    }
+}
+
+const massAssignPoint = async (template, tokenID) => {
+    if (!getAttributeTemplateList().includes(template))  {
+        console.log(`This template does not exist [${template}]`);
+        displayAvailableAttributeTemplate();
+    } else {
+        if (typeof tokenID === 'undefined') {
+            let nonce = await utils.nonceVal();
+            for (let tokenID of constVal.myTokenIds) {
+                await checkStatsAndAssignPoint(tokenID, template, nonce);
+                nonce++;
+            }
+        } else {
+            await checkStatsAndAssignPoint(tokenID, template);
+        }
+    }
+}
+
 module.exports = {
-    get
+    get,
+    buyPoint,
+    checkStatsAndAssignPoint,
+    massAssignPoint,
+    getAttributeTemplateList,
+    displayAvailableAttributeTemplate
 }
