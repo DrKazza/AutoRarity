@@ -165,7 +165,8 @@ const dropTransaction = async (nonce, count = 1) => {
             nonce++;
             i++;
         } catch (e) {
-            console.log(e)
+            console.log(e);
+            return;
         }
     }
 }
