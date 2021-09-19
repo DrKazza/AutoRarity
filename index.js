@@ -155,9 +155,9 @@ const dropTransaction = async (nonce, count = 1) => {
             let transaction = await constVal.account.signTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
-                value: 0,
+                value: "0",
                 gasPrice: thisGas,
-                nonce: nonce
+                nonce: `${nonce}`
             });
             await constVal.account.sendSignedTransaction(transaction);
             nonce++;
