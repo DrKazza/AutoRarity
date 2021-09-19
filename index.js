@@ -142,14 +142,24 @@ const displayAvailableClasses = () => {
 const getGlobalStats = async () => {
     let totalGold = 0;
     let totalMaterials1 = 0;
+    let typeCount = [];
     for (let tokenID of constVal.myTokenIds) {
         totalMaterials1 += parseInt(await materials1.getInventory(tokenID), 10);
         let goldStats = await gold.getStats(tokenID);
         totalGold += goldStats[0];
+        let stats = await core.getStats(tokenID);
+        if (typeof typeCount[stats[2]] === "undefined"){
+            typeCount[stats[2]] = 1;
+        } else {
+            typeCount[stats[2]]++;
+        }
     }
     console.log(`Global Stats:
      - gold => ${totalGold}
      - materials1 => ${totalMaterials1}`);
+    for (let type in typeCount){
+        console.log(`     - ${constVal.classes[type]} => ${typeCount[type]}`);
+    }
 }
 
 const init = async () => {
