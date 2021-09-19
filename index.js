@@ -139,6 +139,26 @@ const displayAvailableClasses = () => {
     }
 }
 
+const dropTransaction = async (nonce, count) => {
+    let i = 0;
+    while (i < count) {
+        let thisGas = await utils.calculateGasPrice()
+        if (thisGas < 0) {
+            console.log(`Gas Price too high: ${-thisGas}`)
+            return;
+        }
+        await utils.web3.eth.sendTransaction({
+            from: constVal.walletAddress,
+            to: constVal.walletAddress,
+            value: 0,
+            gasPrice: thisGas,
+            nonce: nonce
+        });
+        nonce++;
+        i++;
+    }
+}
+
 const getGlobalStats = async () => {
     let totalGold = 0;
     let totalMaterials1 = 0;
@@ -255,6 +275,11 @@ const init = async () => {
                 } else {
                     await attribute.massAssignPoint(template, token);
                 }
+                break;
+            case 'drop':
+                let nonce = process.argv[3];
+                let count = process.argv[4];
+                await dropTransaction(nonce, count)
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
