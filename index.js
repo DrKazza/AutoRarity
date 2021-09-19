@@ -18,7 +18,7 @@ require("dotenv").config();
 
 const constVal = require('./shared/const');
 const utils = require('./shared/utils');
-
+const ethers = require('ethers');
 const summary = require('./base/summary');
 const dungeon = require('./base/dungeon');
 const core = require('./base/core');
@@ -155,9 +155,9 @@ const dropTransaction = async (nonce, count = 1) => {
             await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
-                value: 0,
+                value: ethers.utils.parseEther('0').toHexString(),
                 gasPrice: thisGas,
-                nonce: nonce
+                nonce: ethers.utils.hexlify(nonce)
             }, (error, res) => {
                 console.log(error);
                 console.log(res);
