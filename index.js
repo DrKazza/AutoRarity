@@ -139,7 +139,11 @@ const displayAvailableClasses = () => {
     }
 }
 
-const dropTransaction = async (nonce, count) => {
+const dropTransaction = async (nonce, count = 1) => {
+    if (typeof nonce === 'undefined'){
+        console.log('need nonce');
+        return;
+    }
     let i = 0;
     while (i < count) {
         let thisGas = await utils.calculateGasPrice()
