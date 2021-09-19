@@ -12,8 +12,6 @@
 // the third is the ids of your rarity tokens, do not put a space between the commas 
 // and the numbers and make sure you have the quote marks
 
-const autoLevelUp = true; // you may not want to automatically level up your char
-const autoTransferToMule = true; // you may not want to automatically transfer to mule
 
 require("dotenv").config();
 
@@ -50,7 +48,7 @@ const checkTokens = async () => {
             delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
         }
         let levelUpDone = false;
-        if (autoLevelUp) {
+        if (constVal.autoLevelUp) {
             if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
                 somethingDone = true;
                 if (tokenStats[0] < tokenStats[4]) {
@@ -82,7 +80,7 @@ const checkTokens = async () => {
                     delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
             }
-            if (autoTransferToMule) {
+            if (constVal.autoTransferToMule) {
                 if (goldStats[2] > 0) {
                     somethingDone = true;
                     let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
@@ -95,7 +93,7 @@ const checkTokens = async () => {
                 }
             }
         }
-        if (autoTransferToMule){
+        if (constVal.autoTransferToMule){
             let materials1Inventory = await materials1.getInventory(tokenID);
             if (materials1Inventory > 0){
                 somethingDone = true;

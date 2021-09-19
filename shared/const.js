@@ -36,6 +36,10 @@ const mule = {
     gold:process.env.GOLD_MULE,
     materials1:process.env.MATERIALS_1_MULE
 }
+const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
+const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar); // you may not want to automatically level up your char
+const autoTransferToMuleVar = process.env.AUTO_TRANSFER_TO_MULE;
+const autoTransferToMule = autoTransferToMuleVar === undefined ? true : parseBool(autoTransferToMuleVar); // you may not want to automatically transfer to mule
 
 module.exports = {
     fantomRpcUrl,
@@ -51,5 +55,7 @@ module.exports = {
     account,
     classes,
     liveTrading,
-    mule
+    mule,
+    autoLevelUp,
+    autoTransferToMule
 }
