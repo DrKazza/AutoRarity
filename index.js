@@ -151,7 +151,7 @@ const dropTransaction = async (nonce, count = 1) => {
             console.log(`Gas Price too high: ${-thisGas}`)
             return;
         }
-        await utils.web3.eth.sendTransaction({
+        await constVal.account.sendTransaction({
             from: constVal.walletAddress,
             to: constVal.walletAddress,
             value: 0,
