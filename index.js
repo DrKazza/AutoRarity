@@ -166,17 +166,18 @@ const getGlobalStats = async () => {
 const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
-    node index.js sum/summary           - gives a summary of your characters
-    node index.js gl/globalStats        - gives global stats (gold/materials1)
-    node index.js xp                    - claim xp/level up/gold collection/dungeoneering - one off
-    node index.js auto                  - automatic repeating xp/levelling/gold collection/[dungeoneering]
-    node index.js utl/updateTokenList   - update the token id list in .env file
-    node index.js dgl/dgList            - get list of available dungeon
-    node index.js cl/classList          - get list of available class
-    node index.js tl/templateList       - get list of available template
-    node index.js scout <name> [token]  - scout <name> dungeon with all characters or with a specific [token]
-    node index.js dg <name> [token]     - go in <name> dungeon with all characters or with a specific [token]
-    node index.js sm [class] [quantity] - summon [quantity=1] of [class=all]`)
+    node index.js sum/summary                   - gives a summary of your characters
+    node index.js gl/globalStats                - gives global stats (gold/materials1)
+    node index.js xp                            - claim xp/level up/gold collection/dungeoneering - one off
+    node index.js auto                          - automatic repeating xp/levelling/gold collection/[dungeoneering]
+    node index.js utl/updateTokenList           - update the token id list in .env file
+    node index.js dgl/dgList                    - get list of available dungeon
+    node index.js cl/classList                  - get list of available class
+    node index.js tl/templateList               - get list of available template
+    node index.js ap/assignPoint <name> [token] - apply template <name> to all characters or to a specific [token]
+    node index.js scout <name> [token]          - scout <name> dungeon with all characters or with a specific [token]
+    node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
+    node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]`)
     } else {
         switch (process.argv[2]) {
             case 'summary':
