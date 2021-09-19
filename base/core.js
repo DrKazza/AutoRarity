@@ -14,13 +14,6 @@ const getStats = async (tokenID) => {
     return tokenStats;
 }
 
-const getNonce = (nonce) => {
-    if (typeof nonce === 'undefined'){
-        nonce = utils.nonceVal();
-    }
-    return nonce;
-}
-
 const claimXp = async (tokenID, nonce)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
@@ -35,7 +28,7 @@ const claimXp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce(nonce)
+                        nonce: utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => xp claimed`);
                 return [true, 'success'];
@@ -65,7 +58,7 @@ const levelUp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce(nonce)
+                        nonce: utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => levelUp done`);
                 return [true, 'success'];
@@ -81,9 +74,6 @@ const levelUp = async (tokenID, nonce)  => {
 }
 
 const summon = async (classToSummon, nonceVal, i = 0) => {
-    if (typeof nonceVal === 'undefined'){
-        nonceVal = utils.nonceVal()
-    }
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
@@ -97,7 +87,7 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: utils.calculateGasPrice(),
-                        nonce: nonceVal
+                        nonce: utils.getNonce(nonceVal)
                     });
                 console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;
@@ -143,7 +133,7 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
                 result.fail++;
                 console.log(`#${i+1} => summon fail`);
             }
-            await utils.sleep(1000);
+            await utils.delay(1000);
             nonce.value++;
             i++;
         }
@@ -170,7 +160,7 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
         do {
             if (currentCount !== 0){
                 console.log("Waiting a bit to let the transaction spread...")
-                await utils.sleep(10000);
+                await utils.delay(10000);
             }
             console.log("Fetching token count...")
             currentCount = await tokenGetter.getTokenCount(constVal.walletAddress);

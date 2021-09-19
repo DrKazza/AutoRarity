@@ -7,13 +7,6 @@ const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 const recommendedClass = [1,5,7];
 
-const getNonce = async (nonce) => {
-    if (typeof nonce === 'undefined'){
-        nonce = await utils.nonceVal();
-    }
-    return nonce;
-}
-
 const run = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
@@ -32,7 +25,7 @@ const run = async (tokenID, nonce = undefined) => {
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
-            nonce = await getNonce(nonce);
+            nonce = await utils.getNonce(nonce);
             try {
                 let contract = new ethers.Contract(address, abi, constVal.account);
                 let approveResponse = await contract.adventure(

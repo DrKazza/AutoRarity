@@ -13,13 +13,6 @@ const getStats = async (tokenID) => {
     return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18))]
 }
 
-const getNonce = (nonce) => {
-    if (typeof nonce === 'undefined'){
-        nonce = utils.nonceVal();
-    }
-    return nonce;
-}
-
 const claim = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
@@ -34,7 +27,7 @@ const claim = async (tokenID, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce(nonce)
+                        nonce: utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => gold claimed`);
                 return [true, 'success'];
@@ -64,7 +57,7 @@ const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce(nonce)
+                        nonce: utils.getNonce(nonce)
                     });
                 return [true, 'success'];
             } catch (e){

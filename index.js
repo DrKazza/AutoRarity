@@ -19,7 +19,6 @@ require("dotenv").config();
 const constVal = require('./shared/const');
 const utils = require('./shared/utils');
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
 const summary = require('./base/summary');
 const dungeon = require('./base/dungeon');
 const core = require('./base/core');
@@ -125,7 +124,7 @@ const autoRun = async (repeater) => {
         if (repeater) {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
             console.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
-            await delay(tokenCheck[0]*1000);
+            await utils.delay(tokenCheck[0]*1000);
         } else {
             break;
         }

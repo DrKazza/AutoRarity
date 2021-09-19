@@ -13,13 +13,6 @@ const get = async (tokenID) => {
     return await contract.methods.ability_scores(tokenID).call();
 }
 
-const getNonce = (nonce) => {
-    if (typeof nonce === 'undefined'){
-        nonce = utils.nonceVal();
-    }
-    return nonce;
-}
-
 const getAttributeTemplateList = () => {
     let templates = [];
     fs.readdirSync('./misc/templates/classes/').forEach(file => {
@@ -64,7 +57,7 @@ const buyPoint = async (tokenID, point, nonce) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: getNonce(nonce)
+                        nonce: utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
                 return [true, 'success'];
@@ -86,8 +79,10 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
         let className = constVal.classes[tokenStats[2]];
         let template = getAttributeTemplate(templateName);
         await buyPoint(tokenID, template[className].attributes, nonce);
+        return true;
     } else {
         console.log(`${tokenID} => point already bought`);
+        return false;
     }
 }
 
@@ -99,8 +94,10 @@ const massAssignPoint = async (template, tokenID) => {
         if (typeof tokenID === 'undefined') {
             let nonce = await utils.nonceVal();
             for (let tokenID of constVal.myTokenIds) {
-                await checkStatsAndAssignPoint(tokenID, template, nonce);
-                nonce++;
+                let res = await checkStatsAndAssignPoint(tokenID, template, nonce);
+                if (res){
+                    nonce++;
+                }
             }
         } else {
             await checkStatsAndAssignPoint(tokenID, template);
