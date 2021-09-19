@@ -151,15 +151,22 @@ const dropTransaction = async (nonce, count = 1) => {
             console.log(`Gas Price too high: ${-thisGas}`)
             return;
         }
-        await constVal.account.sendTransaction({
-            from: constVal.walletAddress,
-            to: constVal.walletAddress,
-            value: 0,
-            gasPrice: thisGas,
-            nonce: nonce
-        });
-        nonce++;
-        i++;
+        try {
+            await constVal.account.sendTransaction({
+                from: constVal.walletAddress,
+                to: constVal.walletAddress,
+                value: 0,
+                gasPrice: thisGas,
+                nonce: nonce
+            }, (error, res) => {
+                console.log(error);
+                console.log(res);
+            });
+            nonce++;
+            i++;
+        } catch (e) {
+            console.log(e)
+        }
     }
 }
 
