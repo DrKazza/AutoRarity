@@ -32,6 +32,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                 return [true, 'success'];
             } catch (e){
                 console.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
+                console.log(e);
                 return [false, 'ERROR'];
             }
         } else {
