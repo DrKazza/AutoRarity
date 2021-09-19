@@ -152,16 +152,14 @@ const dropTransaction = async (nonce, count = 1) => {
             return;
         }
         try {
-            await constVal.account.sendTransaction({
+            let transaction = await constVal.account.signTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
-                value: ethers.utils.parseEther('0').toHexString(),
+                value: 0,
                 gasPrice: thisGas,
-                nonce: ethers.utils.hexlify(nonce)
-            }, (error, res) => {
-                console.log(error);
-                console.log(res);
+                nonce: nonce
             });
+            await constVal.account.sendSignedTransaction(transaction);
             nonce++;
             i++;
         } catch (e) {
@@ -292,6 +290,10 @@ const init = async () => {
                 let nonce = process.argv[3];
                 let count = process.argv[4];
                 await dropTransaction(nonce, count)
+                break;
+            case 'test':
+                console.log( ethers.utils.hexlify(9623));
+                console.log(ethers.utils.parseEther('0').toHexString())
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
