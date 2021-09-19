@@ -5,27 +5,26 @@ const constVal = require('../shared/const');
 
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
-const recommendedClass = [1,5,7];
+const dungeonName = 'cellar';
 
 const run = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
     if ((loot = await getLoot(tokenID)) < 1){
-        console.log(`${tokenID} => no loot`);
+        console.log(`${tokenID} => [${dungeonName}] no loot`);
         return [false, 'no loot']
     }
     let time = await getTimeUntilAvailable(tokenID);
     let timeLeft = utils.timeLeft(time);
     if (timeLeft[0] !== -1){
-        console.log(`${tokenID} => not available => ${timeLeft[0]}h${timeLeft[1]}m`);
-        return [false, `not available => ${timeLeft[0]}h${timeLeft[1]}m`]
+        console.log(`${tokenID} => [${dungeonName}] not available => ${timeLeft[0]}h${timeLeft[1]}m`);
+        return [false, 'time', timeLeft[2]]
     }
     if (thisGas < 0) {
         console.log(`${tokenID} => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
-            nonce = await utils.getNonce(nonce);
             try {
                 let contract = new ethers.Contract(address, abi, constVal.account);
                 let approveResponse = await contract.adventure(
@@ -33,18 +32,18 @@ const run = async (tokenID, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: nonce
+                        nonce: await utils.getNonce(nonce)
                     });
                 //console.log(approveResponse);
-                console.log(`${tokenID} => success, loot => ${loot}`);
+                console.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
                 return [true, `success, loot => ${loot}`];
             } catch (e) {
-                console.log(`${tokenID} => error`);
+                console.log(`${tokenID} => [${dungeonName}] error`);
                 console.log(e);
                 return [false, 'ERROR'];
             }
         } else {
-            console.log(`Live trading disabled - dungeoneering NOT submitted.`)
+            console.log(`Live trading disabled - [${dungeonName}]  dungeoning NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -77,7 +76,7 @@ const getTimeUntilAvailable = async (tokenID) => {
 }
 
 module.exports = {
-    recommendedClass,
+    dungeonName,
     run,
     scout
 }

@@ -32,6 +32,11 @@ const parseBool = (val) => {return val === true || val === 'true'}
 const liveTradingVar = process.env.LIVETRADING;
 const liveTrading = liveTradingVar === undefined ? false : parseBool(liveTradingVar);
 
+const mule = {
+    gold:process.env.GOLD_MULE,
+    materials1:process.env.MATERIALS_1_MULE
+}
+
 module.exports = {
     fantomRpcUrl,
     totalGasLimit,
@@ -45,5 +50,6 @@ module.exports = {
     myTokenIds,
     account,
     classes,
-    liveTrading
+    liveTrading,
+    mule
 }

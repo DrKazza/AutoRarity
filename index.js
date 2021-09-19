@@ -29,9 +29,7 @@ const attribute = require('./base/attribute');
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
     let delayToUse = constVal.xpRetryDelay;
-    let xpGains = [];
-    let levelGains = [];
-    let goldGains = [];
+    let dungeonList = dungeon.getAvailableDungeons();
     for (let tokenID of constVal.myTokenIds) {
         let somethingDone = false;
         let tokenStats = await core.getStats(tokenID);
@@ -44,7 +42,6 @@ const checkTokens = async () => {
                 // success
                 xpPending = 250*10**18;
                 latestNonce++;
-                xpGains.push(tokenID)
             } else if (xpEarnAttempt[1] === 'high gas') {
                 // fail due to high gas price
                 delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
@@ -62,7 +59,6 @@ const checkTokens = async () => {
                     // try to levelup
                     let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
                     if (lvlEarnAttempt[0]) {
-                        levelGains.push(tokenID);
                         latestNonce++;
                         levelUpDone = true;
                     } else if (lvlEarnAttempt[1] === 'high gas') {
@@ -75,51 +71,63 @@ const checkTokens = async () => {
         if (levelUpDone){
             delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
         } else {
-            if ((await gold.getStats(tokenID))[1] > 0) {
+            let  goldStats = await gold.getStats(tokenID);
+            if (goldStats[1] > 0) {
                 somethingDone = true;
                 let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
                 if (goldEarnAttempt[0]) {
-                    goldGains.push(tokenID);
                     latestNonce++;
                 } else if (goldEarnAttempt[1] === 'high gas') {
                     // fail due to high gas price
                     delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
             }
+            if (goldStats[2] > 0){
+                somethingDone = true;
+                let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
+                if (transferAttempt[0]) {
+                    latestNonce++;
+                } else if (transferAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                }
+            }
         }
+        let materials1Inventory = await materials1.getInventory(tokenID);
+        if (materials1Inventory > 0){
+            somethingDone = true;
+            let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory, latestNonce);
+            if (transferAttempt[0]) {
+                latestNonce++;
+            } else if (transferAttempt[1] === 'high gas') {
+                // fail due to high gas price
+                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+            }
+        }
+        for (let dungeonName of dungeonList){
+            let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce);
+            if (dungeonAttempt[0]) {
+                latestNonce++;
+                delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+            } else if (dungeonAttempt[1] === 'high gas') {
+                // fail due to high gas price
+                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+            } else if (dungeonAttempt[1] === 'time') {
+                // fail due to not time not available
+                delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
+            }
+        }
+
         if (!somethingDone){
             console.log(`${tokenID} => nothing to do...`);
         }
     }
-    return [delayToUse, xpGains, levelGains, goldGains];
+    return [delayToUse];
 }
 
 const autoRun = async (repeater) => {
     while (true) {
-        let transactionPerformed = false;
         let tokenCheck = await checkTokens()
-        if (tokenCheck[1].length !== 0) {
-            transactionPerformed = true;
-            /*
-            console.log(`Successfully adventured:`)
-            for (let thistok of tokenCheck[1]) {console.log(thistok)}
-             */
-        }
-        if (tokenCheck[2].length !== 0) {
-            transactionPerformed = true;
-            /*
-            console.log(`Successfully Levelled:`)
-            for (let thistok of tokenCheck[2]) {console.log(thistok)}
-             */
-        }
-        if (tokenCheck[3].length !== 0) {
-            transactionPerformed = true;
-            /*
-            console.log(`Successfully Claimed Gold:`)
-            for (let thistok of tokenCheck[3]) {console.log(thistok)}
-             */
-        }
-        //if (!transactionPerformed){console.log(`Nothing to do...`)}
         let textTimeleft = utils.secsToText(tokenCheck[0])
         if (repeater) {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
@@ -153,7 +161,7 @@ const dropTransaction = async (nonce, count = 1) => {
             return;
         }
         try {
-            console.log(`current nonce => ${nonce} ${i}/${count}`)
+            console.log(`current nonce => ${nonce} ${i+1}/${count}`)
             await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
@@ -198,8 +206,8 @@ const init = async () => {
         console.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
     node index.js gl/globalStats                - gives global stats (gold/materials1)
-    node index.js xp                            - claim xp/level up/gold collection/dungeoneering - one off
-    node index.js auto                          - automatic repeating xp/levelling/gold collection/[dungeoneering]
+    node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
+    node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
     node index.js utl/updateTokenList           - update the token id list in .env file
     node index.js dgl/dgList                    - get list of available dungeon
     node index.js cl/classList                  - get list of available class
@@ -207,7 +215,9 @@ const init = async () => {
     node index.js ap/assignPoint <name> [token] - apply template <name> to all characters or to a specific [token]
     node index.js scout <name> [token]          - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
-    node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]`)
+    node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]
+    node index.js gp                            - get current gas price
+    node index.js cn                            - get current nonce`)
     } else {
         switch (process.argv[2]) {
             case 'summary':
@@ -292,9 +302,15 @@ const init = async () => {
                 let count = process.argv[4];
                 await dropTransaction(nonce, count)
                 break;
-            case 'test':
-                console.log( ethers.utils.hexlify(9623));
-                console.log(ethers.utils.parseEther('0').toHexString())
+            case 'gp':
+                let gas = await utils.calculateGasPrice();
+                if (gas > 0){
+                    gas = Math.floor(gas/(10**9));
+                }
+                console.log(`current gasPrice => ${gas}`);
+                break;
+            case 'cn':
+                console.log(`current nonce => ${await utils.nonceVal()}`)
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)

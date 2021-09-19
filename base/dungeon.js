@@ -29,13 +29,13 @@ const scout = async (dungeonName, token) => {
     }
 }
 
-const doDungeon = async (dungeonName, token) => {
+const doDungeon = async (dungeonName, token, nonce = undefined) => {
     if (!dungeons.isDungeonAvailable(dungeonName)) {
         console.log(`This dungeon is not implemented yet [${dungeonName}]`);
         displayAvailableDungeons();
     } else {
         if (typeof token === 'undefined'){
-            let nonce = await utils.nonceVal();
+            nonce = await utils.nonceVal();
             for (let token of constVal.myTokenIds){
                 await dungeons.runDungeon(dungeonName, token, nonce);
                 nonce++;
@@ -44,7 +44,7 @@ const doDungeon = async (dungeonName, token) => {
             if (!constVal.myTokenIds.includes(token)){
                 console.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
             } else {
-                await dungeons.runDungeon(dungeonName, token);
+                return await dungeons.runDungeon(dungeonName, token, nonce);
             }
         }
     }
@@ -53,5 +53,6 @@ const doDungeon = async (dungeonName, token) => {
 module.exports = {
     displayAvailableDungeons,
     doDungeon,
-    scout
+    scout,
+    getAvailableDungeons: dungeons.getAvailableDungeons
 }

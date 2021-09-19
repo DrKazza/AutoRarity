@@ -10,7 +10,7 @@ const getInventory = async (tokenID) => {
     return await contract.methods.balanceOf(tokenID).call();
 }
 
-const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
+const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         console.log(`${tokenFrom} > ${tokenTo} => transfer material1 => Gas Price too high: ${-thisGas}`)
@@ -22,23 +22,38 @@ const transfer = async (tokenFrom, tokenTo, nonce = undefined) => {
                 let approveResponse = await contract.transfer(
                     tokenFrom,
                     tokenTo,
+                    amount,
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: utils.getNonce(nonce)
+                        nonce: await utils.getNonce(nonce)
                     });
+                console.log(`${tokenFrom} > ${tokenTo} => transfer materials1 success`);
                 return [true, 'success'];
             } catch (e){
-                return [false, 'error'];
+                console.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
+                return [false, 'ERROR'];
             }
         } else {
-            console.log(`Live trading disabled - adventuring NOT submitted.`)
+            console.log(`${tokenFrom} > ${tokenTo} Live trading disabled - adventuring NOT submitted.`)
             return [false, 'not live'];
         }
     }
 }
 
+const transferToMule = async (tokenID, amount, nonce = undefined) => {
+    let mule = constVal.mule.materials1;
+    if (typeof mule === 'undefined'){
+        return [false, 'no mule defined'];
+    }
+    if (tokenID === mule){
+        return [false, 'same token as mule'];
+    }
+    return await transfer(tokenID, mule, amount, nonce);
+}
+
 module.exports = {
     getInventory,
-    transfer
+    transfer,
+    transferToMule
 }

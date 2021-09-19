@@ -28,7 +28,7 @@ const claimXp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: utils.getNonce(nonce)
+                        nonce: await utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => xp claimed`);
                 return [true, 'success'];
@@ -58,7 +58,7 @@ const levelUp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: utils.getNonce(nonce)
+                        nonce: await utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => levelUp done`);
                 return [true, 'success'];
@@ -87,7 +87,7 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: utils.calculateGasPrice(),
-                        nonce: utils.getNonce(nonceVal)
+                        nonce: await utils.getNonce(nonceVal)
                     });
                 console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;

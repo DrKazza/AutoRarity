@@ -57,7 +57,7 @@ const buyPoint = async (tokenID, point, nonce) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: utils.getNonce(nonce)
+                        nonce: await utils.getNonce(nonce)
                     });
                 console.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
                 return [true, 'success'];

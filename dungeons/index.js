@@ -16,7 +16,7 @@ const isDungeonAvailable  = (dungeonName) => {
 }
 
 const runDungeon = async (dungeonName, token, nonce = undefined) => {
-    await dungeons[dungeonName].run(token);
+    return await dungeons[dungeonName].run(token, nonce);
 }
 
 const scoutDungeon = async (dungeonName, token) => {
