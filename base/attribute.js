@@ -40,7 +40,7 @@ const getAttributeTemplate = (templateName) => {
 const buyPoint = async (tokenID, point, nonce) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        console.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -78,8 +78,8 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
     if (parseInt(attribs[0], 10) === 0) {
         let className = constVal.classes[tokenStats[2]];
         let template = getAttributeTemplate(templateName);
-        await buyPoint(tokenID, template[className].attributes, nonce);
-        return true;
+        let res = await buyPoint(tokenID, template[className].attributes, nonce);
+        return res[0];
     } else {
         console.log(`${tokenID} => point already bought`);
         return false;
