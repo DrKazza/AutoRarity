@@ -12,7 +12,14 @@
 // the third is the ids of your rarity tokens, do not put a space between the commas 
 // and the numbers and make sure you have the quote marks
 
-
+// SETTING UP YOUR TELEGRAM BOT
+// 1) In Telegram, open chat with @BotFather
+// 2) Create your new bot, give it a name and a handle - BotFather will give you the token
+// 3) Add a line to your .env file: TGTOKEN=<the token from BotFather>
+// 4) Join a chat with your bot 
+// 5) Make sure index.js is running in auto mode
+// 6) Send /init command from your bot. You should receive a reply that a comms channel has been setup and ready to go.
+// You only need to initialise once from each place you run index.js. 
 
 
 const autoLevelUp = true; // you may not want to automatically level up your char
@@ -31,6 +38,38 @@ require("dotenv").config();
 var myTokenIds = [];
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
+
+// Telegram Bot -- OPTIONAL
+const TelegramBot = require('node-telegram-bot-api');
+const fs = require('fs');
+var chatId = undefined;
+const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
+var bot = {};
+
+if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
+
+// Listen for initialisation message from bot user to establish comms channel
+bot.onText(/\/init/, (msg, match) => {
+  chatId = msg.chat.id;
+  // Store the chat ID across sessions
+  fs.writeFile(".chatId", JSON.stringify(chatId), function(err) {
+        if(err){
+            return console.log(err);
+        }
+        console.log("AutoRarity TG bot initialised by user.");
+  });
+  sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
+});
+}
+
+// Retrieve any previously set bot channel identifier
+try {
+    chatId = fs.readFileSync('.chatId','utf8')
+    console.log('AutoRarity TG bot resuming comms channel with user.')
+} catch (err) {
+    console.log('Unable to access existing TG bot setup.')
+}
+
 
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
@@ -337,11 +376,18 @@ const autoRun = async (repeater, dungeon) => {
         }
         textTimeleft = summary.secsToText(tokenCheck[0])
         if (repeater) {
-            console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            console.log(`Retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            sendTelegram(`Waiting for ${textTimeleft[0]} hours ${textTimeleft[1]} minutes for next adventure.`);
             await delay(tokenCheck[0]*1000);
         } else {
             break;
         }
+    }
+}
+
+const sendTelegram = async (message) => {
+    if(chatId != undefined){
+        bot.sendMessage(chatId, message);
     }
 }
 
