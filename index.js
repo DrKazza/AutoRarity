@@ -13,12 +13,12 @@
 // and the numbers and make sure you have the quote marks
 
 const autoLevelUp = true; // you may not want to automatically level up your char
+const autoTransferToMule = true; // you may not want to automatically transfer to mule
 
 require("dotenv").config();
 
 const constVal = require('./shared/const');
 const utils = require('./shared/utils');
-const ethers = require('ethers');
 const summary = require('./base/summary');
 const dungeon = require('./base/dungeon');
 const core = require('./base/core');
@@ -82,26 +82,30 @@ const checkTokens = async () => {
                     delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
             }
-            if (goldStats[2] > 0){
+            if (autoTransferToMule) {
+                if (goldStats[2] > 0) {
+                    somethingDone = true;
+                    let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
+                    if (transferAttempt[0]) {
+                        latestNonce++;
+                    } else if (transferAttempt[1] === 'high gas') {
+                        // fail due to high gas price
+                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                    }
+                }
+            }
+        }
+        if (autoTransferToMule){
+            let materials1Inventory = await materials1.getInventory(tokenID);
+            if (materials1Inventory > 0){
                 somethingDone = true;
-                let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
+                let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory, latestNonce);
                 if (transferAttempt[0]) {
                     latestNonce++;
                 } else if (transferAttempt[1] === 'high gas') {
                     // fail due to high gas price
                     delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
-            }
-        }
-        let materials1Inventory = await materials1.getInventory(tokenID);
-        if (materials1Inventory > 0){
-            somethingDone = true;
-            let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory, latestNonce);
-            if (transferAttempt[0]) {
-                latestNonce++;
-            } else if (transferAttempt[1] === 'high gas') {
-                // fail due to high gas price
-                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
             }
         }
         for (let dungeonName of dungeonList){

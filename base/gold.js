@@ -74,8 +74,9 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 }
 
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
-    let mule = constVal.mule.materials1;
+    let mule = constVal.mule.gold;
     if (typeof mule === 'undefined'){
+        console.log(`${tokenID} => can't transfer gold no mule defined, you can disable with var in index.js`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){
