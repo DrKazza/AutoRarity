@@ -40,18 +40,12 @@ const walletAddress = process.env.WALLETADDRESS;
 
 // Telegram Bot -- OPTIONAL
 const TelegramBot = require('node-telegram-bot-api');
-const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
-const bot = new TelegramBot(tgToken, {polling: true});
 const fs = require('fs');
 var chatId = undefined;
+const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
+var bot = {};
 
-// Retrieve any previously set bot channel identifier
-try {
-    chatId = fs.readFileSync('.chatId','utf8')
-    console.log('AutoRarity TG bot resuming comms channel with user.')
-} catch (err) {
-    console.log('Unable to access existing TG bot setup.')
-}
+if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
 
 // Listen for initialisation message from bot user to establish comms channel
 bot.onText(/\/init/, (msg, match) => {
@@ -65,6 +59,16 @@ bot.onText(/\/init/, (msg, match) => {
   });
   sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
 });
+}
+
+// Retrieve any previously set bot channel identifier
+try {
+    chatId = fs.readFileSync('.chatId','utf8')
+    console.log('AutoRarity TG bot resuming comms channel with user.')
+} catch (err) {
+    console.log('Unable to access existing TG bot setup.')
+}
+
 
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
