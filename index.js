@@ -144,6 +144,7 @@ const dropTransaction = async (nonce, count = 1) => {
         console.log('need nonce');
         return;
     }
+    nonce = parseInt(nonce, 10);
     let i = 0;
     while (i < count) {
         let thisGas = await utils.calculateGasPrice()
@@ -152,12 +153,13 @@ const dropTransaction = async (nonce, count = 1) => {
             return;
         }
         try {
+            console.log(`current nonce => ${nonce} ${i}/${count}`)
             await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
                 value: 0,
                 gasPrice: thisGas,
-                nonce: parseInt(nonce, 10)
+                nonce: nonce
             });
             nonce++;
             i++;
