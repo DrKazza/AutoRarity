@@ -64,6 +64,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                 return [true, 'success'];
             } catch (e){
                 console.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
+                console.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
                 console.log(e);
                 return [false, 'ERROR'];
             }
