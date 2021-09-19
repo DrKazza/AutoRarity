@@ -25,7 +25,7 @@ const minimumDelay = 60 // don't repeat too often
 // Don't set the delays too short or you'll keep tryingt to XP up and just burn gas for no reason
 const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
 const parseBool = (val) => {return val === true || val === 'true'}
-
+const lowFTM = 5
 
 require("dotenv").config();
 var myTokenIds = [];
@@ -68,6 +68,12 @@ const calculateGasPrice = async () => {
     }
 }
 
+const getFTMBalance = async () => {
+    let balance = 0;
+    balance = await web3.eth.getBalance(walletAddress);
+    return balance;
+}
+
 const nonceVal = async () => {
     baseNonce = await provider.getTransactionCount(walletAddress, "pending");
     return baseNonce
@@ -88,7 +94,8 @@ const earnXP = async (tokenIDvalue, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+//            console.log(`approveResponse`);
+            console.log(`...`);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
@@ -112,7 +119,8 @@ const earnLevel = async (tokenIDvalue, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+//            console.log(`approveResponse`);
+            console.log(`...`);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - levelling NOT submitted.`)
@@ -136,7 +144,8 @@ const earnGold = async (tokenIDvalue, nonceToUse)  => {
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+//            console.log(`approveResponse`);
+            console.log(`...`);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - adventuring NOT submitted.`)
@@ -167,7 +176,8 @@ const runDungeon = async (tokenIDvalue, dungeonABI, dungeonAddress, nonceToUse) 
                     gasPrice: thisGas,
                     nonce: nonceToUse
                 });
-            console.log(approveResponse);
+//            console.log(`approveResponse`);
+            console.log(`...`);
             return [true, 'success'];
         } else {
             console.log(`Live trading disabled - dungeoneering NOT submitted.`)
@@ -321,6 +331,10 @@ const autoRun = async (repeater, dungeon) => {
         }
 
         if (!transactionPerformed){console.log(`Nothing to do...`)}
+        let ftmBalance = (await getFTMBalance())/10**18
+        if ( ftmBalance < lowFTM) {
+            console.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
+        }
         textTimeleft = summary.secsToText(tokenCheck[0])
         if (repeater) {
             console.log(`retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
