@@ -120,7 +120,7 @@ const checkTokens = async () => {
             }
         }
         for (let dungeonName of dungeonList){
-            let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce);
+            let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce, true);
             if (dungeonAttempt[0]) {
                 latestNonce++;
                 delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)

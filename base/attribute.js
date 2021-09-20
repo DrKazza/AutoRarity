@@ -91,16 +91,21 @@ const massAssignPoint = async (template, tokenID) => {
         console.log(`This template does not exist [${template}]`);
         displayAvailableAttributeTemplate();
     } else {
+        let latestNonce = await  utils.nonceVal();
+        let transactionCount = await constVal.account.getTransactionCount();
+        if (transactionCount < latestNonce){
+            console.log(`nonce [${latestNonce}] val is higher than transaction count [${transactionCount}] wait before launch again`);
+            return;
+        }
         if (typeof tokenID === 'undefined') {
-            let nonce = await utils.nonceVal();
             for (let tokenID of constVal.myTokenIds) {
-                let res = await checkStatsAndAssignPoint(tokenID, template, nonce);
+                let res = await checkStatsAndAssignPoint(tokenID, template, latestNonce);
                 if (res){
-                    nonce++;
+                    latestNonce++;
                 }
             }
         } else {
-            await checkStatsAndAssignPoint(tokenID, template);
+            await checkStatsAndAssignPoint(tokenID, template, latestNonce);
         }
     }
 }

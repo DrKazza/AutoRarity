@@ -29,13 +29,20 @@ const scout = async (dungeonName, token) => {
     }
 }
 
-const doDungeon = async (dungeonName, token, nonce = undefined) => {
+const doDungeon = async (dungeonName, token, nonce = undefined, isAuto = false) => {
     if (!dungeons.isDungeonAvailable(dungeonName)) {
         console.log(`This dungeon is not implemented yet [${dungeonName}]`);
         displayAvailableDungeons();
     } else {
+        nonce = await utils.getNonce(nonce);
+        if (!isAuto){
+            let transactionCount = await constVal.account.getTransactionCount();
+            if (transactionCount < nonce){
+                console.log(`nonce [${nonce}] val is higher than transaction count [${transactionCount}] wait before launch again`);
+                return;
+            }
+        }
         if (typeof token === 'undefined'){
-            nonce = await utils.nonceVal();
             for (let token of constVal.myTokenIds){
                 await dungeons.runDungeon(dungeonName, token, nonce);
                 nonce++;
