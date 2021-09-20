@@ -31,7 +31,9 @@ const checkTokens = async () => {
     let transactionCount = await constVal.account.getTransactionCount();
     if (transactionCount < latestNonce){
         console.log(`nonce [${latestNonce}] val is higher than transaction count [${transactionCount}] waiting before launch again`);
-        return [constVal.nonceDelay];
+        let waitPercentage = Math.abs(Math.floor(transactionCount / latestNonce * 100) - 100);
+        delayToUse = constVal.nonceDelay * waitPercentage / 100;
+        return [delayToUse];
     }
     for (let tokenID of constVal.myTokenIds) {
         let somethingDone = false;
@@ -79,6 +81,9 @@ const checkTokens = async () => {
                 somethingDone = true;
                 let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
                 if (goldEarnAttempt[0]) {
+                    if (constVal.autoTransferToMule){
+                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                    }
                     latestNonce++;
                 } else if (goldEarnAttempt[1] === 'high gas') {
                     // fail due to high gas price
@@ -90,6 +95,9 @@ const checkTokens = async () => {
                     somethingDone = true;
                     let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
                     if (transferAttempt[0]) {
+                        if (constVal.autoTransferToMule){
+                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                        }
                         latestNonce++;
                     } else if (transferAttempt[1] === 'high gas') {
                         // fail due to high gas price

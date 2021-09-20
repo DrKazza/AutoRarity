@@ -8,7 +8,7 @@ const xpRetryDelay = 24 * 60 * 60 // 1 day in seconds - try to level up every 24
 const gasRetryDelay = 5 * 60 // if gas is too expensive then try again in 5 mins
 const xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
 const minimumDelay = 60 // don't repeat too often
-const nonceDelay = 60 * 60 // wait 1 hour to see if all transaction have passed
+const nonceDelay = 6 * 60 * 60 // wait 6 hour to see if all transaction have passed a percentage of this time will be use
 // Don't set the delays too short or you'll keep trying to XP up and just burn gas for no reason
 
 const classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Wizard'];
