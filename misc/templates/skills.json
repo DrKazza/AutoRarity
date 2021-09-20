@@ -1,0 +1,202 @@
+{
+    "Barbarian": {
+        "formula": "(4 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "climb",
+            "craft",
+            "handle_animal",
+            "intimidate",
+            "jump",
+            "listen",
+            "ride",
+            "survival",
+            "swim"
+        ]
+    },
+    "Bard": {
+        "formula": "(6 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "appraise",
+            "balance",
+            "bluff",
+            "climb",
+            "concentration",
+            "craft",
+            "decipher_script",
+            "diplomacy",
+            "disguise",
+            "escape_artist",
+            "gather_information",
+            "hide",
+            "jump",
+            "knowledge",
+            "listen",
+            "move_silently",
+            "perform",
+            "profession",
+            "sense_motive",
+            "sleight_of_hand",
+            "speak_language",
+            "spellcraft",
+            "swim",
+            "tumble",
+            "use_magic_device"
+        ]
+    },
+    "Cleric": {
+        "formula": "(2 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "concentration",
+            "craft",
+            "diplomacy",
+            "heal",
+            "knowledge",
+            "profession",
+            "spellcraft"
+        ]
+    },
+    "Druid": {
+        "formula": "(4 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "concentration",
+            "craft",
+            "diplomacy",
+            "handle_animal",
+            "heal",
+            "knowledge",
+            "listen",
+            "profession",
+            "ride",
+            "spellcraft",
+            "spot",
+            "survival",
+            "swim"
+        ]
+    },
+    "Fighter": {
+        "formula": "(2 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "climb",
+            "craft",
+            "handle_animal",
+            "intimidate",
+            "jump",
+            "ride",
+            "swim"
+        ]
+    },
+    "Monk": {
+        "formula": "(4 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "balance",
+            "climb",
+            "concentration",
+            "craft",
+            "diplomacy",
+            "escape_artist",
+            "hide",
+            "jump",
+            "knowledge",
+            "listen",
+            "move_silently",
+            "perform",
+            "profession",
+            "sense_motive",
+            "spot",
+            "swim",
+            "tumble"
+        ]
+    },
+    "Paladin": {
+        "formula": "(2 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "concentration",
+            "craft",
+            "diplomacy",
+            "handle_animal",
+            "heal",
+            "knowledge",
+            "profession",
+            "ride",
+            "sense_motive"
+        ]
+    },
+    "Ranger": {
+        "formula": "(6 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "climb",
+            "concentration",
+            "craft",
+            "handle_animal",
+            "heal",
+            "hide",
+            "jump",
+            "knowledge",
+            "listen",
+            "move_silently",
+            "profession",
+            "ride",
+            "search",
+            "spot",
+            "survival",
+            "swim",
+            "use_rope"
+        ]
+    },
+    "Rogue": {
+        "formula": "(8 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "appraise",
+            "balance",
+            "bluff",
+            "climb",
+            "craft",
+            "decipher_script",
+            "diplomacy",
+            "disable_device",
+            "disguise",
+            "escape_artist",
+            "forgery",
+            "gather_information",
+            "hide",
+            "intimidate",
+            "jump",
+            "knowledge",
+            "listen",
+            "move_silently",
+            "open_lock",
+            "perform",
+            "profession",
+            "search",
+            "sense_motive",
+            "sleight_of_hand",
+            "spot",
+            "swim",
+            "tumble",
+            "use_magic_device",
+            "use_rope"
+        ]
+    },
+    "Sorcerer": {
+        "formula": "(2 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "bluff",
+            "concentration",
+            "craft",
+            "knowledge",
+            "profession",
+            "spellcraft"
+        ]
+    },
+    "Wizard": {
+        "formula": "(2 + :int:) * (:level: + 3)",
+        "class_skills": [
+            "concentration",
+            "craft",
+            "decipher_script",
+            "knowledge",
+            "profession",
+            "spellcraft"
+        ]
+    }
+}
