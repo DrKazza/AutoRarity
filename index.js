@@ -28,6 +28,11 @@ const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
     let delayToUse = constVal.xpRetryDelay;
     let dungeonList = dungeon.getAvailableDungeons();
+    let transactionCount = await constVal.account.getTransactionCount();
+    if (transactionCount < latestNonce){
+        console.log(`nonce [${latestNonce}] val is higher than transaction count [${transactionCount}] waiting before launch again`);
+        return [constVal.nonceDelay];
+    }
     for (let tokenID of constVal.myTokenIds) {
         let somethingDone = false;
         let tokenStats = await core.getStats(tokenID);
