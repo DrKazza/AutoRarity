@@ -38,7 +38,7 @@ const doDungeon = async (dungeonName, token, nonce = undefined, isAuto = false) 
         if (!isAuto){
             let transactionCount = await constVal.account.getTransactionCount();
             if (transactionCount < nonce){
-                console.log(`nonce [${nonce}] val is higher than transaction count [${transactionCount}] wait before launch again`);
+                console.log(`nonce val [${nonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
                 return;
             }
         }

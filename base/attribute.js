@@ -94,7 +94,7 @@ const massAssignPoint = async (template, tokenID) => {
         let latestNonce = await  utils.nonceVal();
         let transactionCount = await constVal.account.getTransactionCount();
         if (transactionCount < latestNonce){
-            console.log(`nonce [${latestNonce}] val is higher than transaction count [${transactionCount}] wait before launch again`);
+            console.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
             return;
         }
         if (typeof tokenID === 'undefined') {

@@ -24,15 +24,20 @@ const gold = require('./base/gold');
 const materials1 = require('./base/material_1');
 const attribute = require('./base/attribute');
 
+let lastAutoNonce = 0;
+
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
-    latestNonce = await utils.nonceVal();
-    //double check sometime nonce is not correct
+    if (lastAutoNonce > latestNonce){
+        latestNonce = lastAutoNonce;
+    } else {
+        lastAutoNonce = latestNonce;
+    }
     let delayToUse = constVal.xpRetryDelay;
     let dungeonList = dungeon.getAvailableDungeons();
     let transactionCount = await constVal.account.getTransactionCount();
     if (transactionCount < latestNonce){
-        console.log(`nonce [${latestNonce}] val is higher than transaction count [${transactionCount}] waiting before launch again`);
+        console.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] waiting before launch again`);
         let waitPercentage = Math.abs(Math.floor(transactionCount / latestNonce * 100) - 100);
         delayToUse = constVal.nonceDelay * waitPercentage / 100;
         return [delayToUse];
@@ -139,6 +144,7 @@ const checkTokens = async () => {
             console.log(`${tokenID} => nothing to do...`);
         }
     }
+    lastAutoNonce = latestNonce;
     return [delayToUse];
 }
 
