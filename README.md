@@ -20,8 +20,9 @@
 ```
 ## How to Use
 
- 1. Copy the `.env.dist` to `.env`  
- 2. Fill the variables with your data, you don't have to fill the `TOKENIDS` variable  
- 3. Run `node index utl` to update the `TOKENIDS` variable  
- 4. Run `node index sum` or ` node index gl` to see if everything is setup correctly
- 5. Run `node index xp` to launch one time or `node index auto` for automatic farming
+1. run `npm install`
+2. Copy the `.env.dist` to `.env`  
+3. Fill the variables with your data, you don't have to fill the `TOKENIDS` variable  
+4. Run `node index utl` to update the `TOKENIDS` variable  
+5. Run `node index sum` or ` node index gl` to see if everything is setup correctly
+6. Run `node index xp` to launch one time or `node index auto` for automatic farming

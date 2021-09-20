@@ -321,6 +321,8 @@ const init = async () => {
                 let gas = await utils.calculateGasPrice();
                 if (gas > 0){
                     gas = Math.floor(gas/(10**9));
+                } else {
+                    gas = Math.abs(gas);
                 }
                 console.log(`current gasPrice => ${gas}`);
                 console.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
