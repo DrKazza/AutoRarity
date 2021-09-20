@@ -42,6 +42,13 @@ const checkTokens = async () => {
         delayToUse = constVal.nonceDelay * waitPercentage / 100;
         return [delayToUse];
     }
+    let checkGas = await utils.calculateGasPrice()
+    if (checkGas < 0) {
+        console.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice}`)
+        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+
+        return [delayToUse]
+    }
     for (let tokenID of constVal.myTokenIds) {
         let somethingDone = false;
         let tokenStats = await core.getStats(tokenID);
