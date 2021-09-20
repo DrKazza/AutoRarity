@@ -41,11 +41,14 @@ const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
 
 // Telegram Bot -- OPTIONAL
+process.env.NTBA_FIX_319 = 1; // need this to stop a deprecated error message firing
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 var chatId = undefined;
 const tgToken = process.env.TGTOKEN; // AutoRarity Bot identifier
+var useTelegram = false;
 var bot = {};
+
 
 if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
     // Listen for initialisation message from bot user to establish comms channel
@@ -60,14 +63,14 @@ if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
     });
     sendTelegram('AutoRarity Telegram bot initiated - you will be updated on key events in your wallet and with your Summoners');
     });
-}
-
-// Retrieve any previously set bot channel identifier
-try {
-    chatId = fs.readFileSync('.chatId','utf8')
-    console.log('AutoRarity TG bot resuming comms channel with user.')
-} catch (err) {
-    console.log('Unable to access existing TG bot setup.')
+    // Retrieve any previously set bot channel identifier
+    try {
+        chatId = fs.readFileSync('.chatId','utf8')
+        console.log('AutoRarity TG bot resuming comms channel with user.')
+    } catch (err) {
+        console.log('Unable to access existing TG bot setup.')
+    }
+    useTelegram = true;
 }
 
 
@@ -96,6 +99,12 @@ const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const summary = require('./summary.js');
 const {contractAddresses} = require('./contractAddresses.js');
+var highGasSpam = false;
+
+const report = (reportingText) => {
+    console.log(reportingText);
+    if (useTelegram) {sendTelegram(reportingText)};
+}
 
 const calculateGasPrice = async () => {
     let spotPx = await web3.eth.getGasPrice();
@@ -246,8 +255,8 @@ const checkAndRunDungeon = async (dungeon, latestNonce) => {
         }
     }
     if (dungeonRuns.length != 0) {
-        console.log(`Successfully Dungeoned:`)
-        for (let thistok of dungeonRuns) {console.log(thistok)}
+        report(`Successfully Dungeoned:`)
+        for (let thistok of dungeonRuns) {report(thistok)}
     }
 }
 
@@ -350,35 +359,42 @@ const autoRun = async (repeater, dungeon) => {
         tokenCheck = await checkTokens(dungeon)
         if (tokenCheck[1].length != 0) {
             transactionPerformed = true;
-            console.log(`Successfully adventured:`)
-            for (let thistok of tokenCheck[1]) {console.log(await nameOrToken(thistok))}
+            report(`Successfully adventured:`)
+            for (let thistok of tokenCheck[1]) {report(await nameOrToken(thistok))}
         }
         if (tokenCheck[2].length != 0) {
             transactionPerformed = true;
-            console.log(`Successfully Levelled:`)
-            for (let thistok of tokenCheck[2]) {console.log(await nameOrToken(thistok))}
+            report(`Successfully Levelled:`)
+            for (let thistok of tokenCheck[2]) {report(await nameOrToken(thistok))}
         }
         if (tokenCheck[3].length != 0) {
             transactionPerformed = true;
-            console.log(`Successfully Claimed Gold:`)
-            for (let thistok of tokenCheck[3]) {console.log(await nameOrToken(thistok))}
+            report(`Successfully Claimed Gold:`)
+            for (let thistok of tokenCheck[3]) {report(await nameOrToken(thistok))}
         }
         if (tokenCheck[4].length != 0) {
             transactionPerformed = true;
-            console.log(`Successfully Ran Dungeons:`)
-            for (let thistok of tokenCheck[4]) {console.log(await nameOrToken(thistok))}
+            report(`Successfully Ran Dungeons:`)
+            for (let thistok of tokenCheck[4]) {report(await nameOrToken(thistok))}
         }
 
         if (!transactionPerformed){console.log(`Nothing to do...`)}
         let ftmBalance = (await getFTMBalance())/10**18
         if ( ftmBalance < lowFTM) {
-            sendTelegram(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
-            console.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
+            report(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`)
         }
         textTimeleft = summary.secsToText(tokenCheck[0])
         if (repeater) {
-            console.log(`Retrying in = ${textTimeleft[0]}h${textTimeleft[1]}m`);
-            sendTelegram(`Waiting for ${textTimeleft[0]} hours ${textTimeleft[1]} minutes for next adventure.`);
+            if (textTimeleft[1] == 5){
+                if (!highGasSpam) {
+                    report(`High Gas Price, will keep retrying every 5 minutes`)
+                    highGasSpam = true;
+                } 
+                //high gas retrying - don't spam telegram
+            } else {
+                highGasSpam = false;
+                report(`Waiting for ${textTimeleft[0]} hours ${textTimeleft[1]} minutes for next adventure.`);
+            }
             await delay(tokenCheck[0]*1000);
         } else {
             break;
