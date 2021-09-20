@@ -42,15 +42,19 @@ const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpV
 const autoTransferToMuleVar = process.env.AUTO_TRANSFER_TO_MULE;
 const autoTransferToMule = autoTransferToMuleVar === undefined ? true : parseBool(autoTransferToMuleVar); // you may not want to automatically transfer to mule
 
+const maxGasPxVar = process.env.MAXGAS;
+if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
+const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
+
 module.exports = {
     fantomRpcUrl,
     totalGasLimit,
-    defaultMaxGasPx,
     xpRetryDelay,
     gasRetryDelay,
     xpPendingDelay,
     minimumDelay,
     nonceDelay,
+    maxGasPrice,
     jsonRpcProvider,
     walletAddress,
     myTokenIds,

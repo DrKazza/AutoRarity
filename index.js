@@ -325,6 +325,7 @@ const init = async () => {
                     gas = Math.floor(gas/(10**9));
                 }
                 console.log(`current gasPrice => ${gas}`);
+                console.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
                 break;
             case 'cn':
                 console.log(`current nonce => ${await utils.nonceVal()}`)

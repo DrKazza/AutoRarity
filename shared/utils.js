@@ -4,9 +4,6 @@ const constVal = require('./const');
 
 
 let web3 = new Web3(constVal.fantomRpcUrl);
-const maxGasPxVar = process.env.MAXGAS;
-if (maxGasPxVar === undefined){maxGasPx = constVal.defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
-const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 
 const timeLeft = (timestamp) => {
     let rightNow = Date.now()/1000
@@ -28,7 +25,7 @@ const secsToText = (secs) => {
 const calculateGasPrice = async () => {
     let spotPx = await web3.eth.getGasPrice();
     let spotPxBN = ethers.BigNumber.from(spotPx.toString())
-    if (spotPxBN.gte(maxGasPrice)) {
+    if (spotPxBN.gte(constVal.maxGasPrice)) {
         return -(Math.floor(spotPx/(10**9)))
     } else {
         return spotPxBN
