@@ -26,6 +26,8 @@ const attribute = require('./base/attribute');
 
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
+    latestNonce = await utils.nonceVal();
+    //double check sometime nonce is not correct
     let delayToUse = constVal.xpRetryDelay;
     let dungeonList = dungeon.getAvailableDungeons();
     let transactionCount = await constVal.account.getTransactionCount();
