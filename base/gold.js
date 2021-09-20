@@ -77,8 +77,8 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.gold;
-    if (typeof mule === 'undefined'){
-        console.log(`${tokenID} => can't transfer gold no mule defined, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+    if (typeof mule === 'undefined' || mule.length === 0){
+        console.log(`${tokenID} => can't transfer gold no mule defined, define GOLD_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){

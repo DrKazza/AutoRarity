@@ -40,7 +40,7 @@ const mule = {
 const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
 const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar); // you may not want to automatically level up your char
 const autoTransferToMuleVar = process.env.AUTO_TRANSFER_TO_MULE;
-const autoTransferToMule = autoTransferToMuleVar === undefined ? true : parseBool(autoTransferToMuleVar); // you may not want to automatically transfer to mule
+const autoTransferToMule = autoTransferToMuleVar === undefined ? false : parseBool(autoTransferToMuleVar); // you may want to automatically transfer to mule
 
 const maxGasPxVar = process.env.MAXGAS;
 if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}

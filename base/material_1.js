@@ -45,8 +45,8 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.materials1;
-    if (typeof mule === 'undefined'){
-        console.log(`${tokenID} => can't transfer materials1 no mule defined, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+    if (typeof mule === 'undefined' || mule.length === 0){
+        console.log(`${tokenID} => can't transfer materials1 no mule defined, define MATERIALS_1_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){
