@@ -6,10 +6,16 @@ const ethers = require("ethers");
 const abi = contractAddresses.goldABI;
 const address = contractAddresses.rarityGold;
 
+let contractGetStats;
+let contractClaim;
+let contractTransfer;
+
 const getStats = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    let goldheld = await contract.methods.balanceOf(tokenID).call();
-    let claimable = await contract.methods.claimable(tokenID).call();
+    if (typeof contractGetStats === 'undefined') {
+        contractGetStats = new utils.web3.eth.Contract(abi, address);
+    }
+    let goldheld = await contractGetStats.methods.balanceOf(tokenID).call();
+    let claimable = await contractGetStats.methods.claimable(tokenID).call();
     return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18)), goldheld]
 }
 
@@ -21,8 +27,10 @@ const claim = async (tokenID, nonce = undefined) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.claim(
+                if (typeof contractClaim === 'undefined') {
+                    contractClaim = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractClaim.claim(
                     tokenID,
                     {
                         gasLimit: constVal.totalGasLimit,
@@ -50,8 +58,10 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.transfer(
+                if (typeof contractTransfer === 'undefined') {
+                    contractTransfer = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractTransfer.transfer(
                     tokenFrom,
                     tokenTo,
                     amount,

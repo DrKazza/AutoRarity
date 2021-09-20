@@ -7,6 +7,10 @@ const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 const dungeonName = 'cellar';
 
+let contractRun;
+let contractGetLoot;
+let contractGetTimeUntilAvailable;
+
 const run = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
@@ -26,8 +30,10 @@ const run = async (tokenID, nonce = undefined) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.adventure(
+                if (typeof contractRun === 'undefined') {
+                    contractRun = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractRun.adventure(
                     tokenID,
                     {
                         gasLimit: constVal.totalGasLimit,
@@ -66,13 +72,17 @@ const scout = async (tokenID) => {
 }
 
 const getLoot = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    return await contract.methods.scout(tokenID).call();
+    if (typeof contractGetLoot === 'undefined') {
+        contractGetLoot = new utils.web3.eth.Contract(abi, address);
+    }
+    return await contractGetLoot.methods.scout(tokenID).call();
 }
 
 const getTimeUntilAvailable = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    return await contract.methods.adventurers_log(tokenID).call();
+    if (typeof contractGetTimeUntilAvailable === 'undefined') {
+        contractGetTimeUntilAvailable = new utils.web3.eth.Contract(abi, address);
+    }
+    return await contractGetTimeUntilAvailable.methods.adventurers_log(tokenID).call();
 }
 
 module.exports = {

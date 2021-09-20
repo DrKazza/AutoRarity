@@ -4,13 +4,17 @@ const constVal = require("../shared/const");
 const ethers = require("ethers");
 const core = require('./core');
 const fs = require("fs");
-const dungeons = require("../dungeons");
 const abi =contractAddresses.attributesABI;
 const address = contractAddresses.rarityAttributes;
 
+let contractGet;
+let contractBuyPoint;
+
 const get = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    return await contract.methods.ability_scores(tokenID).call();
+    if (typeof contractGet === 'undefined') {
+        contractGet = new utils.web3.eth.Contract(abi, address);
+    }
+    return await contractGet.methods.ability_scores(tokenID).call();
 }
 
 const getAttributeTemplateList = () => {
@@ -45,8 +49,10 @@ const buyPoint = async (tokenID, point, nonce) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.point_buy(
+                if (typeof contractBuyPoint === 'undefined') {
+                    contractBuyPoint = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractBuyPoint.point_buy(
                     tokenID,
                     point['str'],
                     point['dex'],

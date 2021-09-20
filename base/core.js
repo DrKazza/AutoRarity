@@ -6,10 +6,17 @@ const tokenGetter = require("../shared/tokenIdGetter.js");
 const abi =contractAddresses.manifestABI;
 const address = contractAddresses.rarityManifested;
 
+let contractGetStats;
+let contractClaimXp;
+let contractLevelUp;
+let contractSummon;
+
 const getStats = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    let tokenStats = await contract.methods.summoner(tokenID).call();
-    tokenStats[4] = await contract.methods.xp_required(tokenStats[3]).call();
+    if (typeof contractGetStats === 'undefined') {
+        contractGetStats = new utils.web3.eth.Contract(abi, address);
+    }
+    let tokenStats = await contractGetStats.methods.summoner(tokenID).call();
+    tokenStats[4] = await contractGetStats.methods.xp_required(tokenStats[3]).call();
     // tokenStats will return [currentxp, time of next xpgain, char class, level, xp to next level]
     return tokenStats;
 }
@@ -22,8 +29,10 @@ const claimXp = async (tokenID, nonce)  => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.adventure(
+                if (typeof contractClaimXp === 'undefined') {
+                    contractClaimXp = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractClaimXp.adventure(
                     tokenID,
                     {
                         gasLimit: constVal.totalGasLimit,
@@ -52,8 +61,10 @@ const levelUp = async (tokenID, nonce)  => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.level_up(
+                if (typeof contractLevelUp === 'undefined') {
+                    contractLevelUp = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractLevelUp.level_up(
                     tokenID,
                     {
                         gasLimit: constVal.totalGasLimit,
@@ -81,8 +92,10 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address,abi, constVal.account);
-                let approveResponse = await contract.summon(
+                if (typeof contractSummon === 'undefined') {
+                    contractSummon = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractSummon.summon(
                     classToSummon,
                     {
                         gasLimit: constVal.totalGasLimit,

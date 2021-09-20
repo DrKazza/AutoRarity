@@ -5,9 +5,14 @@ const ethers = require("ethers");
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 
+let contractGetInventory;
+let contractTransfer;
+
 const getInventory = async (tokenID) => {
-    let contract = new utils.web3.eth.Contract(abi, address);
-    return await contract.methods.balanceOf(tokenID).call();
+    if (typeof contractGetInventory === 'undefined') {
+        contractGetInventory = new utils.web3.eth.Contract(abi, address);
+    }
+    return await contractGetInventory.methods.balanceOf(tokenID).call();
 }
 
 const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
@@ -18,8 +23,10 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     } else {
         if (constVal.liveTrading) {
             try {
-                let contract = new ethers.Contract(address, abi, constVal.account);
-                let approveResponse = await contract.transfer(
+                if (typeof contractTransfer === 'undefined') {
+                    contractTransfer = new ethers.Contract(address, abi, constVal.account);
+                }
+                let approveResponse = await contractTransfer.transfer(
                     tokenFrom,
                     tokenTo,
                     amount,
