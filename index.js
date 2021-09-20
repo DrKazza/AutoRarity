@@ -1,18 +1,3 @@
-// YOU NEED TO CREATE A FILE CALLED .env
-// it needs to have 5 variables
-//
-// WALLETADDRESS = '0xcABC123ABC123ABC123'
-// SECRETKEY = 'house cards bakery muppet grizzly head tyre back face'
-// TOKENIDS = '444,555,666'
-// LIVETRADING = 'false'   change this to LIVETRADING = 'true' when you're ready to run
-// MAXGAS = '250'  this defaults to 250 if you've not specified it
-//
-// the first is obviously your wallet
-// the secret key is your phrase for your wallet so you can pay for gas
-// the third is the ids of your rarity tokens, do not put a space between the commas 
-// and the numbers and make sure you have the quote marks
-
-
 require("dotenv").config();
 
 const constVal = require('./shared/const');
@@ -235,7 +220,7 @@ const init = async () => {
     if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
         console.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
-    node index.js gl/globalStats                - gives global stats (gold/materials1)
+    node index.js gl/globalStats                - gives global stats (gold/materials1/number of token of each classes)
     node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
     node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
     node index.js utl/updateTokenList           - update the token id list in .env file
