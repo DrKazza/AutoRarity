@@ -87,6 +87,10 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
     if (parseInt(attribs[0], 10) === 0) {
         let className = constVal.classes[tokenStats[2]];
         let template = getAttributeTemplate(templateName);
+        if (typeof template[className] === 'undefined'){
+            utils.log(`The class [${className}] is missing in template [${templateName}]`);
+            return false;
+        }
         let res = await buyPoint(tokenID, template[className].attributes, nonce);
         return res[0];
     } else {

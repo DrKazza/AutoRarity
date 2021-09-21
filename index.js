@@ -157,7 +157,6 @@ const autoRun = async (repeater) => {
             }
             utils.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
             await utils.delay(tokenCheck[0]*1000);
-
         } else {
             break;
         }
