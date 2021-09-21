@@ -30,8 +30,7 @@
 
 ## In case you have multiple address
 You can have multiple `.env` file like `.env.addr2`/`.env.addr3`.  
-to use it start the script as follows `node -r dotenv/config index sum dotenv_config_path=./.env.addr2`  
-the `dotenv_config_path` param will be ignored
+to use it start the script as follows `node -r dotenv/config index sum dotenv_config_path=./.env.addr2`
 
 ## Debug mode
 You can pass `--debug=true` to switch to debug mode that will display real error instead of `xp error`/`point error`etc  
