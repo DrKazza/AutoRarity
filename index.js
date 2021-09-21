@@ -106,6 +106,7 @@ const checkTokens = async () => {
                     }
                 }
             }
+            /*
             let  rarStats = await rar.getStats(tokenID);
             if (rarStats[1] > 0) {
                 somethingDone = true;
@@ -132,6 +133,7 @@ const checkTokens = async () => {
                     }
                 }
             }
+             */
         }
         if (constVal.autoTransferToMule){
             let materials1Inventory = await materials1.getInventory(tokenID);
