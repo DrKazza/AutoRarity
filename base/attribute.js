@@ -69,6 +69,9 @@ const buyPoint = async (tokenID, point, nonce) => {
                 return [true, 'success'];
             } catch (e){
                 console.log(`${tokenID} => point error`);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return [false, 'error'];
             }
         } else {

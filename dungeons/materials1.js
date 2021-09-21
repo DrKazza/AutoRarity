@@ -45,7 +45,9 @@ const run = async (tokenID, nonce = undefined) => {
                 return [true, `success, loot => ${loot}`];
             } catch (e) {
                 console.log(`${tokenID} => [${dungeonName}] error`);
-                console.log(e);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return [false, 'ERROR'];
             }
         } else {

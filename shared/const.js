@@ -1,6 +1,9 @@
 const {JsonRpcProvider} = require("@ethersproject/providers");
 const ethers = require("ethers");
 
+const parseBool = (val) => {return val === true || val === 'true'}
+
+
 const fantomRpcUrl = 'https://rpc.ftm.tools/';
 const totalGasLimit = 125000 // 50,000 seems sensible for general xping up and 30,000 seems right for levelling, claim gold is ~100k
 const defaultMaxGasPx = 250 // usually 50-100, sometimes this spikes to nearly 200
@@ -13,6 +16,9 @@ const nonceDelay = 6 * 60 * 60 // wait 6 hour to see if all transaction have pas
 
 const classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Wizard'];
 
+const rawArgs = require('minimist')(process.argv.slice(2));
+
+const debug = rawArgs.debug === undefined ? false : parseBool(rawArgs.debug);
 
 let myTokenIds = [];
 const importedTokenIds = process.env.TOKENIDS;
@@ -29,7 +35,6 @@ const jsonRpcProvider = new JsonRpcProvider(fantomRpcUrl);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(jsonRpcProvider);
 
-const parseBool = (val) => {return val === true || val === 'true'}
 const liveTradingVar = process.env.LIVETRADING;
 const liveTrading = liveTradingVar === undefined ? false : parseBool(liveTradingVar);
 
@@ -63,5 +68,6 @@ module.exports = {
     liveTrading,
     mule,
     autoLevelUp,
-    autoTransferToMule
+    autoTransferToMule,
+    debug
 }

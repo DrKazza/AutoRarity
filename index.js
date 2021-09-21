@@ -217,7 +217,9 @@ const getGlobalStats = async () => {
 }
 
 const init = async () => {
-    if (typeof process.argv[2] === 'undefined' || process.argv[2] === 'help') {
+    const rawArgs = require('minimist')(process.argv.slice(2));
+    const args = rawArgs['_'];
+    if (typeof args[0] === 'undefined' || args[0] === 'help') {
         console.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
     node index.js gl/globalStats                - gives global stats (gold/materials1/number of token of each classes)
@@ -234,7 +236,7 @@ const init = async () => {
     node index.js gp                            - get current gas price
     node index.js cn                            - get current nonce`)
     } else {
-        switch (process.argv[2]) {
+        switch (args[0]) {
             case 'summary':
             case 'sum':
                 await summary.charSummary();
@@ -254,22 +256,22 @@ const init = async () => {
                 dungeon.displayAvailableDungeons();
                 break;
             case 'scout':
-                if (typeof process.argv[3] === 'undefined'){
+                if (typeof args[1] === 'undefined'){
                     console.log('You have to select a dungeon to scout');
                     dungeon.displayAvailableDungeons();
                 } else {
-                    let dungeonName = process.argv[3];
-                    let token = process.argv[4];
+                    let dungeonName = args[1];
+                    let token = args[2];
                     await dungeon.scout(dungeonName, token);
                 }
                 break;
             case 'dg':
-                if (typeof process.argv[3] === 'undefined'){
+                if (typeof args[1] === 'undefined'){
                     console.log('You have to select a dungeon to go');
                     dungeon.displayAvailableDungeons();
                 } else {
-                    let dungeonName = process.argv[3];
-                    let token = process.argv[4];
+                    let dungeonName = args[1];
+                    let token = args[2];
                     await dungeon.doDungeon(dungeonName, token);
                 }
                 break;
@@ -278,16 +280,16 @@ const init = async () => {
                 displayAvailableClasses();
                 break;
             case 'sm':
-                let className = typeof process.argv[3] === 'undefined' ? "all" : process.argv[3];
-                let quantity = typeof process.argv[4] === 'undefined' ? 1 : process.argv[4];
+                let className = typeof args[1] === 'undefined' ? "all" : args[1];
+                let quantity = typeof args[2] === 'undefined' ? 1 : args[2];
                 await core.massSummon(className, quantity);
                 break;
             case 'testScrap':
-                let resume = typeof process.argv[3] !== 'undefined';
+                let resume = typeof args[1] !== 'undefined';
                 await require('./scrap').scrapData( resume ? require('./scrap/sqliteUtils').getMaxTokenId() : 0);
                 break;
             case 'testData':
-                let minCount = typeof process.argv[3] === 'undefined' ? -1 : process.argv[3];
+                let minCount = typeof args[1] === 'undefined' ? -1 : args[1];
                 let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
                     console.log(dat);
@@ -303,8 +305,8 @@ const init = async () => {
                 break;
             case 'assignPoint':
             case 'ap':
-                let template = process.argv[3];
-                let token = process.argv[4];
+                let template = args[1];
+                let token = args[2];
                 if (typeof template === 'undefined'){
                     console.log('You have to select a template');
                     attribute.displayAvailableAttributeTemplate();
@@ -313,8 +315,8 @@ const init = async () => {
                 }
                 break;
             case 'drop':
-                let nonce = process.argv[3];
-                let count = process.argv[4];
+                let nonce = args[1];
+                let count = args[2];
                 await dropTransaction(nonce, count)
                 break;
             case 'gp':
@@ -332,7 +334,7 @@ const init = async () => {
                 console.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
                 break;
             default:
-                console.log(`${process.argv[2]} is not a valid command`)
+                console.log(`${args[0]} is not a valid command`)
                 break;
         }
     }

@@ -3,6 +3,7 @@ const fs = require('fs');
 const util = require('util');
 const readline = require('readline');
 const stream = require('stream');
+const constVal = require("../shared/const");
 const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
 
@@ -66,8 +67,11 @@ const updateDotEnvFile = async function (tokens){
 
                 await rename(tempFile, file) // Rename temp file with original file name.
                 console.log(`the .env file has been successfully updated with ${tokens.length} tokens`);
-            } catch (error) {
+            } catch (e) {
                 console.log('error when updating the .env file with new tokens');
+                if (constVal.debug){
+                    console.log(e);
+                }
             }
         });
     });

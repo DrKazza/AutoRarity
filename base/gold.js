@@ -41,6 +41,9 @@ const claim = async (tokenID, nonce = undefined) => {
                 return [true, 'success'];
             } catch (e){
                 console.log(`${tokenID} => gold error`);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return [false, 'error'];
             }
         } else {
@@ -74,8 +77,10 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                 return [true, 'success'];
             } catch (e){
                 console.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
-                console.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
-                console.log(e);
+                if (constVal.debug){
+                    console.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    console.log(e);
+                }
                 return [false, 'ERROR'];
             }
         } else {

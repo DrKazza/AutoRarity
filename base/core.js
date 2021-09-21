@@ -43,7 +43,9 @@ const claimXp = async (tokenID, nonce)  => {
                 return [true, 'success'];
             } catch (e) {
                 console.log(`${tokenID} => xp error`);
-                console.log(e);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return [false, 'error'];
             }
         } else {
@@ -75,6 +77,9 @@ const levelUp = async (tokenID, nonce)  => {
                 return [true, 'success'];
             } catch (e) {
                 console.log(`${tokenID} => levelUp error`);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return [false, 'error'];
             }
         } else {
@@ -104,8 +109,11 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
                     });
                 console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;
-            } catch (error) {
+            } catch (e) {
                 console.log(`summon error`);
+                if (constVal.debug){
+                    console.log(e);
+                }
                 return false;
             }
         }else {
