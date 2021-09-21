@@ -20,6 +20,7 @@ const scrapData = async (start = 0) => {
         }
         tokenID++;
     }
+    console.log("Scrap finished");
 }
 
 const writePercentage = (current, max, request) => {
