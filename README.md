@@ -26,3 +26,8 @@
 4. Run `node index utl` to update the `TOKENIDS` variable  
 5. Run `node index sum` or ` node index gl` to see if everything is setup correctly
 6. Run `node index xp` to launch one time or `node index auto` for automatic farming
+
+## In case you have multiple address
+You can have multiple `.env` file like `.env.addr2`/`.env.addr3`.  
+to use it start the script as follows `node -r dotenv/config index sum dotenv_config_path=./.env.addr2`  
+the `dotenv_config_path` param will be ignored

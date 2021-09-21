@@ -218,7 +218,10 @@ const getGlobalStats = async () => {
 
 const init = async () => {
     const rawArgs = require('minimist')(process.argv.slice(2));
-    const args = rawArgs['_'];
+    const args = rawArgs['_'].filter((value) => {
+        let reg = /dotenv_config_path=.*/
+        return !reg.exec(value);
+    });
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
         console.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
@@ -236,6 +239,9 @@ const init = async () => {
     node index.js gp                            - get current gas price
     node index.js cn                            - get current nonce`)
     } else {
+        if (constVal.debug){
+            console.log(`/!\\DEBUG ON/!\\`);
+        }
         switch (args[0]) {
             case 'summary':
             case 'sum':
