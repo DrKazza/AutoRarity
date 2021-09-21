@@ -22,7 +22,7 @@ const insertToken = (id, owner, materials1Count, goldCount, claimableGoldCount) 
 const getNumberOfTokenByAddress = (minCount = -1) => {
     initDb();
     if (minCount !== -1){
-        return db.prepare(`SELECT owner, SUM(gold)/POWER(10, 18) as 'gold', SUM(material_1) as 'material_1', count(*) as 'token' FROM token GROUP BY owner HAVING token >= ${minCount} ORDER BY count(*)`).all();
+        return db.prepare(`SELECT owner, SUM(gold)/POWER(10, 18) as 'gold', SUM(gold_claimable)/POWER(10, 18) as 'gold_claimable', SUM(material_1) as 'material_1', count(*) as 'token' FROM token GROUP BY owner HAVING token >= ${minCount} ORDER BY count(*)`).all();
     }else {
         return db.prepare(`SELECT owner, SUM(gold)/POWER(10, 18) as 'gold', SUM(gold_claimable)/POWER(10, 18) as 'gold_claimable', SUM(material_1) as 'material_1', count(*) as 'token' FROM token GROUP BY owner ORDER BY count(*)`).all();
     }
