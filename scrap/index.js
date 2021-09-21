@@ -1,14 +1,22 @@
 const scrapUtil = require('./scrapUtils');
 const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
+const constVal = require('../shared/const');
 
 const scrapAndInsert = async (tokenID) => {
+
     let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
     let materials1Count = await scrapUtil.getTokenMaterial1Count(tokenID);
     let goldCount = await scrapUtil.getTokenGoldCount(tokenID);
-    let goldClaimableCount = await scrapUtil.getTokenGoldClaimableCount(tokenID);
+    let goldClaimableCount = 0;
+    try {
+        goldClaimableCount = await scrapUtil.getTokenGoldClaimableCount(tokenID);
+    } catch (e) {
+    }
     sqliteUtils.insertAddress(ownerAddress);
     sqliteUtils.insertToken(tokenID, ownerAddress, materials1Count, goldCount, goldClaimableCount);
+
+
 }
 
 const scrapData = async (start = 0) => {
