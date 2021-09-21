@@ -13,7 +13,7 @@ const getAllLineOfFile = async (file) => {
             });
             let lines = [];
             for await (const line of rl) {
-                lines.push(line);
+                lines.push(line.trim());
             }
             return lines;
         } else {
