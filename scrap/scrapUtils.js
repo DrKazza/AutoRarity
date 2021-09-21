@@ -46,6 +46,13 @@ const getTokenGoldCount = async (tokenID) => {
     return await contractGetTokenGoldCount.methods.balanceOf(tokenID).call();
 }
 
+const getTokenGoldClaimableCount = async (tokenID) => {
+    if (typeof contractGetTokenGoldCount === 'undefined') {
+        contractGetTokenGoldCount = new utils.web3.eth.Contract(contractAddresses.goldABI, contractAddresses.rarityGold);
+    }
+    return await contractGetTokenGoldCount.methods.claimable(tokenID).call();
+}
+
 const getTokenMaterial1Count = async (tokenID) => {
     if (typeof contractGetTokenMaterial1Count === 'undefined') {
         contractGetTokenMaterial1Count = new utils.web3.eth.Contract(contractAddresses.materials1ABI, contractAddresses.rarityMaterials1);
@@ -82,6 +89,7 @@ module.exports = {
     getTokenDetail,
     getTokenAbility,
     getTokenGoldCount,
+    getTokenGoldClaimableCount,
     getTokenMaterial1Count,
     getNextItemId,
     getOwnerOfItem,

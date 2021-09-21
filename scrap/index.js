@@ -6,8 +6,9 @@ const scrapAndInsert = async (tokenID) => {
     let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
     let materials1Count = await scrapUtil.getTokenMaterial1Count(tokenID);
     let goldCount = await scrapUtil.getTokenGoldCount(tokenID);
+    let goldClaimableCount = await scrapUtil.getTokenGoldClaimableCount(tokenID);
     sqliteUtils.insertAddress(ownerAddress);
-    sqliteUtils.insertToken(tokenID, ownerAddress, materials1Count, goldCount);
+    sqliteUtils.insertToken(tokenID, ownerAddress, materials1Count, goldCount, goldClaimableCount);
 }
 
 const scrapData = async (start = 0) => {
