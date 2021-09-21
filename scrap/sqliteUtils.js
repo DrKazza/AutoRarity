@@ -12,7 +12,7 @@ const insertAddress = (address) => {
 
 const insertToken = (id, owner) => {
     initDb();
-    db.exec(`INSERT INTO token (id, owner) VALUES ('${id}', '${owner}') ON CONFLICT DO NOTHING;`);
+    db.exec(`INSERT INTO token (id, owner) VALUES ('${id}', '${owner}') ON CONFLICT DO UPDATE SET owner=excluded.owner;`);
 }
 
 const getNumberOfTokenByAddress = (minCount = -1) => {
