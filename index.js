@@ -197,6 +197,7 @@ const getGlobalStats = async () => {
     let totalGold = 0;
     let totalMaterials1 = 0;
     let typeCount = [];
+    console.log(`/!\\it may take a long time if you have a lot of token/!\\`)
     for (let tokenID of constVal.myTokenIds) {
         totalMaterials1 += parseInt(await materials1.getInventory(tokenID), 10);
         let goldStats = await gold.getStats(tokenID);
