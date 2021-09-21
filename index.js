@@ -328,7 +328,8 @@ const init = async () => {
                 console.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
                 break;
             case 'cn':
-                console.log(`current nonce => ${await utils.nonceVal()}`)
+                console.log(`current nonce => ${await utils.nonceVal()}`);
+                console.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
                 break;
             default:
                 console.log(`${process.argv[2]} is not a valid command`)
