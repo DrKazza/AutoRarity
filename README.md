@@ -15,6 +15,7 @@
         node index.js scout <name> [token]          - scout <name> dungeon with all characters or with a specific [token]
         node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
         node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]
+        node index.js tn/testNames <file>           - validate and check for availability of names in <file>
         node index.js gp                            - get current gas price
         node index.js cn                            - get current nonce
 ```
