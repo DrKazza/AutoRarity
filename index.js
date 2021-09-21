@@ -8,6 +8,7 @@ const core = require('./base/core');
 const gold = require('./base/gold');
 const materials1 = require('./base/material_1');
 const attribute = require('./base/attribute');
+const name = require('./base/name');
 
 let lastAutoNonce = 0;
 
@@ -237,6 +238,7 @@ const init = async () => {
     node index.js scout <name> [token]          - scout <name> dungeon with all characters or with a specific [token]
     node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
     node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]
+    node index.js tn/testNames <file>           - validate and check for availability of names in <file>  
     node index.js gp                            - get current gas price
     node index.js cn                            - get current nonce`)
     } else {
@@ -339,6 +341,14 @@ const init = async () => {
             case 'cn':
                 console.log(`current nonce => ${await utils.nonceVal()}`);
                 console.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
+                break;
+            case 'testNames':
+            case 'tn':
+                if (typeof args[1] === 'undefined'){
+                    console.log('you need to pass a file');
+                } else {
+                    await name.massValidate(args[1]);
+                }
                 break;
             default:
                 console.log(`${args[0]} is not a valid command`)
