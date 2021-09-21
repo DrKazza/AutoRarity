@@ -4,12 +4,17 @@ const gold = require('./gold');
 const attribute = require('./attribute');
 const material1 = require('./material_1');
 const core = require('./core');
+const name = require('./name');
 
 const charSummary = async () => {
     for (let tokenID of constVal.myTokenIds) {
         let tokenStats = await core.getStats(tokenID)
         let timeleft = utils.timeLeft(tokenStats[1])
         console.log(`*****************`)
+        let charName = await name.get(tokenID);
+        if (charName.length > 0) {
+            console.log(`${charName}`)
+        }
         if (timeleft[0] < 0) {
             console.log(`Token: ${tokenID}, ${constVal.classes[tokenStats[2]]} Lvl ${tokenStats[3]}, currentXP ${Math.floor(tokenStats[0]/10**18)}/${Math.floor(tokenStats[4]/10**18)} - Ready to get XP`)
         } else {
