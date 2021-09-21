@@ -12,6 +12,7 @@ const name = require('./base/name');
 const telegramUtils = require('./shared/TelegramUtils');
 const scrap = require('./scrap');
 const scrapSqliteUtils = require('./scrap/sqliteUtils');
+const rar = require('./base/rar');
 
 let lastAutoNonce = 0;
 
@@ -98,9 +99,32 @@ const checkTokens = async () => {
                     somethingDone = true;
                     let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
                     if (transferAttempt[0]) {
-                        if (constVal.autoTransferToMule){
-                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-                        }
+                        latestNonce++;
+                    } else if (transferAttempt[1] === 'high gas') {
+                        // fail due to high gas price
+                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                    }
+                }
+            }
+            let  rarStats = await rar.getStats(tokenID);
+            if (rarStats[1] > 0) {
+                somethingDone = true;
+                let rarEarnAttempt = await rar.claim(tokenID, latestNonce)
+                if (rarEarnAttempt[0]) {
+                    if (constVal.autoTransferToMule){
+                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                    }
+                    latestNonce++;
+                } else if (rarEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                }
+            }
+            if (constVal.autoTransferToMule) {
+                if (rarStats[2] > 0) {
+                    somethingDone = true;
+                    let transferAttempt = await rar.transferToMule(tokenID, rarStats[2], latestNonce);
+                    if (transferAttempt[0]) {
                         latestNonce++;
                     } else if (transferAttempt[1] === 'high gas') {
                         // fail due to high gas price
