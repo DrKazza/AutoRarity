@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const parseArgs = require('mri');
 const constVal = require('./shared/const');
 const utils = require('./shared/utils');
 const summary = require('./base/summary');
@@ -10,6 +10,8 @@ const materials1 = require('./base/material_1');
 const attribute = require('./base/attribute');
 const name = require('./base/name');
 const telegramUtils = require('./shared/TelegramUtils');
+const scrap = require('./scrap');
+const scrapSqliteUtils = require('./scrap/sqliteUtils');
 
 let lastAutoNonce = 0;
 
@@ -227,7 +229,7 @@ const getGlobalStats = async () => {
 }
 
 const init = async () => {
-    const rawArgs = require('minimist')(process.argv.slice(2));
+    const rawArgs = parseArgs(process.argv.slice(2));
     const args = rawArgs['_'].filter((value) => {
         let dotenvReg = /dotenv_config_path=(.*)/
         let dotenvRegVal = dotenvReg.exec(value);
@@ -306,14 +308,32 @@ const init = async () => {
                 await core.massSummon(className, quantity);
                 break;
             case 'testScrap':
+            case 'ts':
                 let resume = typeof args[1] !== 'undefined';
-                await require('./scrap').scrapData( resume ? require('./scrap/sqliteUtils').getMaxTokenId() : 0);
+                await scrap.scrapData( resume ? scrapSqliteUtils.getMaxTokenId() : 0);
+                break;
+            case 'testScrapAddress':
+            case 'tsa':
+                if (typeof args[1] === 'undefined'){
+                    utils.log("You must provide an address");
+                } else {
+                    await scrap.scrapDataFromAddress(args[1]);
+                }
                 break;
             case 'testData':
+            case 'td':
                 let minCount = typeof args[1] === 'undefined' ? -1 : args[1];
-                let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress(minCount);
+                let data = scrapSqliteUtils.getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
                     utils.log(dat);
+                }
+                break;
+            case 'testDataAddress':
+            case 'tda':
+                if (typeof args[1] === 'undefined'){
+                    utils.log("You must provide an address");
+                } else {
+                    console.log(await scrapSqliteUtils.getNumberOfTokenFromAddress(args[1]));
                 }
                 break;
             case 'globalStats':
@@ -361,9 +381,6 @@ const init = async () => {
                 } else {
                     await name.massValidate(args[1]);
                 }
-                break;
-            case 'test':
-                utils.log(constVal);
                 break;
             default:
                 utils.log(`${args[0]} is not a valid command`)

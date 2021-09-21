@@ -2,25 +2,62 @@ const scrapUtil = require('./scrapUtils');
 const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
 
+const scrapAndInsert = async (tokenID) => {
+    let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
+    let materials1Count = await scrapUtil.getTokenMaterial1Count(tokenID);
+    let goldCount = await scrapUtil.getTokenGoldCount(tokenID);
+    sqliteUtils.insertAddress(ownerAddress);
+    sqliteUtils.insertToken(tokenID, ownerAddress, materials1Count, goldCount);
+}
+
 const scrapData = async (start = 0) => {
     let maxId = await scrapUtil.getNextTokenId();
     let tokenID = start;
     let request = 0;
     let lastId = tokenID;
-    setInterval(() => {
+    let interval = setInterval(() => {
         request = ((tokenID-lastId)/10).toFixed(0);
         lastId = tokenID;
     }, 10000);
     while (tokenID < maxId){
-        let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
-        sqliteUtils.insertAddress(ownerAddress);
-        sqliteUtils.insertToken(tokenID, ownerAddress);
+        await scrapAndInsert(tokenID);
         if (tokenID%1000 === 0){
             writePercentage(tokenID, maxId, request);
         }
         tokenID++;
     }
+    clearInterval(interval);
     utils.log("Scrap finished");
+}
+
+const scrapDataFromList = async (tokenList)=> {
+    let i = 0;
+    let total = tokenList.length;
+    let lastId = i;
+    let request = 0;
+    let interval = setInterval(() => {
+        request = ((i-lastId)/10).toFixed(0);
+        lastId = i;
+    }, 10000);
+    for (let tokenID of tokenList){
+        await scrapAndInsert(tokenID);
+        if (i%50 === 0){
+            writePercentage(i, total, request);
+        }
+        i++;
+    }
+    clearInterval(interval);
+    utils.log("Scrap finished");
+}
+
+const scrapDataFromAddress = async (address) => {
+    utils.log(`Start update token of ${address}`);
+    let rawTokenList = sqliteUtils.getTokenListFromAddress(address);
+    let tokenList = [];
+    for (let token of rawTokenList){
+        tokenList.push(token.token);
+    }
+    await scrapDataFromList(tokenList);
 }
 
 const writePercentage = (current, max, request) => {
@@ -31,4 +68,7 @@ const writePercentage = (current, max, request) => {
 
 }
 
-module.exports = { scrapData };
+module.exports = {
+    scrapData,
+    scrapDataFromAddress
+};

@@ -83,6 +83,7 @@ const massValidate = async (file) => {
         return;
     }
     for (let name of lines) {
+        name = formatName(name);
         let validated = await validate(name);
         if (!validated){
             utils.log(`[${name}] is not valid`);
@@ -97,6 +98,10 @@ const massValidate = async (file) => {
     }
 }
 
+const formatName = (name) => {
+    return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u2013|\u2014|-/g, " ").replace(/'/g, " ").replace(/\s\s+/g, ' ');
+}
+
 module.exports = {
     get,
     isAvailable,
@@ -104,5 +109,6 @@ module.exports = {
     getNameIDFromTokenID,
     claim,
     validate,
-    massValidate
+    massValidate,
+    formatName
 }
