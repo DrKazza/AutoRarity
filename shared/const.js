@@ -51,6 +51,8 @@ const maxGasPxVar = process.env.MAXGAS;
 if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 
+let envFile = '.env';
+
 module.exports = {
     fantomRpcUrl,
     totalGasLimit,
@@ -69,5 +71,6 @@ module.exports = {
     mule,
     autoLevelUp,
     autoTransferToMule,
-    debug
+    debug,
+    envFile
 }

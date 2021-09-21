@@ -43,7 +43,7 @@ const getTokenCount = async (owner) => {
 
 const updateDotEnvFile = async function (tokens){
     const newTokenLine = `TOKENIDS = '${tokens.join(',')}'`;
-    const file = '.env';
+    const file = constVal.envFile;
     const readStream = fs.createReadStream(file)
     const tempFile = `${file}.tmp`
     const writeStream = fs.createWriteStream(tempFile)
@@ -66,9 +66,9 @@ const updateDotEnvFile = async function (tokens){
                 await unlink(file) // Delete original file.
 
                 await rename(tempFile, file) // Rename temp file with original file name.
-                console.log(`the .env file has been successfully updated with ${tokens.length} tokens`);
+                console.log(`the [${file}] file has been successfully updated with ${tokens.length} tokens`);
             } catch (e) {
-                console.log('error when updating the .env file with new tokens');
+                console.log(`error when updating the [${file}] file with new tokens`);
                 if (constVal.debug){
                     console.log(e);
                 }
@@ -80,5 +80,5 @@ const updateDotEnvFile = async function (tokens){
 module.exports = {
     getTokenList,
     updateDotEnvFile,
-    getTokenCount
+    getTokenCount,
 };

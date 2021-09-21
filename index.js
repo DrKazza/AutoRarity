@@ -221,8 +221,12 @@ const getGlobalStats = async () => {
 const init = async () => {
     const rawArgs = require('minimist')(process.argv.slice(2));
     const args = rawArgs['_'].filter((value) => {
-        let reg = /dotenv_config_path=.*/
-        return !reg.exec(value);
+        let dotenvReg = /dotenv_config_path=(.*)/
+        let dotenvRegVal = dotenvReg.exec(value);
+        if (dotenvRegVal){
+            constVal.envFile = dotenvRegVal[1];
+        }
+        return !dotenvRegVal;
     });
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
         console.log(`Rarity Autolevelling commands are:
