@@ -26,10 +26,10 @@ const getAttributeTemplateList = () => {
 }
 
 const displayAvailableAttributeTemplate = () => {
-    console.log('Available template: ');
+    utils.log('Available template: ');
     let templateList = getAttributeTemplateList();
     templateList.forEach(name => {
-        console.log(`    - ${name}`);
+        utils.log(`    - ${name}`);
     });
 }
 
@@ -44,7 +44,7 @@ const getAttributeTemplate = (templateName) => {
 const buyPoint = async (tokenID, point, nonce) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -65,17 +65,17 @@ const buyPoint = async (tokenID, point, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
+                utils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
                 return [true, 'success'];
             } catch (e){
-                console.log(`${tokenID} => point error`);
+                utils.log(`${tokenID} => point error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            console.log(`${tokenID} => Live trading disabled - point not submitted.`)
+            utils.log(`${tokenID} => Live trading disabled - point not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -90,20 +90,20 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
         let res = await buyPoint(tokenID, template[className].attributes, nonce);
         return res[0];
     } else {
-        console.log(`${tokenID} => point already bought`);
+        utils.log(`${tokenID} => point already bought`);
         return false;
     }
 }
 
 const massAssignPoint = async (template, tokenID) => {
     if (!getAttributeTemplateList().includes(template))  {
-        console.log(`This template does not exist [${template}]`);
+        utils.log(`This template does not exist [${template}]`);
         displayAvailableAttributeTemplate();
     } else {
         let latestNonce = await  utils.nonceVal();
         let transactionCount = await constVal.account.getTransactionCount();
         if (transactionCount < latestNonce){
-            console.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
+            utils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
             return;
         }
         if (typeof tokenID === 'undefined') {

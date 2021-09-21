@@ -22,7 +22,7 @@ const getStats = async (tokenID) => {
 const claim = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -37,17 +37,17 @@ const claim = async (tokenID, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenID} => gold claimed`);
+                utils.log(`${tokenID} => gold claimed`);
                 return [true, 'success'];
             } catch (e){
-                console.log(`${tokenID} => gold error`);
+                utils.log(`${tokenID} => gold error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            console.log(`${tokenID} => Live trading disabled - gold claim not submitted.`)
+            utils.log(`${tokenID} => Live trading disabled - gold claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -56,7 +56,7 @@ const claim = async (tokenID, nonce = undefined) => {
 const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenFrom} > ${tokenTo} => transfer gold => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenFrom} > ${tokenTo} => transfer gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -73,18 +73,18 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenFrom} > ${tokenTo} => transfer gold success`);
+                utils.log(`${tokenFrom} > ${tokenTo} => transfer gold success`);
                 return [true, 'success'];
             } catch (e){
-                console.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
+                utils.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
                 if (constVal.debug){
-                    console.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
-                    console.log(e);
+                    utils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    utils.log(e);
                 }
                 return [false, 'ERROR'];
             }
         } else {
-            console.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
+            utils.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -93,7 +93,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.gold;
     if (typeof mule === 'undefined' || mule.length === 0){
-        console.log(`${tokenID} => can't transfer gold no mule defined, define GOLD_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+        utils.log(`${tokenID} => can't transfer gold no mule defined, define GOLD_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){

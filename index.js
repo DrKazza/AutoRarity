@@ -9,6 +9,7 @@ const gold = require('./base/gold');
 const materials1 = require('./base/material_1');
 const attribute = require('./base/attribute');
 const name = require('./base/name');
+const telegramUtils = require('./shared/TelegramUtils');
 
 let lastAutoNonce = 0;
 
@@ -23,14 +24,14 @@ const checkTokens = async () => {
     let dungeonList = dungeon.getAvailableDungeons();
     let transactionCount = await constVal.account.getTransactionCount();
     if (transactionCount < latestNonce){
-        console.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] waiting before launch again`);
+        utils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] waiting before launch again`);
         let waitPercentage = Math.abs(Math.floor(transactionCount / latestNonce * 100) - 100);
         delayToUse = constVal.nonceDelay * waitPercentage / 100;
         return [delayToUse];
     }
     let checkGas = await utils.calculateGasPrice()
     if (checkGas < 0) {
-        console.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice/(10**9)}`)
+        utils.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice/(10**9)}`)
         delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
 
         return [delayToUse]
@@ -134,7 +135,7 @@ const checkTokens = async () => {
         }
 
         if (!somethingDone){
-            console.log(`${tokenID} => nothing to do...`);
+            utils.log(`${tokenID} => nothing to do...`);
         }
     }
     lastAutoNonce = latestNonce;
@@ -142,13 +143,21 @@ const checkTokens = async () => {
 }
 
 const autoRun = async (repeater) => {
+    if (repeater && constVal.enableTelegramBot){
+        telegramUtils.init();
+    }
     while (true) {
         let tokenCheck = await checkTokens()
         let textTimeleft = utils.secsToText(tokenCheck[0])
         if (repeater) {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
-            console.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
+            let ftmBalance = (await utils.getFTMBalance())/10**18;
+            if (ftmBalance <= constVal.lowFTM) {
+                utils.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`, true);
+            }
+            utils.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
             await utils.delay(tokenCheck[0]*1000);
+
         } else {
             break;
         }
@@ -156,16 +165,16 @@ const autoRun = async (repeater) => {
 }
 
 const displayAvailableClasses = () => {
-    console.log('Available classes:');
+    utils.log('Available classes:');
     for (let cl of constVal.classes){
         if (cl !== 'noClass')
-            console.log(` - ${cl}`);
+            utils.log(` - ${cl}`);
     }
 }
 
 const dropTransaction = async (nonce, count = 1) => {
     if (typeof nonce === 'undefined'){
-        console.log('need nonce');
+        utils.log('need nonce');
         return;
     }
     nonce = parseInt(nonce, 10);
@@ -173,11 +182,11 @@ const dropTransaction = async (nonce, count = 1) => {
     while (i < count) {
         let thisGas = await utils.calculateGasPrice()
         if (thisGas < 0) {
-            console.log(`Gas Price too high: ${-thisGas}`)
+            utils.log(`Gas Price too high: ${-thisGas}`)
             return;
         }
         try {
-            console.log(`current nonce => ${nonce} ${i+1}/${count}`)
+            utils.log(`current nonce => ${nonce} ${i+1}/${count}`)
             await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
@@ -188,7 +197,7 @@ const dropTransaction = async (nonce, count = 1) => {
             nonce++;
             i++;
         } catch (e) {
-            console.log(e);
+            utils.log(e);
             return;
         }
     }
@@ -198,7 +207,7 @@ const getGlobalStats = async () => {
     let totalGold = 0;
     let totalMaterials1 = 0;
     let typeCount = [];
-    console.log(`/!\\it may take a long time if you have a lot of token/!\\`)
+    utils.log(`/!\\it may take a long time if you have a lot of token/!\\`)
     for (let tokenID of constVal.myTokenIds) {
         totalMaterials1 += parseInt(await materials1.getInventory(tokenID), 10);
         let goldStats = await gold.getStats(tokenID);
@@ -210,11 +219,11 @@ const getGlobalStats = async () => {
             typeCount[stats[2]]++;
         }
     }
-    console.log(`Global Stats:
+    utils.log(`Global Stats:
      - gold => ${totalGold}
      - materials1 => ${totalMaterials1}`);
     for (let type in typeCount){
-        console.log(`     - ${constVal.classes[type]} => ${typeCount[type]}`);
+        utils.log(`     - ${constVal.classes[type]} => ${typeCount[type]}`);
     }
 }
 
@@ -229,7 +238,7 @@ const init = async () => {
         return !dotenvRegVal;
     });
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
-        console.log(`Rarity Autolevelling commands are:
+        utils.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
     node index.js gl/globalStats                - gives global stats (gold/materials1/number of token of each classes)
     node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
@@ -247,7 +256,7 @@ const init = async () => {
     node index.js cn                            - get current nonce`)
     } else {
         if (constVal.debug){
-            console.log(`/!\\DEBUG ON/!\\`);
+            utils.log(`/!\\DEBUG ON/!\\`);
         }
         switch (args[0]) {
             case 'summary':
@@ -270,7 +279,7 @@ const init = async () => {
                 break;
             case 'scout':
                 if (typeof args[1] === 'undefined'){
-                    console.log('You have to select a dungeon to scout');
+                    utils.log('You have to select a dungeon to scout');
                     dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = args[1];
@@ -280,7 +289,7 @@ const init = async () => {
                 break;
             case 'dg':
                 if (typeof args[1] === 'undefined'){
-                    console.log('You have to select a dungeon to go');
+                    utils.log('You have to select a dungeon to go');
                     dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = args[1];
@@ -305,7 +314,7 @@ const init = async () => {
                 let minCount = typeof args[1] === 'undefined' ? -1 : args[1];
                 let data = require('./scrap/sqliteUtils').getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
-                    console.log(dat);
+                    utils.log(dat);
                 }
                 break;
             case 'globalStats':
@@ -321,7 +330,7 @@ const init = async () => {
                 let template = args[1];
                 let token = args[2];
                 if (typeof template === 'undefined'){
-                    console.log('You have to select a template');
+                    utils.log('You have to select a template');
                     attribute.displayAvailableAttributeTemplate();
                 } else {
                     await attribute.massAssignPoint(template, token);
@@ -339,23 +348,26 @@ const init = async () => {
                 } else {
                     gas = Math.abs(gas);
                 }
-                console.log(`current gasPrice => ${gas}`);
-                console.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
+                utils.log(`current gasPrice => ${gas}`);
+                utils.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
                 break;
             case 'cn':
-                console.log(`current nonce => ${await utils.nonceVal()}`);
-                console.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
+                utils.log(`current nonce => ${await utils.nonceVal()}`);
+                utils.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
                 break;
             case 'testNames':
             case 'tn':
                 if (typeof args[1] === 'undefined'){
-                    console.log('you need to pass a file');
+                    utils.log('you need to pass a file');
                 } else {
                     await name.massValidate(args[1]);
                 }
                 break;
+            case 'test':
+                utils.log(constVal);
+                break;
             default:
-                console.log(`${args[0]} is not a valid command`)
+                utils.log(`${args[0]} is not a valid command`)
                 break;
         }
     }

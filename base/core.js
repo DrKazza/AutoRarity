@@ -24,7 +24,7 @@ const getStats = async (tokenID) => {
 const claimXp = async (tokenID, nonce)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => xp => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => xp => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -39,17 +39,17 @@ const claimXp = async (tokenID, nonce)  => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenID} => xp claimed`);
+                utils.log(`${tokenID} => xp claimed`);
                 return [true, 'success'];
             } catch (e) {
-                console.log(`${tokenID} => xp error`);
+                utils.log(`${tokenID} => xp error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            console.log(`${tokenID} => Live trading disabled - claimXp NOT submitted.`)
+            utils.log(`${tokenID} => Live trading disabled - claimXp NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -58,7 +58,7 @@ const claimXp = async (tokenID, nonce)  => {
 const levelUp = async (tokenID, nonce)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => levelUp => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => levelUp => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -73,17 +73,17 @@ const levelUp = async (tokenID, nonce)  => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenID} => levelUp done`);
+                utils.log(`${tokenID} => levelUp done`);
                 return [true, 'success'];
             } catch (e) {
-                console.log(`${tokenID} => levelUp error`);
+                utils.log(`${tokenID} => levelUp error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            console.log(`${tokenID} => Live trading disabled - levelUp NOT submitted.`)
+            utils.log(`${tokenID} => Live trading disabled - levelUp NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -92,7 +92,7 @@ const levelUp = async (tokenID, nonce)  => {
 const summon = async (classToSummon, nonceVal, i = 0) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
+        utils.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
         return false;
     } else {
         if (constVal.liveTrading) {
@@ -107,17 +107,17 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
                         gasPrice: utils.calculateGasPrice(),
                         nonce: await utils.getNonce(nonceVal)
                     });
-                console.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
+                utils.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;
             } catch (e) {
-                console.log(`summon error`);
+                utils.log(`summon error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return false;
             }
         }else {
-            console.log(`#${i+1} => Live trading disabled - summoning NOT submitted.`)
+            utils.log(`#${i+1} => Live trading disabled - summoning NOT submitted.`)
             return true;
         }
     }
@@ -130,7 +130,7 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
     if (classToSummon !== "all"){
         let classId = constVal.classes.indexOf(classToSummon);
         if (classId === -1 || classId === 0){
-            console.log(`Unknown class [${classToSummon}]`);
+            utils.log(`Unknown class [${classToSummon}]`);
             return;
         }
         if (typeof nonce === 'undefined'){
@@ -143,23 +143,23 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
             fail: 0
         };
         let i = 0;
-        console.log(`Start summoning of ${quantity} ${classToSummon}`);
+        utils.log(`Start summoning of ${quantity} ${classToSummon}`);
         while (i < quantity) {
-            console.log(`#${i+1} => summoning...`);
+            utils.log(`#${i+1} => summoning...`);
             let res = await summon(classId, nonce.value, i);
             if (res){
                 result.success++;
-                console.log(`#${i+1} => summon success`);
+                utils.log(`#${i+1} => summon success`);
             } else {
                 result.fail++;
-                console.log(`#${i+1} => summon fail`);
+                utils.log(`#${i+1} => summon fail`);
             }
             await utils.delay(1000);
             nonce.value++;
             i++;
         }
     } else {
-        console.log(`Start summoning ${quantity} of each classes`)
+        utils.log(`Start summoning ${quantity} of each classes`)
         nonce = {
             value : await utils.nonceVal()
         };
@@ -170,9 +170,9 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
         }
     }
     if (typeof result !== "undefined"){
-        console.log(`Result Class [${classToSummon}] | Quantity [${quantity}]:`)
-        console.log(` - success : ${result.success}`)
-        console.log(` - fail : ${result.fail}`)
+        utils.log(`Result Class [${classToSummon}] | Quantity [${quantity}]:`)
+        utils.log(` - success : ${result.success}`)
+        utils.log(` - fail : ${result.fail}`)
     }
 
     if (!isMass){
@@ -180,15 +180,15 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
         let currentCount = 0;
         do {
             if (currentCount !== 0){
-                console.log("Waiting a bit to let the transaction spread...")
+                utils.log("Waiting a bit to let the transaction spread...")
                 await utils.delay(10000);
             }
-            console.log("Fetching token count...")
+            utils.log("Fetching token count...")
             currentCount = await tokenGetter.getTokenCount(constVal.walletAddress);
-            console.log(`CurrentCount => ${currentCount} of ${newTotal}`)
+            utils.log(`CurrentCount => ${currentCount} of ${newTotal}`)
         } while (currentCount < newTotal)
 
-        console.log("Updating token list...")
+        utils.log("Updating token list...")
         await updateTokenList();
     } else {
         return result.success;

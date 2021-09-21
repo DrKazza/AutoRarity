@@ -15,17 +15,17 @@ const run = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
     if ((loot = await getLoot(tokenID)) < 1){
-        console.log(`${tokenID} => [${dungeonName}] no loot`);
+        utils.log(`${tokenID} => [${dungeonName}] no loot`);
         return [false, 'no loot']
     }
     let time = await getTimeUntilAvailable(tokenID);
     let timeLeft = utils.timeLeft(time);
     if (timeLeft[0] !== -1){
-        console.log(`${tokenID} => [${dungeonName}] not available => ${timeLeft[0]}h${timeLeft[1]}m`);
+        utils.log(`${tokenID} => [${dungeonName}] not available => ${timeLeft[0]}h${timeLeft[1]}m`);
         return [false, 'time', timeLeft[2]]
     }
     if (thisGas < 0) {
-        console.log(`${tokenID} => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -40,18 +40,17 @@ const run = async (tokenID, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                //console.log(approveResponse);
-                console.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
+                utils.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
                 return [true, `success, loot => ${loot}`];
             } catch (e) {
-                console.log(`${tokenID} => [${dungeonName}] error`);
+                utils.log(`${tokenID} => [${dungeonName}] error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'ERROR'];
             }
         } else {
-            console.log(`Live trading disabled - [${dungeonName}]  dungeoning NOT submitted.`)
+            utils.log(`Live trading disabled - [${dungeonName}]  dungeoning NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -63,13 +62,13 @@ const scout = async (tokenID) => {
         let time = await getTimeUntilAvailable(tokenID);
         let textTimeleft = utils.timeLeft(time);
         if (textTimeleft[0] !== -1){
-            console.log(`${tokenID} => ${loot} => time left ${textTimeleft[0]}h${textTimeleft[1]}m`);
+            utils.log(`${tokenID} => ${loot} => time left ${textTimeleft[0]}h${textTimeleft[1]}m`);
         } else {
-            console.log(`${tokenID} => ${loot} => ready`);
+            utils.log(`${tokenID} => ${loot} => ready`);
 
         }
     } else {
-        console.log(`${tokenID} => ${loot}`);
+        utils.log(`${tokenID} => ${loot}`);
     }
 }
 

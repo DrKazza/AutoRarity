@@ -32,6 +32,14 @@
 You can have multiple `.env` file like `.env.addr2`/`.env.addr3`.  
 to use it start the script as follows `node -r dotenv/config index sum dotenv_config_path=./.env.addr2`
 
+## Telegram bot feature
+Open Telegram to create a bot and obtain a bot token for it.  
+Talk to [@BotFather](https://telegram.me/BotFather) to do this. The bot token looks like `123456:aBcDeF_gHiJkLmNoP-q`.  
+Put the token in `.env` file and set `ENABLE_TELEGRAM_BOT` to 'true'.  
+Next run `node index auto` wait to see `Bot started` then send `/init` to your bot to finish setup
+
+For now the bot only send warning when your FTM balance is low (the low balance is configurable in `.env` file)
+
 ## Debug mode
 You can pass `--debug=true` to switch to debug mode that will display real error instead of `xp error`/`point error`etc  
 When it's activated you will see this warning `/!\DEBUG ON/!\` at start

@@ -45,7 +45,7 @@ const hasName = async (tokenID) => {
 const claim = async (tokenID, name, nonce) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        console.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        utils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -61,17 +61,17 @@ const claim = async (tokenID, name, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                console.log(`${tokenID} => name claimed => ${name}`);
+                utils.log(`${tokenID} => name claimed => ${name}`);
                 return [true, 'success'];
             } catch (e){
-                console.log(`${tokenID} => name error`);
+                utils.log(`${tokenID} => name error`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            console.log(`${tokenID} => Live trading disabled - name claim not submitted.`)
+            utils.log(`${tokenID} => Live trading disabled - name claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -85,15 +85,14 @@ const massValidate = async (file) => {
     for (let name of lines) {
         let validated = await validate(name);
         if (!validated){
-            console.log(`[${name}] is not valid`);
+            utils.log(`[${name}] is not valid`);
             continue;
         }
         let available = await isAvailable(name);
         if (available){
-            console.log(`[${name}] is not available`);
-
+            utils.log(`[${name}] is not available`);
         } else {
-            console.log(`[${name}] is available`);
+            utils.log(`[${name}] is available`);
         }
     }
 }

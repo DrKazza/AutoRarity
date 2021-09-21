@@ -4,6 +4,7 @@ const util = require('util');
 const readline = require('readline');
 const stream = require('stream');
 const constVal = require("../shared/const");
+const utils = require("../shared/utils");
 const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
 
@@ -66,11 +67,11 @@ const updateDotEnvFile = async function (tokens){
                 await unlink(file) // Delete original file.
 
                 await rename(tempFile, file) // Rename temp file with original file name.
-                console.log(`the [${file}] file has been successfully updated with ${tokens.length} tokens`);
+                utils.log(`the [${file}] file has been successfully updated with ${tokens.length} tokens`);
             } catch (e) {
-                console.log(`error when updating the [${file}] file with new tokens`);
+                utils.log(`error when updating the [${file}] file with new tokens`);
                 if (constVal.debug){
-                    console.log(e);
+                    utils.log(e);
                 }
             }
         });

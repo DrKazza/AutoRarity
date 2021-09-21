@@ -20,14 +20,14 @@ const scrapData = async (start = 0) => {
         }
         tokenID++;
     }
-    console.log("Scrap finished");
+    utils.log("Scrap finished");
 }
 
 const writePercentage = (current, max, request) => {
     let percentage = (current/max*100).toFixed(2);
     let eta = utils.secsToText((max-current)/request);
 
-    console.log(`progress => ${percentage}% (${current}/${max}) ~${request}/s eta => ${eta[0]}h${eta[1]}m`);
+    utils.log(`progress => ${percentage}% (${current}/${max}) ~${request}/s eta => ${eta[0]}h${eta[1]}m`);
 
 }
 

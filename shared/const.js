@@ -53,6 +53,16 @@ const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 
 let envFile = '.env';
 
+const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
+
+const enableTelegramBotVar = process.env.ENABLE_TELEGRAM_BOT;
+const enableTelegramBot = enableTelegramBotVar === undefined ? false : parseBool(enableTelegramBotVar);
+const chatIdVar = process.env.TELEGRAM_CHAT_ID;
+let chatId = chatIdVar === undefined ? '' : chatIdVar; // you may not want to automatically level up your char
+
+const lowFTMVar = process.env.LOW_FTM;
+const lowFTM = lowFTMVar === undefined ? 5 : parseInt(lowFTMVar, 10);
+
 module.exports = {
     fantomRpcUrl,
     totalGasLimit,
@@ -72,5 +82,9 @@ module.exports = {
     autoLevelUp,
     autoTransferToMule,
     debug,
-    envFile
+    envFile,
+    enableTelegramBot,
+    telegramBotToken,
+    chatId,
+    lowFTM
 }
