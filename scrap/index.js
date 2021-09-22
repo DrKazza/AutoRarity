@@ -6,6 +6,11 @@ const constVal = require('../shared/const');
 const scrapAndInsert = async (tokenID) => {
 
     let ownerAddress = await scrapUtil.getOwnerOfToken(tokenID);
+    let data = await scrapUtil.getTokenData(tokenID);
+    let materials1Count = data.materials[0].balance;
+    let goldCount = data.gold.balance;
+    let goldClaimableCount = data.gold.claimable;
+    /*
     let materials1Count = await scrapUtil.getTokenMaterial1Count(tokenID);
     let goldCount = await scrapUtil.getTokenGoldCount(tokenID);
     let goldClaimableCount = 0;
@@ -13,47 +18,85 @@ const scrapAndInsert = async (tokenID) => {
         goldClaimableCount = await scrapUtil.getTokenGoldClaimableCount(tokenID);
     } catch (e) {
     }
+     */
     sqliteUtils.insertAddress(ownerAddress);
     sqliteUtils.insertToken(tokenID, ownerAddress, materials1Count, goldCount, goldClaimableCount);
-
-
 }
 
 const scrapData = async (start = 0) => {
+    let startDate = new Date();
     let maxId = await scrapUtil.getNextTokenId();
     let tokenID = start;
-    let request = 0;
-    let lastId = tokenID;
-    let interval = setInterval(() => {
-        request = ((tokenID-lastId)/10).toFixed(0);
-        lastId = tokenID;
-    }, 10000);
+    let tokenToScrap = [];
     while (tokenID < maxId){
-        await scrapAndInsert(tokenID);
-        if (tokenID%1000 === 0){
-            writePercentage(tokenID, maxId, request);
+        //await scrapAndInsert(tokenID);
+        tokenToScrap.push(tokenID);
+        if (tokenID%50 === 0 && tokenID > 0) {
+            let data = await scrapUtil.getTokensData(tokenToScrap);
+            for (let tokenIndex in tokenToScrap){
+                let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
+                sqliteUtils.insertAddress(ownerAddress);
+                let materials1Count = data[tokenIndex].materials[0].balance;
+                let goldCount = data[tokenIndex].gold.balance;
+                let goldClaimableCount = data[tokenIndex].gold.claimable;
+                sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
+            }
+            tokenToScrap = [];
+        }
+        if (tokenID%500 === 0){
+            writePercentage(tokenID, maxId, start, startDate);
         }
         tokenID++;
     }
-    clearInterval(interval);
+    let data = await scrapUtil.getTokensData(tokenToScrap);
+    for (let tokenIndex in tokenToScrap){
+        let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
+        sqliteUtils.insertAddress(ownerAddress);
+        let materials1Count = data[tokenIndex].materials[0].balance;
+        let goldCount = data[tokenIndex].gold.balance;
+        let goldClaimableCount = data[tokenIndex].gold.claimable;
+        sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
+    }
     utils.log("Scrap finished");
 }
 
 const scrapDataFromList = async (tokenList)=> {
+    let startDate = new Date();
     let i = 0;
     let total = tokenList.length;
     let lastId = i;
     let request = 0;
     let interval = setInterval(() => {
-        request = ((i-lastId)/10).toFixed(0);
+        request = ((i-lastId)).toFixed(0);
         lastId = i;
-    }, 10000);
+    }, 1000);
+    let tokenToScrap = [];
     for (let tokenID of tokenList){
-        await scrapAndInsert(tokenID);
-        if (i%50 === 0){
-            writePercentage(i, total, request);
+        tokenToScrap.push(tokenID);
+        //await scrapAndInsert(tokenID);
+        if (i%50 === 0 && i > 0){
+            let data = await scrapUtil.getTokensData(tokenToScrap);
+            for (let tokenIndex in tokenToScrap){
+                let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
+                sqliteUtils.insertAddress(ownerAddress);
+                let materials1Count = data[tokenIndex].materials[0].balance;
+                let goldCount = data[tokenIndex].gold.balance;
+                let goldClaimableCount = data[tokenIndex].gold.claimable;
+                sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
+            }
+            tokenToScrap = [];
+            writePercentage(i, total, 0, startDate);
         }
         i++;
+    }
+    let data = await scrapUtil.getTokensData(tokenToScrap);
+    for (let tokenIndex in tokenToScrap){
+        let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
+        sqliteUtils.insertAddress(ownerAddress);
+        let materials1Count = data[tokenIndex].materials[0].balance;
+        let goldCount = data[tokenIndex].gold.balance;
+        let goldClaimableCount = data[tokenIndex].gold.claimable;
+        sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
     }
     clearInterval(interval);
     utils.log("Scrap finished");
@@ -69,10 +112,15 @@ const scrapDataFromAddress = async (address) => {
     await scrapDataFromList(tokenList);
 }
 
-const writePercentage = (current, max, request) => {
+const writePercentage = (current, max, start, startDate) => {
     let percentage = (current/max*100).toFixed(2);
-    let eta = utils.secsToText((max-current)/request);
-    utils.log(`progress => ${percentage}% (${current}/${max}) ~${request}/s eta => ${eta[0]}h${eta[1]}m`);
+    let diff = current - start;
+    let diffTime = Math.floor(((new Date()).getTime() - startDate.getTime())/1000);
+    let perSecond = Math.floor(diff/diffTime);
+    let res = (diffTime/diff*max) - diffTime;
+    let eta = utils.secsToText(res);
+    let sec = Math.floor(res - (eta[0] * 60 * 60) - (eta[1]*60));
+    utils.log(`progress => ${percentage}% (${current}/${max}) ~${perSecond}/s eta => ${eta[0]}h${eta[1]}m${sec}`);
 }
 
 module.exports = {

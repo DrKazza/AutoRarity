@@ -4,7 +4,7 @@ const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 
 const abi = contractAddresses.rarABI;
-const address = contractAddresses.rariryRAR;
+const address = contractAddresses.rarityRAR;
 
 let contractGetStats;
 let contractClaim;

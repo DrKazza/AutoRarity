@@ -10,6 +10,22 @@ let contractGetTokenMaterial1Count;
 let contractGetNextItemId;
 let contractGetOwnerOfItem;
 let contractGetItemDetail;
+let libraryContract;
+
+const getTokenData = async (tokenID) => {
+    if (typeof libraryContract === 'undefined'){
+        libraryContract = new utils.web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
+    }
+    return await libraryContract.methods.summoner_full(tokenID).call();
+}
+
+const getTokensData = async (tokenList) => {
+    if (typeof libraryContract === 'undefined'){
+        libraryContract = new utils.web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
+    }
+    return await libraryContract.methods.summoners_full(tokenList).call();
+}
+
 //TOKEN RELATED
 const getNextTokenId = async () => {
     if (typeof contractGetNextTokenId === 'undefined'){
@@ -94,4 +110,6 @@ module.exports = {
     getNextItemId,
     getOwnerOfItem,
     getItemDetail,
+    getTokenData,
+    getTokensData
 };
