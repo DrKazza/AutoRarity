@@ -72,9 +72,7 @@ const scrapDataFromAddress = async (address) => {
 const writePercentage = (current, max, request) => {
     let percentage = (current/max*100).toFixed(2);
     let eta = utils.secsToText((max-current)/request);
-
     utils.log(`progress => ${percentage}% (${current}/${max}) ~${request}/s eta => ${eta[0]}h${eta[1]}m`);
-
 }
 
 module.exports = {

@@ -81,17 +81,19 @@ const checkTokens = async () => {
             delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
         } else {
             let  goldStats = await gold.getStats(tokenID);
-            if (goldStats[1] > 0) {
-                somethingDone = true;
-                let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
-                if (goldEarnAttempt[0]) {
-                    if (constVal.autoTransferToMule){
-                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+            if (constVal.enableClaimGold){
+                if (goldStats[1] > 0) {
+                    somethingDone = true;
+                    let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
+                    if (goldEarnAttempt[0]) {
+                        if (constVal.autoTransferToMule){
+                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                        }
+                        latestNonce++;
+                    } else if (goldEarnAttempt[1] === 'high gas') {
+                        // fail due to high gas price
+                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                     }
-                    latestNonce++;
-                } else if (goldEarnAttempt[1] === 'high gas') {
-                    // fail due to high gas price
-                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
             }
             if (constVal.autoTransferToMule) {
@@ -106,19 +108,20 @@ const checkTokens = async () => {
                     }
                 }
             }
-            /*
             let  rarStats = await rar.getStats(tokenID);
-            if (rarStats[1] > 0) {
-                somethingDone = true;
-                let rarEarnAttempt = await rar.claim(tokenID, latestNonce)
-                if (rarEarnAttempt[0]) {
-                    if (constVal.autoTransferToMule){
-                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+            if (constVal.enableClaimRar){
+                if (rarStats[1] > 0) {
+                    somethingDone = true;
+                    let rarEarnAttempt = await rar.claim(tokenID, latestNonce)
+                    if (rarEarnAttempt[0]) {
+                        if (constVal.autoTransferToMule){
+                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                        }
+                        latestNonce++;
+                    } else if (rarEarnAttempt[1] === 'high gas') {
+                        // fail due to high gas price
+                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                     }
-                    latestNonce++;
-                } else if (rarEarnAttempt[1] === 'high gas') {
-                    // fail due to high gas price
-                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
                 }
             }
             if (constVal.autoTransferToMule) {
@@ -133,7 +136,6 @@ const checkTokens = async () => {
                     }
                 }
             }
-             */
         }
         if (constVal.autoTransferToMule){
             let materials1Inventory = await materials1.getInventory(tokenID);
@@ -148,17 +150,19 @@ const checkTokens = async () => {
                 }
             }
         }
-        for (let dungeonName of dungeonList){
-            let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce, true);
-            if (dungeonAttempt[0]) {
-                latestNonce++;
-                delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-            } else if (dungeonAttempt[1] === 'high gas') {
-                // fail due to high gas price
-                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-            } else if (dungeonAttempt[1] === 'time') {
-                // fail due to not time not available
-                delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
+        if (constVal.enableAutoDungeon){
+            for (let dungeonName of dungeonList){
+                let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce, true);
+                if (dungeonAttempt[0]) {
+                    latestNonce++;
+                    delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                } else if (dungeonAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (dungeonAttempt[1] === 'time') {
+                    // fail due to not time not available
+                    delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
+                }
             }
         }
 
@@ -267,7 +271,7 @@ const init = async () => {
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
         utils.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
-    node index.js gl/globalStats                - gives global stats (gold/materials1/number of token of each classes)
+    node index.js gs/globalStats                - gives global stats (gold/materials1/number of token of each classes)
     node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
     node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
     node index.js utl/updateTokenList           - update the token id list in .env file

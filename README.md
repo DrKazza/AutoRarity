@@ -4,7 +4,7 @@
 ```
     Rarity Autolevelling commands are:
         node index.js sum/summary                   - gives a summary of your characters
-        node index.js gl/globalStats                - gives global stats (gold/materials1/number of token of each classes)
+        node index.js gs/globalStats                - gives global stats (gold/materials1/number of token of each classes)
         node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
         node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
         node index.js utl/updateTokenList           - update the token id list in .env file
@@ -22,9 +22,9 @@
 ## How to Use
 
 1. run `npm install`
-2. Copy the `.env.dist` to `.env`  
-3. Fill the variables with your data, you don't have to fill the `TOKENIDS` variable  
-4. Run `node index utl` to update the `TOKENIDS` variable  
+2. Copy the `.env.dist` to `.env`
+3. Fill the variables with your data, you don't have to fill the `TOKENIDS` variable
+4. Run `node index utl` to update the `TOKENIDS` variable
 5. Run `node index sum` or ` node index gl` to see if everything is setup correctly
 6. Run `node index xp` to launch one time or `node index auto` for automatic farming
 

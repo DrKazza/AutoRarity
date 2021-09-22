@@ -15,7 +15,11 @@ const getStats = async (tokenID) => {
         contractGetStats = new utils.web3.eth.Contract(abi, address);
     }
     let goldheld = await contractGetStats.methods.balanceOf(tokenID).call();
-    let claimable = await contractGetStats.methods.claimable(tokenID).call();
+    let claimable = 0;
+    try {
+        claimable = await contractGetStats.methods.claimable(tokenID).call();
+    } catch (e) {
+    }
     return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18)), goldheld]
 }
 

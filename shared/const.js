@@ -1,6 +1,6 @@
 const {JsonRpcProvider} = require("@ethersproject/providers");
 const ethers = require("ethers");
-
+const parseArg = require('mri');
 const parseBool = (val) => {return val === true || val === 'true'}
 
 
@@ -16,7 +16,7 @@ const nonceDelay = 6 * 60 * 60 // wait 6 hour to see if all transaction have pas
 
 const classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Wizard'];
 
-const rawArgs = require('minimist')(process.argv.slice(2));
+const rawArgs = parseArg(process.argv.slice(2));
 
 const debug = rawArgs.debug === undefined ? false : parseBool(rawArgs.debug);
 
@@ -44,9 +44,15 @@ const mule = {
     materials1:process.env.MATERIALS_1_MULE
 }
 const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
-const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar); // you may not want to automatically level up your char
+const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar);
 const autoTransferToMuleVar = process.env.AUTO_TRANSFER_TO_MULE;
-const autoTransferToMule = autoTransferToMuleVar === undefined ? false : parseBool(autoTransferToMuleVar); // you may want to automatically transfer to mule
+const autoTransferToMule = autoTransferToMuleVar === undefined ? false : parseBool(autoTransferToMuleVar);
+const claimGoldVar = process.env.ENABLE_CLAIM_GOLD;
+const enableClaimGold = claimGoldVar === undefined ? true : parseBool(claimGoldVar);
+const claimRarVar = process.env.ENABLE_CLAIM_RAR;
+const enableClaimRar = claimRarVar === undefined ? false : parseBool(claimRarVar);
+const autoDungeonVar = process.env.ENABLE_AUTO_DUNGEON;
+const enableAutoDungeon = autoDungeonVar === undefined ? true : parseBool(autoDungeonVar);
 
 const maxGasPxVar = process.env.MAXGAS;
 if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
@@ -87,5 +93,8 @@ module.exports = {
     enableTelegramBot,
     telegramBotToken,
     chatId,
-    lowFTM
+    lowFTM,
+    enableClaimGold,
+    enableClaimRar,
+    enableAutoDungeon
 }
