@@ -412,16 +412,13 @@ const init = async () => {
                     await name.massValidate(args[1]);
                 }
                 break;
-            case 'test':
-                let datd = await require('./scrap/scrapUtils').getTokenData('1809151');
-                console.log(datd.gold.claimable);
-                break;
             default:
                 utils.log(`${args[0]} is not a valid command`)
                 break;
         }
     }
 }
+
 
 init();
 

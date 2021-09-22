@@ -35,7 +35,7 @@ const getNextTokenId = async () => {
 }
 
 const getOwnerOfToken = async (tokenID) => {
-    if (typeof contractGetOwnerOfToken === 'undefined'){
+    if (typeof contractGetOwnerOfToken === 'undefined') {
         contractGetOwnerOfToken = new utils.web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
     }
     return await contractGetOwnerOfToken.methods.ownerOf(tokenID).call();
