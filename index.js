@@ -2,6 +2,7 @@ require("dotenv").config();
 const parseArgs = require('mri');
 const constVal = require('./shared/const');
 const utils = require('./shared/utils');
+const logUtils = require("./shared/logUtils");
 const summary = require('./base/summary');
 const dungeon = require('./base/dungeon');
 const core = require('./base/core');
@@ -13,6 +14,7 @@ const telegramUtils = require('./shared/TelegramUtils');
 const scrap = require('./scrap');
 const scrapSqliteUtils = require('./scrap/sqliteUtils');
 const rar = require('./base/rar');
+const statsUtils = require('./shared/statsUtils');
 
 let lastAutoNonce = 0;
 
@@ -27,14 +29,14 @@ const checkTokens = async () => {
     let dungeonList = dungeon.getAvailableDungeons();
     let transactionCount = await constVal.account.getTransactionCount();
     if (transactionCount < latestNonce){
-        utils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] waiting before launch again`);
+        logUtils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] waiting before launch again`);
         let waitPercentage = Math.abs(Math.floor(transactionCount / latestNonce * 100) - 100);
         delayToUse = constVal.nonceDelay * waitPercentage / 100;
         return [delayToUse];
     }
     let checkGas = await utils.calculateGasPrice()
     if (checkGas < 0) {
-        utils.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice/(10**9)}`)
+        logUtils.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice/(10**9)}`)
         delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
 
         return [delayToUse]
@@ -167,7 +169,7 @@ const checkTokens = async () => {
         }
 
         if (!somethingDone){
-            utils.log(`${tokenID} => nothing to do...`);
+            logUtils.log(`${tokenID} => nothing to do...`);
         }
     }
     lastAutoNonce = latestNonce;
@@ -185,9 +187,9 @@ const autoRun = async (repeater) => {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
             let ftmBalance = (await utils.getFTMBalance())/10**18;
             if (ftmBalance <= constVal.lowFTM) {
-                utils.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`, true);
+                logUtils.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`, true);
             }
-            utils.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
+            logUtils.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
             await utils.delay(tokenCheck[0]*1000);
         } else {
             break;
@@ -196,16 +198,16 @@ const autoRun = async (repeater) => {
 }
 
 const displayAvailableClasses = () => {
-    utils.log('Available classes:');
+    logUtils.log('Available classes:');
     for (let cl of constVal.classes){
         if (cl !== 'noClass')
-            utils.log(` - ${cl}`);
+            logUtils.log(` - ${cl}`);
     }
 }
 
 const dropTransaction = async (nonce, count = 1) => {
     if (typeof nonce === 'undefined'){
-        utils.log('need nonce');
+        logUtils.log('need nonce');
         return;
     }
     nonce = parseInt(nonce, 10);
@@ -213,11 +215,11 @@ const dropTransaction = async (nonce, count = 1) => {
     while (i < count) {
         let thisGas = await utils.calculateGasPrice()
         if (thisGas < 0) {
-            utils.log(`Gas Price too high: ${-thisGas}`)
+            logUtils.log(`Gas Price too high: ${-thisGas}`)
             return;
         }
         try {
-            utils.log(`current nonce => ${nonce} ${i+1}/${count}`)
+            logUtils.log(`current nonce => ${nonce} ${i+1}/${count}`)
             await constVal.account.sendTransaction({
                 from: constVal.walletAddress,
                 to: constVal.walletAddress,
@@ -228,34 +230,17 @@ const dropTransaction = async (nonce, count = 1) => {
             nonce++;
             i++;
         } catch (e) {
-            utils.log(e);
+            logUtils.log(e);
             return;
         }
     }
 }
 
-const getGlobalStats = async () => {
-    let totalGold = 0;
-    let totalMaterials1 = 0;
-    let typeCount = [];
-    utils.log(`/!\\it may take a long time if you have a lot of token/!\\`)
-    for (let tokenID of constVal.myTokenIds) {
-        totalMaterials1 += parseInt(await materials1.getInventory(tokenID), 10);
-        let goldStats = await gold.getStats(tokenID);
-        totalGold += goldStats[0];
-        let stats = await core.getStats(tokenID);
-        if (typeof typeCount[stats[2]] === "undefined"){
-            typeCount[stats[2]] = 1;
-        } else {
-            typeCount[stats[2]]++;
-        }
-    }
-    utils.log(`Global Stats:
-     - gold => ${totalGold}
-     - materials1 => ${totalMaterials1}`);
-    for (let type in typeCount){
-        utils.log(`     - ${constVal.classes[type]} => ${typeCount[type]}`);
-    }
+const displayGlobalStats = async () => {
+    logUtils.log(`/!\\it may take a long time if you have a lot of token/!\\`)
+    let data = await statsUtils.getGlobalStats();
+    let text = statsUtils.formatGlobalStats(data);
+    logUtils.log(text);
 }
 
 const init = async () => {
@@ -269,7 +254,7 @@ const init = async () => {
         return !dotenvRegVal;
     });
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
-        utils.log(`Rarity Autolevelling commands are:
+        logUtils.log(`Rarity Autolevelling commands are:
     node index.js sum/summary                   - gives a summary of your characters
     node index.js gs/globalStats                - gives global stats (gold/materials1/number of token of each classes)
     node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
@@ -287,7 +272,7 @@ const init = async () => {
     node index.js cn                            - get current nonce`)
     } else {
         if (constVal.debug){
-            utils.log(`/!\\DEBUG ON/!\\`);
+            logUtils.log(`/!\\DEBUG ON/!\\`);
         }
         switch (args[0]) {
             case 'summary':
@@ -310,7 +295,7 @@ const init = async () => {
                 break;
             case 'scout':
                 if (typeof args[1] === 'undefined'){
-                    utils.log('You have to select a dungeon to scout');
+                    logUtils.log('You have to select a dungeon to scout');
                     dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = args[1];
@@ -320,7 +305,7 @@ const init = async () => {
                 break;
             case 'dg':
                 if (typeof args[1] === 'undefined'){
-                    utils.log('You have to select a dungeon to go');
+                    logUtils.log('You have to select a dungeon to go');
                     dungeon.displayAvailableDungeons();
                 } else {
                     let dungeonName = args[1];
@@ -345,7 +330,7 @@ const init = async () => {
             case 'testScrapAddress':
             case 'tsa':
                 if (typeof args[1] === 'undefined'){
-                    utils.log("You must provide an address");
+                    logUtils.log("You must provide an address");
                 } else {
                     await scrap.scrapDataFromAddress(args[1]);
                 }
@@ -355,20 +340,20 @@ const init = async () => {
                 let minCount = typeof args[1] === 'undefined' ? -1 : args[1];
                 let data = scrapSqliteUtils.getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
-                    utils.log(dat);
+                    logUtils.log(dat);
                 }
                 break;
             case 'testDataAddress':
             case 'tda':
                 if (typeof args[1] === 'undefined'){
-                    utils.log("You must provide an address");
+                    logUtils.log("You must provide an address");
                 } else {
                     console.log(await scrapSqliteUtils.getNumberOfTokenFromAddress(args[1]));
                 }
                 break;
             case 'globalStats':
             case 'gs':
-                await getGlobalStats();
+                await displayGlobalStats();
                 break;
             case 'templateList':
             case 'tl':
@@ -379,7 +364,7 @@ const init = async () => {
                 let template = args[1];
                 let token = args[2];
                 if (typeof template === 'undefined'){
-                    utils.log('You have to select a template');
+                    logUtils.log('You have to select a template');
                     attribute.displayAvailableAttributeTemplate();
                 } else {
                     await attribute.massAssignPoint(template, token);
@@ -397,23 +382,33 @@ const init = async () => {
                 } else {
                     gas = Math.abs(gas);
                 }
-                utils.log(`current gasPrice => ${gas}`);
-                utils.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
+                logUtils.log(`current gasPrice => ${gas}`);
+                logUtils.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
                 break;
             case 'cn':
-                utils.log(`current nonce => ${await utils.nonceVal()}`);
-                utils.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
+                logUtils.log(`current nonce => ${await utils.nonceVal()}`);
+                logUtils.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
                 break;
             case 'testNames':
             case 'tn':
                 if (typeof args[1] === 'undefined'){
-                    utils.log('you need to pass a file');
+                    logUtils.log('you need to pass a file');
                 } else {
                     await name.massValidate(args[1]);
                 }
                 break;
+            case 'testBot':
+                if (constVal.enableTelegramBot){
+                    telegramUtils.init();
+                } else {
+                    logUtils.log("Bot not enabled");
+                }
+                break;
+            case 'test':
+                //console.log(await scrapUtil.getTokenData(2275067));
+                break;
             default:
-                utils.log(`${args[0]} is not a valid command`)
+                logUtils.log(`${args[0]} is not a valid command`)
                 break;
         }
     }

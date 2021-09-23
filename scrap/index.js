@@ -1,7 +1,7 @@
 const scrapUtil = require('./scrapUtils');
 const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
-const constVal = require('../shared/const');
+const logUtils = require("../shared/logUtils");
 
 const scrapAndInsert = async (tokenID) => {
 
@@ -57,7 +57,7 @@ const scrapData = async (start = 0) => {
         let goldClaimableCount = data[tokenIndex].gold.claimable;
         sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
     }
-    utils.log("Scrap finished");
+    logUtils.log("Scrap finished");
 }
 
 const scrapDataFromList = async (tokenList)=> {
@@ -99,11 +99,11 @@ const scrapDataFromList = async (tokenList)=> {
         sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
     }
     clearInterval(interval);
-    utils.log("Scrap finished");
+    logUtils.log("Scrap finished");
 }
 
 const scrapDataFromAddress = async (address) => {
-    utils.log(`Start update token of ${address}`);
+    logUtils.log(`Start update token of ${address}`);
     let rawTokenList = sqliteUtils.getTokenListFromAddress(address);
     let tokenList = [];
     for (let token of rawTokenList){
@@ -121,7 +121,7 @@ const writePercentage = (current, max, start, startDate) => {
     let res = (diffTime/diff*maxDiff) - diffTime;
     let eta = utils.secsToText(res);
     let sec = Math.floor(res - (eta[0] * 60 * 60) - (eta[1]*60));
-    utils.log(`progress => ${percentage}% (${current}/${max}) ~${perSecond}/s eta => ${eta[0]}h${eta[1]}m${sec}`);
+    logUtils.log(`progress => ${percentage}% (${current}/${max}) ~${perSecond}/s eta => ${eta[0]}h${eta[1]}m${sec}`);
 }
 
 module.exports = {

@@ -2,6 +2,7 @@ const constVal = require("../shared/const");
 const utils = require('../shared/utils');
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
+const logUtils = require("../shared/logUtils");
 
 const abi = contractAddresses.goldABI;
 const address = contractAddresses.rarityGold;
@@ -26,7 +27,7 @@ const getStats = async (tokenID) => {
 const claim = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -41,17 +42,17 @@ const claim = async (tokenID, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenID} => gold claimed`);
+                logUtils.log(`${tokenID} => gold claimed`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenID} => gold error`);
+                logUtils.log(`${tokenID} => gold error`);
                 if (constVal.debug){
-                    utils.log(e);
+                    logUtils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            utils.log(`${tokenID} => Live trading disabled - gold claim not submitted.`)
+            logUtils.log(`${tokenID} => Live trading disabled - gold claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -60,7 +61,7 @@ const claim = async (tokenID, nonce = undefined) => {
 const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenFrom} > ${tokenTo} => transfer gold => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenFrom} > ${tokenTo} => transfer gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -77,18 +78,18 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer gold success`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer gold success`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
                 if (constVal.debug){
-                    utils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
-                    utils.log(e);
+                    logUtils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    logUtils.log(e);
                 }
                 return [false, 'ERROR'];
             }
         } else {
-            utils.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
+            logUtils.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -97,7 +98,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.gold;
     if (typeof mule === 'undefined' || mule.length === 0){
-        utils.log(`${tokenID} => can't transfer gold no mule defined, define GOLD_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+        logUtils.log(`${tokenID} => can't transfer gold no mule defined, define GOLD_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){

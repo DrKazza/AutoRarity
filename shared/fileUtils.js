@@ -1,7 +1,7 @@
 const fs = require("fs");
 const readline = require("readline");
 const constVal = require('../shared/const');
-const utils = require('../shared/utils');
+const logUtils = require("../shared/logUtils");
 
 const getAllLineOfFile = async (file) => {
     try {
@@ -18,13 +18,13 @@ const getAllLineOfFile = async (file) => {
             }
             return lines;
         } else {
-            utils.log(`error file not found [${file}]`);
+            logUtils.log(`error file not found [${file}]`);
             return false;
         }
     } catch (e) {
-        utils.log(`error while reading file [${file}]`)
+        logUtils.log(`error while reading file [${file}]`)
         if (constVal.debug){
-            utils.log(e);
+            logUtils.log(e);
         }
         return false;
     }

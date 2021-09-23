@@ -7,9 +7,7 @@ const stream = require("stream");
 const util = require("util");
 const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
-const telegramUtils = require('./TelegramUtils');
-
-
+const logUtils = require("../shared/logUtils");
 
 let web3 = new Web3(constVal.fantomRpcUrl);
 
@@ -83,22 +81,15 @@ const saveTelegramChatId = async () => {
                 await unlink(file) // Delete original file.
 
                 await rename(tempFile, file) // Rename temp file with original file name.
-                log(`telegramChatId has been saved to [${file}]`);
+                logUtils.log(`telegramChatId has been saved to [${file}]`);
             } catch (e) {
-                log(`error while saving telegramChatId to [${file}]`);
+                logUtils.log(`error while saving telegramChatId to [${file}]`);
                 if (constVal.debug){
-                    log(e);
+                    logUtils.log(e);
                 }
             }
         });
     });
-}
-
-const log = (message, toTelegram = false) => {
-    console.log(message);
-    if (constVal.enableTelegramBot && toTelegram){
-        telegramUtils.sendMessage(message);
-    }
 }
 
 const getFTMBalance = async () => {
@@ -113,7 +104,6 @@ module.exports = {
     getNonce,
     delay,
     saveTelegramChatId,
-    log,
     getFTMBalance,
     web3
 }

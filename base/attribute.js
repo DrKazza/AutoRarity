@@ -1,5 +1,6 @@
 const {contractAddresses} = require('../shared/contractAddresses');
 const utils = require("../shared/utils");
+const logUtils = require("../shared/logUtils");
 const constVal = require("../shared/const");
 const ethers = require("ethers");
 const core = require('./core');
@@ -26,10 +27,10 @@ const getAttributeTemplateList = () => {
 }
 
 const displayAvailableAttributeTemplate = () => {
-    utils.log('Available template: ');
+    loglogUtils.log('Available template: ');
     let templateList = getAttributeTemplateList();
     templateList.forEach(name => {
-        utils.log(`    - ${name}`);
+        logUtils.log(`    - ${name}`);
     });
 }
 
@@ -44,7 +45,7 @@ const getAttributeTemplate = (templateName) => {
 const buyPoint = async (tokenID, point, nonce) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -65,17 +66,17 @@ const buyPoint = async (tokenID, point, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
+                logUtils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenID} => point error`);
+                logUtils.log(`${tokenID} => point error`);
                 if (constVal.debug){
-                    utils.log(e);
+                    logUtils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            utils.log(`${tokenID} => Live trading disabled - point not submitted.`)
+            logUtils.log(`${tokenID} => Live trading disabled - point not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -88,26 +89,26 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
         let className = constVal.classes[tokenStats[2]];
         let template = getAttributeTemplate(templateName);
         if (typeof template[className] === 'undefined'){
-            utils.log(`The class [${className}] is missing in template [${templateName}]`);
+            logUtils.log(`The class [${className}] is missing in template [${templateName}]`);
             return false;
         }
         let res = await buyPoint(tokenID, template[className].attributes, nonce);
         return res[0];
     } else {
-        utils.log(`${tokenID} => point already bought`);
+        logUtils.log(`${tokenID} => point already bought`);
         return false;
     }
 }
 
 const massAssignPoint = async (template, tokenID) => {
     if (!getAttributeTemplateList().includes(template))  {
-        utils.log(`This template does not exist [${template}]`);
+        logUtils.log(`This template does not exist [${template}]`);
         displayAvailableAttributeTemplate();
     } else {
         let latestNonce = await  utils.nonceVal();
         let transactionCount = await constVal.account.getTransactionCount();
         if (transactionCount < latestNonce){
-            utils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
+            logUtils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
             return;
         }
         if (typeof tokenID === 'undefined') {

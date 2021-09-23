@@ -1,5 +1,6 @@
 const constVal = require("../shared/const");
 const utils = require('../shared/utils');
+const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 
@@ -27,7 +28,7 @@ const getStats = async (tokenID) => {
 const claim = async (tokenID, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenID} => claim rar => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenID} => claim rar => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -42,17 +43,17 @@ const claim = async (tokenID, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenID} => rar claimed`);
+                logUtils.log(`${tokenID} => rar claimed`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenID} => rar error`);
+                logUtils.log(`${tokenID} => rar error`);
                 if (constVal.debug){
-                    utils.log(e);
+                    logUtils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            utils.log(`${tokenID} => Live trading disabled - rar claim not submitted.`)
+            logUtils.log(`${tokenID} => Live trading disabled - rar claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -61,7 +62,7 @@ const claim = async (tokenID, nonce = undefined) => {
 const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenFrom} > ${tokenTo} => transfer rar => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenFrom} > ${tokenTo} => transfer rar => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -78,18 +79,18 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer rar success`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer rar success`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer rar error`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer rar error`);
                 if (constVal.debug){
-                    utils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
-                    utils.log(e);
+                    logUtils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    logUtils.log(e);
                 }
                 return [false, 'ERROR'];
             }
         } else {
-            utils.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
+            logUtils.log(`${tokenFrom} > ${tokenTo} => Live trading disabled - transfer NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -98,7 +99,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.rar;
     if (typeof mule === 'undefined' || mule.length === 0){
-        utils.log(`${tokenID} => can't transfer rar no mule defined, define RAR_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+        logUtils.log(`${tokenID} => can't transfer rar no mule defined, define RAR_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){

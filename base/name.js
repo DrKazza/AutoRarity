@@ -1,5 +1,6 @@
 const constVal = require("../shared/const");
 const utils = require('../shared/utils');
+const logUtils = require("../shared/logUtils");
 const fileUtils = require('../shared/fileUtils');
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
@@ -45,7 +46,7 @@ const hasName = async (tokenID) => {
 const claim = async (tokenID, name, nonce) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -61,17 +62,17 @@ const claim = async (tokenID, name, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenID} => name claimed => ${name}`);
+                logUtils.log(`${tokenID} => name claimed => ${name}`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenID} => name error`);
+                logUtils.log(`${tokenID} => name error`);
                 if (constVal.debug){
-                    utils.log(e);
+                    logUtils.log(e);
                 }
                 return [false, 'error'];
             }
         } else {
-            utils.log(`${tokenID} => Live trading disabled - name claim not submitted.`)
+            logUtils.log(`${tokenID} => Live trading disabled - name claim not submitted.`)
             return [false, 'not live'];
         }
     }
@@ -86,14 +87,14 @@ const massValidate = async (file) => {
         name = formatName(name);
         let validated = await validate(name);
         if (!validated){
-            utils.log(`[${name}] is not valid`);
+            logUtils.log(`[${name}] is not valid`);
             continue;
         }
         let available = await isAvailable(name);
         if (available){
-            utils.log(`[${name}] is not available`);
+            logUtils.log(`[${name}] is not available`);
         } else {
-            utils.log(`[${name}] is available`);
+            logUtils.log(`[${name}] is available`);
         }
     }
 }

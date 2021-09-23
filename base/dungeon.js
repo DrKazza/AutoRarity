@@ -1,18 +1,19 @@
 const dungeons = require("../dungeons");
 const constVal = require("../shared/const");
 const utils = require('../shared/utils');
+const logUtils = require("../shared/logUtils");
 
 const displayAvailableDungeons = () => {
-    utils.log('Available dungeon:');
+    logUtils.log('Available dungeon:');
     let dgList = dungeons.getAvailableDungeons();
     for (let dg of dgList){
-        utils.log(` - ${dg}`);
+        logUtils.log(` - ${dg}`);
     }
 }
 
 const scout = async (dungeonName, token) => {
     if (!dungeons.isDungeonAvailable(dungeonName)) {
-        utils.log(`This dungeon is not implemented yet [${dungeonName}]`);
+        logUtils.log(`This dungeon is not implemented yet [${dungeonName}]`);
         displayAvailableDungeons();
     } else {
         if (typeof token === 'undefined'){
@@ -21,7 +22,7 @@ const scout = async (dungeonName, token) => {
             }
         } else {
             if (!constVal.myTokenIds.includes(token)){
-                utils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
+                logUtils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
             } else {
                 await dungeons.scoutDungeon(dungeonName, token);
             }
@@ -31,14 +32,14 @@ const scout = async (dungeonName, token) => {
 
 const doDungeon = async (dungeonName, token, nonce = undefined, isAuto = false) => {
     if (!dungeons.isDungeonAvailable(dungeonName)) {
-        utils.log(`This dungeon is not implemented yet [${dungeonName}]`);
+        logUtils.log(`This dungeon is not implemented yet [${dungeonName}]`);
         displayAvailableDungeons();
     } else {
         nonce = await utils.getNonce(nonce);
         if (!isAuto){
             let transactionCount = await constVal.account.getTransactionCount();
             if (transactionCount < nonce){
-                utils.log(`nonce val [${nonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
+                logUtils.log(`nonce val [${nonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
                 return;
             }
         }
@@ -49,7 +50,7 @@ const doDungeon = async (dungeonName, token, nonce = undefined, isAuto = false) 
             }
         } else {
             if (!constVal.myTokenIds.includes(token)){
-                utils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
+                logUtils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
             } else {
                 return await dungeons.runDungeon(dungeonName, token, nonce);
             }

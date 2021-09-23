@@ -1,5 +1,6 @@
-const utils = require('../shared/utils');
 const {contractAddresses} = require('../shared/contractAddresses');
+const Web3 = require("web3");
+const constVal = require("../shared/const");
 
 let contractGetOwnerOfToken;
 let contractGetNextTokenId;
@@ -11,17 +12,19 @@ let contractGetNextItemId;
 let contractGetOwnerOfItem;
 let contractGetItemDetail;
 let libraryContract;
+let web3 = new Web3(constVal.fantomRpcUrl);
+
 
 const getTokenData = async (tokenID) => {
     if (typeof libraryContract === 'undefined'){
-        libraryContract = new utils.web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
+        libraryContract = new web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
     }
     return await libraryContract.methods.summoner_full(tokenID).call();
 }
 
 const getTokensData = async (tokenList) => {
     if (typeof libraryContract === 'undefined'){
-        libraryContract = new utils.web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
+        libraryContract = new web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
     }
     return await libraryContract.methods.summoners_full(tokenList).call();
 }
@@ -29,49 +32,49 @@ const getTokensData = async (tokenList) => {
 //TOKEN RELATED
 const getNextTokenId = async () => {
     if (typeof contractGetNextTokenId === 'undefined'){
-        contractGetNextTokenId = new utils.web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
+        contractGetNextTokenId = new web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
     }
     return await contractGetNextTokenId.methods.next_summoner().call();
 }
 
 const getOwnerOfToken = async (tokenID) => {
     if (typeof contractGetOwnerOfToken === 'undefined') {
-        contractGetOwnerOfToken = new utils.web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
+        contractGetOwnerOfToken = new web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
     }
     return await contractGetOwnerOfToken.methods.ownerOf(tokenID).call();
 }
 
 const getTokenDetail = async (tokenID) => {
     if (typeof contractGetTokenDetail === 'undefined') {
-        contractGetTokenDetail = new utils.web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
+        contractGetTokenDetail = new web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
     }
     return await contractGetTokenDetail.methods.summoner(tokenID).call();
 }
 
 const getTokenAbility = async (tokenID) => {
     if (typeof contractGetTokenAbility === 'undefined') {
-        contractGetTokenAbility = new utils.web3.eth.Contract(contractAddresses.attributesABI, contractAddresses.rarityAttributes);
+        contractGetTokenAbility = new web3.eth.Contract(contractAddresses.attributesABI, contractAddresses.rarityAttributes);
     }
     return await contractGetTokenAbility.methods.ability_scores(tokenID).call();
 }
 
 const getTokenGoldCount = async (tokenID) => {
     if (typeof contractGetTokenGoldCount === 'undefined') {
-        contractGetTokenGoldCount = new utils.web3.eth.Contract(contractAddresses.goldABI, contractAddresses.rarityGold);
+        contractGetTokenGoldCount = new web3.eth.Contract(contractAddresses.goldABI, contractAddresses.rarityGold);
     }
     return await contractGetTokenGoldCount.methods.balanceOf(tokenID).call();
 }
 
 const getTokenGoldClaimableCount = async (tokenID) => {
     if (typeof contractGetTokenGoldCount === 'undefined') {
-        contractGetTokenGoldCount = new utils.web3.eth.Contract(contractAddresses.goldABI, contractAddresses.rarityGold);
+        contractGetTokenGoldCount = new web3.eth.Contract(contractAddresses.goldABI, contractAddresses.rarityGold);
     }
     return await contractGetTokenGoldCount.methods.claimable(tokenID).call();
 }
 
 const getTokenMaterial1Count = async (tokenID) => {
     if (typeof contractGetTokenMaterial1Count === 'undefined') {
-        contractGetTokenMaterial1Count = new utils.web3.eth.Contract(contractAddresses.materials1ABI, contractAddresses.rarityMaterials1);
+        contractGetTokenMaterial1Count = new web3.eth.Contract(contractAddresses.materials1ABI, contractAddresses.rarityMaterials1);
     }
     return await contractGetTokenMaterial1Count.methods.balanceOf(tokenID).call();
 }
@@ -80,21 +83,21 @@ const getTokenMaterial1Count = async (tokenID) => {
 //ITEM RELATED
 const getNextItemId = async () => {
     if (typeof contractGetNextItemId === 'undefined') {
-        contractGetNextItemId = new utils.web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
+        contractGetNextItemId = new web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
     }
     return await contractGetNextItemId.methods.next_item().call();
 }
 
 const getOwnerOfItem = async (itemID) => {
     if (typeof contractGetOwnerOfItem === 'undefined') {
-        contractGetOwnerOfItem = new utils.web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
+        contractGetOwnerOfItem = new web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
     }
     return await contractGetOwnerOfItem.methods.ownerOf(itemID).call();
 }
 
 const getItemDetail = async (itemID) => {
     if (typeof contractGetItemDetail === 'undefined') {
-        contractGetItemDetail = new utils.web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
+        contractGetItemDetail = new web3.eth.Contract(contractAddresses.crafting1ABI, contractAddresses.rarityCrafting1);
     }
     return await contractGetItemDetail.methods.items(itemID).call();
 }

@@ -1,5 +1,6 @@
 const constVal = require("../shared/const");
 const utils = require('../shared/utils');
+const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const abi = contractAddresses.materials1ABI;
@@ -18,7 +19,7 @@ const getInventory = async (tokenID) => {
 const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
-        utils.log(`${tokenFrom} > ${tokenTo} => transfer material1 => Gas Price too high: ${-thisGas}`)
+        logUtils.log(`${tokenFrom} > ${tokenTo} => transfer material1 => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
     } else {
         if (constVal.liveTrading) {
@@ -35,18 +36,18 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 success`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 success`);
                 return [true, 'success'];
             } catch (e){
-                utils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
+                logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
                 if (constVal.debug){
-                    utils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
-                    utils.log(e);
+                    logUtils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    logUtils.log(e);
                 }
                 return [false, 'ERROR'];
             }
         } else {
-            utils.log(`${tokenFrom} > ${tokenTo} Live trading disabled - adventuring NOT submitted.`)
+            logUtils.log(`${tokenFrom} > ${tokenTo} Live trading disabled - adventuring NOT submitted.`)
             return [false, 'not live'];
         }
     }
@@ -55,7 +56,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
 const transferToMule = async (tokenID, amount, nonce = undefined) => {
     let mule = constVal.mule.materials1;
     if (typeof mule === 'undefined' || mule.length === 0){
-        utils.log(`${tokenID} => can't transfer materials1 no mule defined, define MATERIALS_1_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
+        logUtils.log(`${tokenID} => can't transfer materials1 no mule defined, define MATERIALS_1_MULE to make it work, you can disable by setting AUTO_TRANSFER_TO_MULE in .env`);
         return [false, 'no mule defined'];
     }
     if (tokenID === mule){
