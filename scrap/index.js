@@ -115,9 +115,10 @@ const scrapDataFromAddress = async (address) => {
 const writePercentage = (current, max, start, startDate) => {
     let percentage = (current/max*100).toFixed(2);
     let diff = current - start;
+    let maxDiff = max - start;
     let diffTime = Math.floor(((new Date()).getTime() - startDate.getTime())/1000);
     let perSecond = Math.floor(diff/diffTime);
-    let res = (diffTime/diff*max) - diffTime;
+    let res = (diffTime/diff*maxDiff) - diffTime;
     let eta = utils.secsToText(res);
     let sec = Math.floor(res - (eta[0] * 60 * 60) - (eta[1]*60));
     utils.log(`progress => ${percentage}% (${current}/${max}) ~${perSecond}/s eta => ${eta[0]}h${eta[1]}m${sec}`);
