@@ -27,7 +27,7 @@ const getAttributeTemplateList = () => {
 }
 
 const displayAvailableAttributeTemplate = () => {
-    loglogUtils.log('Available template: ');
+    logUtils.log('Available template: ');
     let templateList = getAttributeTemplateList();
     templateList.forEach(name => {
         logUtils.log(`    - ${name}`);

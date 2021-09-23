@@ -2,6 +2,7 @@ const ethers = require('ethers');
 const {contractAddresses} = require('../shared/contractAddresses');
 const utils = require('../shared/utils');
 const constVal = require('../shared/const');
+const logUtils = require('../shared/logUtils');
 
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
