@@ -42,7 +42,7 @@ const getAttributeTemplate = (templateName) => {
     }
 }
 
-const buyPoint = async (tokenID, point, nonce) => {
+const buyPoint = async (tokenID, point) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`${tokenID} => buy point => Gas Price too high: ${-thisGas}`)
@@ -51,7 +51,7 @@ const buyPoint = async (tokenID, point, nonce) => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractBuyPoint === 'undefined') {
-                    contractBuyPoint = new ethers.Contract(address, abi, constVal.account);
+                    contractBuyPoint = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 logUtils.log(`${tokenID} => start buy point`);
                 let approveResponse = await contractBuyPoint.point_buy(
@@ -65,7 +65,7 @@ const buyPoint = async (tokenID, point, nonce) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
@@ -76,7 +76,7 @@ const buyPoint = async (tokenID, point, nonce) => {
             } catch (e){
                 logUtils.log(`${tokenID} => point error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -88,7 +88,7 @@ const buyPoint = async (tokenID, point, nonce) => {
     }
 }
 
-const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined) => {
+const checkStatsAndAssignPoint = async (tokenID, templateName) => {
     let attribs = await get(tokenID);
     let tokenStats = await core.getStats(tokenID);
     if (parseInt(attribs[0], 10) === 0) {
@@ -98,7 +98,7 @@ const checkStatsAndAssignPoint = async (tokenID, templateName, nonce = undefined
             logUtils.log(`The class [${className}] is missing in template [${templateName}]`);
             return false;
         }
-        let res = await buyPoint(tokenID, template[className].attributes, nonce);
+        let res = await buyPoint(tokenID, template[className].attributes);
         return res[0];
     } else {
         logUtils.log(`${tokenID} => point already bought`);
@@ -111,21 +111,12 @@ const massAssignPoint = async (template, tokenID) => {
         logUtils.log(`This template does not exist [${template}]`);
         displayAvailableAttributeTemplate();
     } else {
-        let latestNonce = await  utils.nonceVal();
-        let transactionCount = await constVal.account.getTransactionCount();
-        if (transactionCount < latestNonce){
-            logUtils.log(`nonce val [${latestNonce}] is higher than transaction count [${transactionCount}] wait before launch again`);
-            return;
-        }
         if (typeof tokenID === 'undefined') {
             for (let tokenID of constVal.myTokenIds) {
-                let res = await checkStatsAndAssignPoint(tokenID, template, latestNonce);
-                if (res){
-                    latestNonce++;
-                }
+                let res = await checkStatsAndAssignPoint(tokenID, template);
             }
         } else {
-            await checkStatsAndAssignPoint(tokenID, template, latestNonce);
+            await checkStatsAndAssignPoint(tokenID, template);
         }
     }
 }

@@ -43,7 +43,7 @@ const hasName = async (tokenID) => {
     return (await get(tokenID)).length > 0;
 }
 
-const claim = async (tokenID, name, nonce) => {
+const claim = async (tokenID, name) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`${tokenID} => claim gold => Gas Price too high: ${-thisGas}`)
@@ -52,7 +52,7 @@ const claim = async (tokenID, name, nonce) => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractWrite === 'undefined') {
-                    contractWrite = new ethers.Contract(address, abi, constVal.account);
+                    contractWrite = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 let approveResponse = await contractWrite.claim(
                     name,
@@ -60,7 +60,7 @@ const claim = async (tokenID, name, nonce) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => name claimed => ${name}`);
@@ -71,7 +71,7 @@ const claim = async (tokenID, name, nonce) => {
             } catch (e){
                 logUtils.log(`${tokenID} => name error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return [false, 'error'];

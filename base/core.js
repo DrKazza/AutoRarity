@@ -22,7 +22,7 @@ const getStats = async (tokenID) => {
     return tokenStats;
 }
 
-const claimXp = async (tokenID, nonce)  => {
+const claimXp = async (tokenID)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`${tokenID} => xp => Gas Price too high: ${-thisGas}`)
@@ -31,7 +31,7 @@ const claimXp = async (tokenID, nonce)  => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractClaimXp === 'undefined') {
-                    contractClaimXp = new ethers.Contract(address, abi, constVal.account);
+                    contractClaimXp = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 logUtils.log(`${tokenID} => start xp claim`);
                 let approveResponse = await contractClaimXp.adventure(
@@ -39,7 +39,7 @@ const claimXp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => xp claimed`);
@@ -50,7 +50,7 @@ const claimXp = async (tokenID, nonce)  => {
             } catch (e) {
                 logUtils.log(`${tokenID} => xp error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -62,7 +62,7 @@ const claimXp = async (tokenID, nonce)  => {
     }
 }
 
-const levelUp = async (tokenID, nonce)  => {
+const levelUp = async (tokenID)  => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`${tokenID} => levelUp => Gas Price too high: ${-thisGas}`)
@@ -71,7 +71,7 @@ const levelUp = async (tokenID, nonce)  => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractLevelUp === 'undefined') {
-                    contractLevelUp = new ethers.Contract(address, abi, constVal.account);
+                    contractLevelUp = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 logUtils.log(`${tokenID} => start levelUp`);
                 let approveResponse = await contractLevelUp.level_up(
@@ -79,7 +79,7 @@ const levelUp = async (tokenID, nonce)  => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => levelUp done`);
@@ -90,7 +90,7 @@ const levelUp = async (tokenID, nonce)  => {
             } catch (e) {
                 logUtils.log(`${tokenID} => levelUp error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -102,7 +102,7 @@ const levelUp = async (tokenID, nonce)  => {
     }
 }
 
-const summon = async (classToSummon, nonce, i = 0) => {
+const summon = async (classToSummon, i = 0) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
@@ -111,21 +111,21 @@ const summon = async (classToSummon, nonce, i = 0) => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractSummon === 'undefined') {
-                    contractSummon = new ethers.Contract(address, abi, constVal.account);
+                    contractSummon = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 let approveResponse = await contractSummon.summon(
                     classToSummon,
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: utils.calculateGasPrice(),
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(i+1, approveResponse);
                 return receipt.status === 1;
             } catch (e) {
                 logUtils.log(`summon error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return false;
@@ -137,7 +137,7 @@ const summon = async (classToSummon, nonce, i = 0) => {
     }
 }
 
-const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, nonce) => {
+const massSummon = async (classToSummon = "all", quantity = 1, isMass = false) => {
     let result;
     let newToken = 0;
     let originalTokenCount = await tokenGetter.getTokenCount(constVal.walletAddress);
@@ -147,11 +147,6 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
             logUtils.log(`Unknown class [${classToSummon}]`);
             return;
         }
-        if (typeof nonce === 'undefined'){
-            nonce = {
-                value : await utils.nonceVal()
-            };
-        }
         result = {
             success: 0,
             fail: 0
@@ -160,7 +155,7 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
         logUtils.log(`Start summoning of ${quantity} ${classToSummon}`);
         while (i < quantity) {
             logUtils.log(`#${i+1} => summoning...`);
-            let res = await summon(classId, nonce.value, i);
+            let res = await summon(classId, i);
             if (res){
                 result.success++;
                 logUtils.log(`#${i+1} => summon success`);
@@ -169,17 +164,13 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false, n
                 logUtils.log(`#${i+1} => summon fail`);
             }
             await utils.delay(1000);
-            nonce.value++;
             i++;
         }
     } else {
         logUtils.log(`Start summoning ${quantity} of each classes`)
-        nonce = {
-            value : await utils.nonceVal()
-        };
         for (let cl of constVal.classes){
             if (cl !== 'noClass'){
-                newToken += await massSummon(cl, quantity, true, nonce);
+                newToken += await massSummon(cl, quantity, true);
             }
         }
     }

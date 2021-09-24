@@ -12,7 +12,7 @@ let contractRun;
 let contractGetLoot;
 let contractGetTimeUntilAvailable;
 
-const run = async (tokenID, nonce = undefined) => {
+const run = async (tokenID) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
     if ((loot = await getLoot(tokenID)) < 1){
@@ -32,7 +32,7 @@ const run = async (tokenID, nonce = undefined) => {
         if (constVal.liveTrading) {
             try {
                 if (typeof contractRun === 'undefined') {
-                    contractRun = new ethers.Contract(address, abi, constVal.account);
+                    contractRun = new ethers.Contract(address, abi, constVal.nonceManager);
                 }
                 logUtils.log(`${tokenID} => start [${dungeonName}]`);
                 let approveResponse = await contractRun.adventure(
@@ -40,7 +40,7 @@ const run = async (tokenID, nonce = undefined) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: thisGas,
-                        nonce: await utils.getNonce(nonce)
+                        //nonce: await utils.getNonce(nonce)
                     });
                 let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
@@ -51,7 +51,7 @@ const run = async (tokenID, nonce = undefined) => {
             } catch (e) {
                 logUtils.log(`${tokenID} => [${dungeonName}] error`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+
                     logUtils.log(e);
                 }
                 return [false, 'error'];

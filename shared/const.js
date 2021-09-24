@@ -1,4 +1,5 @@
 const ethers = require("ethers");
+const { NonceManager } = require("@ethersproject/experimental");
 const parseArg = require('mri');
 const parseBool = (val) => {return val === true || val === 'true'}
 
@@ -33,6 +34,7 @@ const walletAddress = process.env.WALLETADDRESS;
 const jsonRpcProvider = new ethers.providers.JsonRpcProvider(fantomRpcUrl, 250);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(jsonRpcProvider);
+const nonceManager = new NonceManager(account);
 
 const liveTradingVar = process.env.LIVETRADING;
 const liveTrading = liveTradingVar === undefined ? false : parseBool(liveTradingVar);
@@ -82,6 +84,7 @@ module.exports = {
     walletAddress,
     myTokenIds,
     account,
+    nonceManager,
     classes,
     liveTrading,
     mule,
