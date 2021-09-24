@@ -9,7 +9,7 @@ const getStats = async (tokenIDvalue, abi, address) => {
     let tokenStats = await contract.methods.summoner(tokenIDvalue).call();
     tokenStats[4] = await contract.methods.xp_required(tokenStats[3]).call();
     return tokenStats;
-} 
+}
 
 const getAttributes = async (tokenIDvalue, abi, address) => {
     let contract = new web3.eth.Contract(abi, address);
@@ -73,13 +73,14 @@ const charSummary = async (tokenArray, contractAddresses) => {
         console.log(`Str: ${attribs[0]}, Dex: ${attribs[1]}, Const: ${attribs[2]}, Int: ${attribs[3]}, Wisdom: ${attribs[4]}, Charisma: ${attribs[5]}`)        
         let goldStats = await getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold);
         let goldtext = ''
-        if (goldStats[0] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}
-        if (goldStats[1] > 0) {goldtext +=`Gold to be claimed: ${goldStats[1]}`}
+        if (goldStats[0] > 0 || goldStats[1] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}
+        if (goldStats[1] > 0) {goldtext +=` Gold to be claimed: ${goldStats[1]}`}
         if (goldtext != '') {console.log(goldtext)}
         let inventory = await getInventory(tokenID, contractAddresses.materials1ABI, contractAddresses.rarityMaterials1);
         if (inventory > 0) {console.log(`${inventory} Crafting Materials (I)`)}
     }
-    console.log(`*****************`)
+    console.log(`******* end of tokens ******`)
+    return
 }
 
 module.exports = {charSummary, getStats, getGoldStats, secsToText, getNames};

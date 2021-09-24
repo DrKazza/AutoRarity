@@ -73,6 +73,12 @@ if(tgToken != undefined){ bot = new TelegramBot(tgToken, {polling: true});
     useTelegram = true;
 }
 
+const killTelegramBot = async () => {
+//    await bot.stopPolling();
+// i wished I knew why this didn't work
+    process.exit(0)
+}
+
 
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
@@ -284,12 +290,12 @@ const checkTokens = async (dungeon) => {
     for (var tokenID of myTokenIds) {
         tokenStats = await summary.getStats(tokenID, contractAddresses.manifestABI, contractAddresses.rarityManifested);
         xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
-        xpPending = 0
+        xpPending = new ethers.BigNumber.from('0')
         if (xpCountdown < 0) {
             let xpEarnAttempt = await earnXP(tokenID, latestNonce)
             if (xpEarnAttempt[0]) {
                 // success
-                xpPending = 250;
+                xpPending.add('250000000000000000000')
                 latestNonce++;
                 xpGains.push(tokenID)
             } else if (xpEarnAttempt[1] === 'high gas') {
@@ -302,8 +308,11 @@ const checkTokens = async (dungeon) => {
             delayToUse = Math.max(Math.min(xpCountdown, delayToUse), minimumDelay)
         }
         if (autoLevelUp) {
-            if (tokenStats[4] <= (xpPending + tokenStats[0])) {
-                if (tokenStats[0] < tokenStats[4]) {
+            let nextlvlXP = new ethers.BigNumber.from(tokenStats[4])
+            let rawXP = new ethers.BigNumber.from(tokenStats[0])
+            let pseudoXP = rawXP.add(xpPending)
+            if (nextlvlXP.lte(pseudoXP)) {
+                if (rawXP.lt(nextlvlXP)) {
                     // so we can level up but only when the last adventuring has been registered
                     // don't do anything but set a short delay to try again when xpPending is 0
                     delayToUse = Math.max(Math.min(xpPendingDelay, delayToUse), minimumDelay)
@@ -313,6 +322,8 @@ const checkTokens = async (dungeon) => {
                     if (lvlEarnAttempt[0]) {
                         levelGains.push(tokenID);
                         latestNonce++;
+                        // This adds a very short delay because you can't claim gold immediately until the levelling up has gone thru
+                        delayToUse = Math.max(Math.min(xpPendingDelay, delayToUse), minimumDelay)
                     } else if (lvlEarnAttempt[1] === 'high gas') {
                         // fail due to high gas price
                         delayToUse = Math.max(Math.min(gasRetryDelay, delayToUse), minimumDelay)
@@ -324,7 +335,7 @@ const checkTokens = async (dungeon) => {
                 // not ready to level up - do nothing
             }
         }
-        if ((await summary.getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold)[1] ) > 0) {
+        if ((await summary.getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold))[1] > 0) {
             let goldEarnAttempt = await earnGold(tokenID, latestNonce)
             if (goldEarnAttempt[0]) {
                 goldGains.push(tokenID);
@@ -414,7 +425,7 @@ const init = async () => {
         node index.js summary    - gives a summary of your characters
         node index.js xp         - claim xp/level up/gold collection/dungeoneering - one off
         node index.js auto       - automatic repeating xp/levelling/gold collection/[dungeoneering]
-        node index.js cellar     - run the cellar dungeon only. (not working yet!)`)
+        node index.js cellar     - run the cellar dungeon only.`)
     } else {
         switch (process.argv[2]) {
             case 'summary':
@@ -434,7 +445,9 @@ const init = async () => {
                 console.log(`${process.argv[2]} is not a valid command`)
                 break;
         }
+        return
     }
+    killTelegramBot()
 }
 
 init();
