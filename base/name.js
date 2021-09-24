@@ -62,8 +62,12 @@ const claim = async (tokenID, name, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+                let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => name claimed => ${name}`);
-                return [true, 'success'];
+                if (constVal.debug){
+                    logUtils.log(approveResponse);
+                }
+                return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => name error`);
                 if (constVal.debug){

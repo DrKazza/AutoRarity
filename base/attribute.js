@@ -53,6 +53,7 @@ const buyPoint = async (tokenID, point, nonce) => {
                 if (typeof contractBuyPoint === 'undefined') {
                     contractBuyPoint = new ethers.Contract(address, abi, constVal.account);
                 }
+                logUtils.log(`${tokenID} => start buy point`);
                 let approveResponse = await contractBuyPoint.point_buy(
                     tokenID,
                     point['str'],
@@ -66,8 +67,12 @@ const buyPoint = async (tokenID, point, nonce) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+                let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
-                return [true, 'success'];
+                if (constVal.debug){
+                    logUtils.log(approveResponse);
+                }
+                return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => point error`);
                 if (constVal.debug){

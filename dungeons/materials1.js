@@ -34,6 +34,7 @@ const run = async (tokenID, nonce = undefined) => {
                 if (typeof contractRun === 'undefined') {
                     contractRun = new ethers.Contract(address, abi, constVal.account);
                 }
+                logUtils.log(`${tokenID} => start [${dungeonName}]`);
                 let approveResponse = await contractRun.adventure(
                     tokenID,
                     {
@@ -41,8 +42,12 @@ const run = async (tokenID, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+                let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
-                return [true, `success, loot => ${loot}`];
+                if (constVal.debug){
+                    logUtils.log(approveResponse);
+                }
+                return [receipt.status === 1, `success, loot => ${loot}`];
             } catch (e) {
                 logUtils.log(`${tokenID} => [${dungeonName}] error`);
                 if (constVal.debug){
@@ -67,7 +72,6 @@ const scout = async (tokenID) => {
             logUtils.log(`${tokenID} => ${loot} => time left ${textTimeleft[0]}h${textTimeleft[1]}m`);
         } else {
             logUtils.log(`${tokenID} => ${loot} => ready`);
-
         }
     } else {
         logUtils.log(`${tokenID} => ${loot}`);

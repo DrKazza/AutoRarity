@@ -1,4 +1,3 @@
-const {JsonRpcProvider} = require("@ethersproject/providers");
 const ethers = require("ethers");
 const parseArg = require('mri');
 const parseBool = (val) => {return val === true || val === 'true'}
@@ -31,7 +30,7 @@ if (importedTokenIds === undefined) {
 
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
-const jsonRpcProvider = new JsonRpcProvider(fantomRpcUrl);
+const jsonRpcProvider = new ethers.providers.JsonRpcProvider(fantomRpcUrl, 250);
 const wallet = ethers.Wallet.fromMnemonic(secretKey);
 const account = wallet.connect(jsonRpcProvider);
 

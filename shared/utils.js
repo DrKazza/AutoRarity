@@ -46,6 +46,10 @@ const getNonce = async (nonce) => {
     if (typeof nonce === 'undefined'){
         nonce = await nonceVal();
     }
+    let latestNonceTemp = await nonceVal();
+    if (latestNonceTemp > nonce){
+        nonce = latestNonceTemp;
+    }
     return nonce;
 }
 
@@ -96,6 +100,17 @@ const getFTMBalance = async () => {
     return await constVal.account.getBalance();
 }
 
+const waitForTx = async (tokenID, approveResponse) => {
+    let transactionReceipt = await approveResponse.wait();
+    if (transactionReceipt.status === 1){
+        let actual_cost = (transactionReceipt.gasUsed * (approveResponse.gasPrice / 10**18)).toFixed(5);
+        logUtils.log(`${tokenID} => Tx success, actual cost ${actual_cost} FTM, id: ${approveResponse.hash}`);
+    } else {
+        logUtils.log(`${tokenID} => Tx failed, id: ${approveResponse.hash}`);
+    }
+    return transactionReceipt;
+}
+
 module.exports = {
     secsToText,
     timeLeft,
@@ -105,5 +120,6 @@ module.exports = {
     delay,
     saveTelegramChatId,
     getFTMBalance,
+    waitForTx,
     web3
 }

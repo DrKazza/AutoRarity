@@ -33,6 +33,7 @@ const claimXp = async (tokenID, nonce)  => {
                 if (typeof contractClaimXp === 'undefined') {
                     contractClaimXp = new ethers.Contract(address, abi, constVal.account);
                 }
+                logUtils.log(`${tokenID} => start xp claim`);
                 let approveResponse = await contractClaimXp.adventure(
                     tokenID,
                     {
@@ -40,12 +41,12 @@ const claimXp = async (tokenID, nonce)  => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
-
+                let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => xp claimed`);
                 if (constVal.debug){
-                    logUtils.log(`nonce => ${nonce}`);
+                    logUtils.log(approveResponse);
                 }
-                return [true, 'success'];
+                return [receipt.status === 1, 'success'];
             } catch (e) {
                 logUtils.log(`${tokenID} => xp error`);
                 if (constVal.debug){
@@ -72,6 +73,7 @@ const levelUp = async (tokenID, nonce)  => {
                 if (typeof contractLevelUp === 'undefined') {
                     contractLevelUp = new ethers.Contract(address, abi, constVal.account);
                 }
+                logUtils.log(`${tokenID} => start levelUp`);
                 let approveResponse = await contractLevelUp.level_up(
                     tokenID,
                     {
@@ -79,8 +81,12 @@ const levelUp = async (tokenID, nonce)  => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+                let receipt = await utils.waitForTx(tokenID, approveResponse);
                 logUtils.log(`${tokenID} => levelUp done`);
-                return [true, 'success'];
+                if (constVal.debug){
+                    logUtils.log(approveResponse);
+                }
+                return [receipt.status === 1, 'success'];
             } catch (e) {
                 logUtils.log(`${tokenID} => levelUp error`);
                 if (constVal.debug){
@@ -114,8 +120,8 @@ const summon = async (classToSummon, nonce, i = 0) => {
                         gasPrice: utils.calculateGasPrice(),
                         nonce: await utils.getNonce(nonce)
                     });
-                logUtils.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
-                return true;
+                let receipt = await utils.waitForTx(i+1, approveResponse);
+                return receipt.status === 1;
             } catch (e) {
                 logUtils.log(`summon error`);
                 if (constVal.debug){

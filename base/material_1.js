@@ -27,6 +27,7 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                 if (typeof contractTransfer === 'undefined') {
                     contractTransfer = new ethers.Contract(address, abi, constVal.account);
                 }
+                logUtils.log(`${tokenFrom} > ${tokenTo} => start transfer materials1`);
                 let approveResponse = await contractTransfer.transfer(
                     tokenFrom,
                     tokenTo,
@@ -36,8 +37,12 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+                let receipt = await utils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse);
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 success`);
-                return [true, 'success'];
+                if (constVal.debug){
+                    logUtils.log(approveResponse);
+                }
+                return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
                 if (constVal.debug){
