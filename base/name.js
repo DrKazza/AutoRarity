@@ -67,6 +67,7 @@ const claim = async (tokenID, name, nonce) => {
             } catch (e){
                 logUtils.log(`${tokenID} => name error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
                 return [false, 'error'];

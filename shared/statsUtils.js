@@ -1,5 +1,9 @@
 const constVal = require("../shared/const");
 const scrapUtil = require("../scrap/scrapUtils");
+const ethers = require("ethers");
+const Web3 = require("web3");
+let web3 = new Web3(constVal.fantomRpcUrl);
+
 const getGlobalStats = async () => {
     let totalGold = 0;
     let totalGoldClaimable = 0;
@@ -45,7 +49,18 @@ Summoner Count:\n`;
     return text;
 }
 
+const calculateGasPrice = async () => {
+    let spotPx = await web3.eth.getGasPrice();
+    let spotPxBN = ethers.BigNumber.from(spotPx.toString())
+    if (spotPxBN.gte(constVal.maxGasPrice)) {
+        return -(Math.floor(spotPx/(10**9)))
+    } else {
+        return spotPxBN
+    }
+}
+
 module.exports = {
     getGlobalStats,
-    formatGlobalStats
+    formatGlobalStats,
+    calculateGasPrice
 }

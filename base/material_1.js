@@ -41,10 +41,10 @@ const transfer = async (tokenFrom, tokenTo, amount, nonce = undefined) => {
             } catch (e){
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
                 if (constVal.debug){
-                    logUtils.log(`gas price => ${Math.floor(thisGas/(10**9))}`);
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
-                return [false, 'ERROR'];
+                return [false, 'error'];
             }
         } else {
             logUtils.log(`${tokenFrom} > ${tokenTo} Live trading disabled - adventuring NOT submitted.`)

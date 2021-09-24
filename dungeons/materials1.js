@@ -46,9 +46,10 @@ const run = async (tokenID, nonce = undefined) => {
             } catch (e) {
                 logUtils.log(`${tokenID} => [${dungeonName}] error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
-                return [false, 'ERROR'];
+                return [false, 'error'];
             }
         } else {
             logUtils.log(`Live trading disabled - [${dungeonName}]  dungeoning NOT submitted.`)

@@ -71,6 +71,7 @@ const buyPoint = async (tokenID, point, nonce) => {
             } catch (e){
                 logUtils.log(`${tokenID} => point error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
                 return [false, 'error'];

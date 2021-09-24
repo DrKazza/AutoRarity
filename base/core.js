@@ -40,11 +40,16 @@ const claimXp = async (tokenID, nonce)  => {
                         gasPrice: thisGas,
                         nonce: await utils.getNonce(nonce)
                     });
+
                 logUtils.log(`${tokenID} => xp claimed`);
+                if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
+                }
                 return [true, 'success'];
             } catch (e) {
                 logUtils.log(`${tokenID} => xp error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -79,6 +84,7 @@ const levelUp = async (tokenID, nonce)  => {
             } catch (e) {
                 logUtils.log(`${tokenID} => levelUp error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -90,7 +96,7 @@ const levelUp = async (tokenID, nonce)  => {
     }
 }
 
-const summon = async (classToSummon, nonceVal, i = 0) => {
+const summon = async (classToSummon, nonce, i = 0) => {
     let thisGas = await utils.calculateGasPrice()
     if (thisGas < 0) {
         logUtils.log(`#${i+1} => Gas Price too high: ${-thisGas}`)
@@ -106,13 +112,14 @@ const summon = async (classToSummon, nonceVal, i = 0) => {
                     {
                         gasLimit: constVal.totalGasLimit,
                         gasPrice: utils.calculateGasPrice(),
-                        nonce: await utils.getNonce(nonceVal)
+                        nonce: await utils.getNonce(nonce)
                     });
                 logUtils.log(`#${i+1} => transaction hash => ${approveResponse.hash}`);
                 return true;
             } catch (e) {
                 logUtils.log(`summon error`);
                 if (constVal.debug){
+                    logUtils.log(`nonce => ${nonce}`);
                     logUtils.log(e);
                 }
                 return false;

@@ -18,6 +18,155 @@ const statsUtils = require('./shared/statsUtils');
 
 let lastAutoNonce = 0;
 
+const doStuff = async (tokenID, latestNonce, delayToUse, dungeonList) => {
+    let somethingDone = false;
+    let tokenStats = await core.getStats(tokenID);
+    let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
+    let xpPending = 0
+    if (xpCountdown < 0) {
+        somethingDone = true;
+        let xpEarnAttempt = await core.claimXp(tokenID, latestNonce)
+        if (xpEarnAttempt[0]) {
+            // success
+            xpPending = 250*10**18;
+            latestNonce++;
+        } else if (xpEarnAttempt[1] === 'high gas') {
+            // fail due to high gas price
+            delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+        } else if (xpEarnAttempt[1] === 'error'){
+            return [false, latestNonce, delayToUse, 'error'];
+        }
+    } else {
+        delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
+    }
+    let levelUpDone = false;
+    if (constVal.autoLevelUp) {
+        if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
+            somethingDone = true;
+            if (tokenStats[0] < tokenStats[4]) {
+                delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+            } else {
+                // try to levelup
+                let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
+                if (lvlEarnAttempt[0]) {
+                    latestNonce++;
+                    levelUpDone = true;
+                } else if (lvlEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (lvlEarnAttempt[1] === 'error'){
+                    return [false, latestNonce, delayToUse, 'error'];
+                }
+            }
+        }
+    }
+    if (levelUpDone){
+        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+    } else {
+        let  goldStats = await gold.getStats(tokenID);
+        if (constVal.enableClaimGold){
+            if (goldStats[1] > 0) {
+                somethingDone = true;
+                let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
+                if (goldEarnAttempt[0]) {
+                    if (constVal.autoTransferToMule){
+                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                    }
+                    latestNonce++;
+                } else if (goldEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (goldEarnAttempt[1] === 'error'){
+                    return [false, latestNonce, delayToUse, 'error'];
+                }
+            }
+        }
+        if (constVal.autoTransferToMule) {
+            if (goldStats[2] > 0) {
+                somethingDone = true;
+                let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
+                if (transferAttempt[0]) {
+                    latestNonce++;
+                } else if (transferAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (transferAttempt[1] === 'error'){
+                    return [false, latestNonce, delayToUse, 'error'];
+                }
+            }
+        }
+        let  rarStats = await rar.getStats(tokenID);
+        if (constVal.enableClaimRar){
+            if (rarStats[1] > 0) {
+                somethingDone = true;
+                let rarEarnAttempt = await rar.claim(tokenID, latestNonce)
+                if (rarEarnAttempt[0]) {
+                    if (constVal.autoTransferToMule){
+                        delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+                    }
+                    latestNonce++;
+                } else if (rarEarnAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (rarEarnAttempt[1] === 'error'){
+                    return [false, latestNonce, delayToUse, 'error'];
+                }
+            }
+        }
+        if (constVal.autoTransferToMule) {
+            if (rarStats[2] > 0) {
+                somethingDone = true;
+                let transferAttempt = await rar.transferToMule(tokenID, rarStats[2], latestNonce);
+                if (transferAttempt[0]) {
+                    latestNonce++;
+                } else if (transferAttempt[1] === 'high gas') {
+                    // fail due to high gas price
+                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+                } else if (transferAttempt[1] === 'error'){
+                    return [false, latestNonce, delayToUse, 'error'];
+                }
+            }
+        }
+    }
+    if (constVal.autoTransferToMule){
+        let materials1Inventory = await materials1.getInventory(tokenID);
+        if (materials1Inventory > 0){
+            somethingDone = true;
+            let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory, latestNonce);
+            if (transferAttempt[0]) {
+                latestNonce++;
+            } else if (transferAttempt[1] === 'high gas') {
+                // fail due to high gas price
+                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+            } else if (transferAttempt[1] === 'error'){
+                return [false, latestNonce, delayToUse, 'error'];
+            }
+        }
+    }
+    if (constVal.enableAutoDungeon){
+        for (let dungeonName of dungeonList){
+            let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce, true);
+            if (dungeonAttempt[0]) {
+                latestNonce++;
+                delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
+            } else if (dungeonAttempt[1] === 'high gas') {
+                // fail due to high gas price
+                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+            } else if (dungeonAttempt[1] === 'time') {
+                // fail due to not time not available
+                delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
+            } else if (dungeonAttempt[1] === 'error'){
+                return [false, latestNonce, delayToUse, 'error'];
+            }
+        }
+    }
+
+    if (!somethingDone){
+        logUtils.log(`${tokenID} => nothing to do...`);
+    }
+    return [true, latestNonce, delayToUse, ''];
+}
+
 const checkTokens = async () => {
     let latestNonce = await utils.nonceVal();
     if (lastAutoNonce > latestNonce){
@@ -42,134 +191,23 @@ const checkTokens = async () => {
         return [delayToUse]
     }
     for (let tokenID of constVal.myTokenIds) {
-        let somethingDone = false;
-        let tokenStats = await core.getStats(tokenID);
-        let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
-        let xpPending = 0
-        if (xpCountdown < 0) {
-            somethingDone = true;
-            let xpEarnAttempt = await core.claimXp(tokenID, latestNonce)
-            if (xpEarnAttempt[0]) {
-                // success
-                xpPending = 250*10**18;
-                latestNonce++;
-            } else if (xpEarnAttempt[1] === 'high gas') {
-                // fail due to high gas price
-                delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+        let latestNonceTemp = await utils.nonceVal();
+        if (latestNonceTemp > latestNonce){
+            latestNonce = latestNonceTemp;
+        }
+        let res = await doStuff(tokenID, latestNonce, delayToUse, dungeonList);
+        if (!res[0] && res[3] === 'error'){
+            logUtils.log(`Error detected retrying ${tokenID}`)
+            await utils.delay(10000);
+            latestNonce = res[1];
+            let latestNonceTemp = await utils.nonceVal();
+            if (latestNonceTemp > latestNonce){
+                latestNonce = latestNonceTemp;
             }
+            await doStuff(tokenID, latestNonce, delayToUse, dungeonList);
         } else {
-            delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
-        }
-        let levelUpDone = false;
-        if (constVal.autoLevelUp) {
-            if (tokenStats[4] <= (xpPending + parseInt(tokenStats[0], 10))) {
-                somethingDone = true;
-                if (tokenStats[0] < tokenStats[4]) {
-                    delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-                } else {
-                    // try to levelup
-                    let lvlEarnAttempt = await core.levelUp(tokenID, latestNonce)
-                    if (lvlEarnAttempt[0]) {
-                        latestNonce++;
-                        levelUpDone = true;
-                    } else if (lvlEarnAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    }
-                }
-            }
-        }
-        if (levelUpDone){
-            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-        } else {
-            let  goldStats = await gold.getStats(tokenID);
-            if (constVal.enableClaimGold){
-                if (goldStats[1] > 0) {
-                    somethingDone = true;
-                    let goldEarnAttempt = await gold.claim(tokenID, latestNonce)
-                    if (goldEarnAttempt[0]) {
-                        if (constVal.autoTransferToMule){
-                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-                        }
-                        latestNonce++;
-                    } else if (goldEarnAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    }
-                }
-            }
-            if (constVal.autoTransferToMule) {
-                if (goldStats[2] > 0) {
-                    somethingDone = true;
-                    let transferAttempt = await gold.transferToMule(tokenID, goldStats[2], latestNonce);
-                    if (transferAttempt[0]) {
-                        latestNonce++;
-                    } else if (transferAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    }
-                }
-            }
-            let  rarStats = await rar.getStats(tokenID);
-            if (constVal.enableClaimRar){
-                if (rarStats[1] > 0) {
-                    somethingDone = true;
-                    let rarEarnAttempt = await rar.claim(tokenID, latestNonce)
-                    if (rarEarnAttempt[0]) {
-                        if (constVal.autoTransferToMule){
-                            delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-                        }
-                        latestNonce++;
-                    } else if (rarEarnAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    }
-                }
-            }
-            if (constVal.autoTransferToMule) {
-                if (rarStats[2] > 0) {
-                    somethingDone = true;
-                    let transferAttempt = await rar.transferToMule(tokenID, rarStats[2], latestNonce);
-                    if (transferAttempt[0]) {
-                        latestNonce++;
-                    } else if (transferAttempt[1] === 'high gas') {
-                        // fail due to high gas price
-                        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                    }
-                }
-            }
-        }
-        if (constVal.autoTransferToMule){
-            let materials1Inventory = await materials1.getInventory(tokenID);
-            if (materials1Inventory > 0){
-                somethingDone = true;
-                let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory, latestNonce);
-                if (transferAttempt[0]) {
-                    latestNonce++;
-                } else if (transferAttempt[1] === 'high gas') {
-                    // fail due to high gas price
-                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                }
-            }
-        }
-        if (constVal.enableAutoDungeon){
-            for (let dungeonName of dungeonList){
-                let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, latestNonce, true);
-                if (dungeonAttempt[0]) {
-                    latestNonce++;
-                    delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-                } else if (dungeonAttempt[1] === 'high gas') {
-                    // fail due to high gas price
-                    delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
-                } else if (dungeonAttempt[1] === 'time') {
-                    // fail due to not time not available
-                    delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
-                }
-            }
-        }
-
-        if (!somethingDone){
-            logUtils.log(`${tokenID} => nothing to do...`);
+            latestNonce = res[1];
+            delayToUse = res[2];
         }
     }
     lastAutoNonce = latestNonce;
@@ -403,9 +441,6 @@ const init = async () => {
                 } else {
                     logUtils.log("Bot not enabled");
                 }
-                break;
-            case 'test':
-                //console.log(await scrapUtil.getTokenData(2275067));
                 break;
             default:
                 logUtils.log(`${args[0]} is not a valid command`)

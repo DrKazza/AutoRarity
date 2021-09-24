@@ -1,11 +1,10 @@
 const constVal = require('./const');
-const utils = require("./utils");
 const statsUtils = require('./statsUtils');
 const { Bot } = require("grammy");
 
 let bot;
 
-const init = async () => {
+const init = () => {
     if (typeof constVal.telegramBotToken === 'undefined' || constVal.telegramBotToken.length === 0){
         console.log(`You need to provide a bot token in ${constVal.envFile}, telegramBotToken`);
         return;
@@ -18,10 +17,11 @@ const init = async () => {
         await utils.saveTelegramChatId();
         ctx.reply("Welcome! Up and running.")
     });
-    bot.command("getStats", sendStats);
-    bot.command("getstats", sendStats);
-    await bot.api.setMyCommands([
-        { command: "getstats", description: "Display global stats" },
+    bot.command("stats", sendStats);
+    bot.command("gp", sendGasPrice);
+    bot.api.setMyCommands([
+        { command: "stats", description: "Display global stats" },
+        { command: "gp", description: "Display gas price" },
     ]);
 // Start your bot
     console.log("Bot started");
@@ -34,6 +34,16 @@ const sendStats = async (ctx) => {
     let data = await statsUtils.getGlobalStats();
     let text = statsUtils.formatGlobalStats(data);
     ctx.reply(text);
+}
+
+const sendGasPrice = async (ctx) => {
+    let gas = await statsUtils.calculateGasPrice();
+    if (gas > 0){
+        gas = Math.floor(gas/(10**9));
+    } else {
+        gas = Math.abs(gas);
+    }
+    ctx.reply(`current gasPrice => ${gas}\ncurrent maxGasPrice => ${constVal.maxGasPrice / (10 ** 9)}`);
 }
 
 const sendMessage = (message) => {
