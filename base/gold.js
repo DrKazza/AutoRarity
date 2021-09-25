@@ -3,6 +3,7 @@ const utils = require('../shared/utils');
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const logUtils = require("../shared/logUtils");
+const fileUtils = require("../shared/fileUtils");
 
 const abi = contractAddresses.goldABI;
 const address = contractAddresses.rarityGold;
@@ -51,6 +52,7 @@ const claim = async (tokenID) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => gold error`);
+                fileUtils.logToFile(`gold error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);
@@ -93,6 +95,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer gold error`);
+                fileUtils.logToFile(`transfer gold error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

@@ -3,6 +3,7 @@ const {contractAddresses} = require('../shared/contractAddresses');
 const utils = require('../shared/utils');
 const constVal = require('../shared/const');
 const logUtils = require('../shared/logUtils');
+const fileUtils = require("../shared/fileUtils");
 
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
@@ -50,6 +51,7 @@ const run = async (tokenID) => {
                 return [receipt.status === 1, `success, loot => ${loot}`];
             } catch (e) {
                 logUtils.log(`${tokenID} => [${dungeonName}] error`);
+                fileUtils.logToFile(`[${dungeonName}] error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

@@ -1,6 +1,7 @@
 const {contractAddresses} = require('../shared/contractAddresses');
 const utils = require("../shared/utils");
 const logUtils = require("../shared/logUtils");
+const fileUtils = require("../shared/fileUtils");
 const constVal = require("../shared/const");
 const ethers = require("ethers");
 const tokenGetter = require("../shared/tokenIdGetter.js");
@@ -49,8 +50,8 @@ const claimXp = async (tokenID)  => {
                 return [receipt.status === 1, 'success'];
             } catch (e) {
                 logUtils.log(`${tokenID} => xp error`);
+                fileUtils.logToFile(`xp error\n${e.toString()}`);
                 if (constVal.debug){
-
                     logUtils.log(e);
                 }
                 return [false, 'error'];
@@ -89,6 +90,7 @@ const levelUp = async (tokenID)  => {
                 return [receipt.status === 1, 'success'];
             } catch (e) {
                 logUtils.log(`${tokenID} => levelUp error`);
+                fileUtils.logToFile(`levelUp error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);
@@ -124,6 +126,7 @@ const summon = async (classToSummon, i = 0) => {
                 return receipt.status === 1;
             } catch (e) {
                 logUtils.log(`summon error`);
+                fileUtils.logToFile(`summon error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

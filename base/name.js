@@ -70,6 +70,7 @@ const claim = async (tokenID, name) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => name error`);
+                fileUtils.logToFile(`name error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

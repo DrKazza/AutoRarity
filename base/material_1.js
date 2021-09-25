@@ -3,6 +3,7 @@ const utils = require('../shared/utils');
 const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
+const fileUtils = require("../shared/fileUtils");
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 
@@ -45,6 +46,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 error`);
+                fileUtils.logToFile(`transfer materials1 error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

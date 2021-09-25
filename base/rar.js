@@ -3,6 +3,7 @@ const utils = require('../shared/utils');
 const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
+const fileUtils = require("../shared/fileUtils");
 
 const abi = contractAddresses.rarABI;
 const address = contractAddresses.rarityRAR;
@@ -52,6 +53,7 @@ const claim = async (tokenID) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => rar error`);
+                fileUtils.logToFile(`rar error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);
@@ -94,6 +96,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer rar error`);
+                fileUtils.logToFile(`transfer rar error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);

@@ -30,6 +30,14 @@ const getAllLineOfFile = async (file) => {
     }
 }
 
+const logToFile = (message) => {
+    let formattedMessage = `************************** ${new Date()}
+${message}
+**************************`;
+    fs.appendFileSync('error.log', formattedMessage);
+}
+
 module.exports = {
-    getAllLineOfFile
+    getAllLineOfFile,
+    logToFile
 }

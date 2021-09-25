@@ -5,6 +5,7 @@ const constVal = require("../shared/const");
 const ethers = require("ethers");
 const core = require('./core');
 const fs = require("fs");
+const fileUtils = require("../shared/fileUtils");
 const abi =contractAddresses.attributesABI;
 const address = contractAddresses.rarityAttributes;
 
@@ -75,6 +76,7 @@ const buyPoint = async (tokenID, point) => {
                 return [receipt.status === 1, 'success'];
             } catch (e){
                 logUtils.log(`${tokenID} => point error`);
+                fileUtils.logToFile(`point error\n${e.toString()}`);
                 if (constVal.debug){
 
                     logUtils.log(e);
