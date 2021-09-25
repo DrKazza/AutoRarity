@@ -55,6 +55,15 @@ const enableClaimRar = claimRarVar === undefined ? false : parseBool(claimRarVar
 const autoDungeonVar = process.env.ENABLE_AUTO_DUNGEON;
 const enableAutoDungeon = autoDungeonVar === undefined ? true : parseBool(autoDungeonVar);
 
+const goldTransferThresholdVar = process.env.GOLD_TRANSFER_THRESHOLD;
+const goldTransferThreshold = goldTransferThresholdVar === undefined || goldTransferThresholdVar.length === 0 ? 1000 : parseInt(goldTransferThresholdVar, 10);
+
+const rarTransferThresholdVar = process.env.RAR_TRANSFER_THRESHOLD;
+const rarTransferThreshold = rarTransferThresholdVar === undefined || rarTransferThresholdVar.length === 0 ? 1000 : parseInt(rarTransferThresholdVar, 10);
+
+const materials1TransferThresholdVar = process.env.MATERIALS_1_TRANSFER_THRESHOLD;
+const materials1TransferThreshold = materials1TransferThresholdVar === undefined || materials1TransferThresholdVar.length === 0 ? 100 : parseInt(materials1TransferThresholdVar, 10);
+
 const maxGasPxVar = process.env.MAXGAS;
 if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
@@ -98,5 +107,8 @@ module.exports = {
     lowFTM,
     enableClaimGold,
     enableClaimRar,
-    enableAutoDungeon
+    enableAutoDungeon,
+    goldTransferThreshold,
+    rarTransferThreshold,
+    materials1TransferThreshold
 }

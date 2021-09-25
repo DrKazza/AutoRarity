@@ -78,7 +78,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
             }
         }
         if (constVal.autoTransferToMule) {
-            if (goldStats[2] > 0) {
+            if (goldStats[2] > 0 && goldStats[2] >= constVal.goldTransferThreshold) {
                 somethingDone = true;
                 let transferAttempt = await gold.transferToMule(tokenID, goldStats[2]);
                 if (transferAttempt[0]) {
@@ -108,7 +108,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
             }
         }
         if (constVal.autoTransferToMule) {
-            if (rarStats[2] > 0) {
+            if (rarStats[2] > 0 && rarStats[2] >= constVal.rarTransferThreshold) {
                 somethingDone = true;
                 let transferAttempt = await rar.transferToMule(tokenID, rarStats[2]);
                 if (transferAttempt[0]) {
@@ -123,7 +123,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     }
     if (constVal.autoTransferToMule){
         let materials1Inventory = await materials1.getInventory(tokenID);
-        if (materials1Inventory > 0){
+        if (materials1Inventory > 0 && materials1Inventory >= constVal.materials1TransferThreshold){
             somethingDone = true;
             let transferAttempt = await materials1.transferToMule(tokenID, materials1Inventory);
             if (transferAttempt[0]) {
@@ -404,25 +404,6 @@ const init = async () => {
                 }
                 break;
             case 'test':
-                let gasT = await utils.calculateGasPrice();
-                if (gasT > 0){
-                    gasT = Math.floor(gasT/(10**9));
-                } else {
-                    gasT = Math.abs(gasT);
-                }
-                while (gasT > constVal.maxGasPrice/(10**9)) {
-                    gasT = await utils.calculateGasPrice();
-                    if (gasT > 0){
-                        gasT = Math.floor(gasT/(10**9));
-                    } else {
-                        gasT = Math.abs(gasT);
-                    }
-                    logUtils.log(`current gasPrice => ${gasT}`);
-                    logUtils.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
-                    await utils.delay(30000);
-                    logUtils.log('*********');
-                }
-                logUtils.log('gas price OK');
                 break;
             default:
                 logUtils.log(`${args[0]} is not a valid command`)
