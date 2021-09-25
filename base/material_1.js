@@ -4,6 +4,7 @@ const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const fileUtils = require("../shared/fileUtils");
+const txUtils = require("../shared/txUtils");
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
 
@@ -38,7 +39,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse);
+                let receipt = await txUtils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse, 'transfer materials1');
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer materials1 success`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);

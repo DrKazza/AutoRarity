@@ -4,6 +4,7 @@ const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const logUtils = require("../shared/logUtils");
 const fileUtils = require("../shared/fileUtils");
+const txUtils = require("../shared/txUtils");
 
 const abi = contractAddresses.goldABI;
 const address = contractAddresses.rarityGold;
@@ -44,7 +45,7 @@ const claim = async (tokenID) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'claim gold');
                 logUtils.log(`${tokenID} => gold claimed`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);
@@ -87,7 +88,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse);
+                let receipt = await txUtils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse, 'transfer gold');
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer gold success`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);

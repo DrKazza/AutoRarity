@@ -4,6 +4,7 @@ const logUtils = require("../shared/logUtils");
 const fileUtils = require('../shared/fileUtils');
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
+const txUtils = require("../shared/txUtils");
 
 const abi = contractAddresses.nameABI;
 const address = contractAddresses.rarityName;
@@ -62,7 +63,7 @@ const claim = async (tokenID, name) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'claim name');
                 logUtils.log(`${tokenID} => name claimed => ${name}`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);

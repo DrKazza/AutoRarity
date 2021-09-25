@@ -31,7 +31,7 @@ const scout = async (dungeonName, token) => {
 }
 
 const doDungeon = async (dungeonName, token, isAuto = false) => {
-    if (!dungeons.isDungeonAvailable(dungeonName)) {
+    if (!dungeons.isDungeonAvailable(dungeonName) && !isAuto) {
         logUtils.log(`This dungeon is not implemented yet [${dungeonName}]`);
         displayAvailableDungeons();
     } else {
@@ -40,8 +40,9 @@ const doDungeon = async (dungeonName, token, isAuto = false) => {
                 await dungeons.runDungeon(dungeonName, token);
             }
         } else {
-            if (!constVal.myTokenIds.includes(token)){
+            if (!constVal.myTokenIds.includes(token.toString())){
                 logUtils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
+                return false;
             } else {
                 return await dungeons.runDungeon(dungeonName, token);
             }

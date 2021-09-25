@@ -7,6 +7,7 @@ const constVal = require("../shared/const");
 const logUtils = require("../shared/logUtils");
 const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
+const dataDb = require('../data');
 
 const SUMMONERS = gql`
     query getSummoners($owner: String!, $skip: Int!) {
@@ -27,7 +28,9 @@ const getTokenList = async function (owner) {
         await request('https://api.rarity.game/subgraphs/name/rarity', SUMMONERS, {owner: owner, skip:skip})
             .then((data) => {
                 data.summoners.forEach((elem) => {
-                    tokenList.push(parseInt(elem.id, 16));
+                    let tokenID = parseInt(elem.id, 16);
+                    tokenList.push(tokenID);
+                    dataDb.insertToken(tokenID);
                 })
                 currentResCount = data.summoners.length;
             });

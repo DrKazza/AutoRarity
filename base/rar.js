@@ -4,6 +4,7 @@ const logUtils = require("../shared/logUtils");
 const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const fileUtils = require("../shared/fileUtils");
+const txUtils = require("../shared/txUtils");
 
 const abi = contractAddresses.rarABI;
 const address = contractAddresses.rarityRAR;
@@ -45,7 +46,7 @@ const claim = async (tokenID) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'claim rar');
                 logUtils.log(`${tokenID} => rar claimed`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);
@@ -88,7 +89,7 @@ const transfer = async (tokenFrom, tokenTo, amount) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse);
+                let receipt = await txUtils.waitForTx(`${tokenFrom} > ${tokenTo}`, approveResponse, 'transfer rar');
                 logUtils.log(`${tokenFrom} > ${tokenTo} => transfer rar success`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);

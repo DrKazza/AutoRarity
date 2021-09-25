@@ -4,6 +4,7 @@ const utils = require('../shared/utils');
 const constVal = require('../shared/const');
 const logUtils = require('../shared/logUtils');
 const fileUtils = require("../shared/fileUtils");
+const txUtils = require("../shared/txUtils");
 
 const abi = contractAddresses.materials1ABI;
 const address = contractAddresses.rarityMaterials1;
@@ -43,7 +44,7 @@ const run = async (tokenID) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'cellar');
                 logUtils.log(`${tokenID} => [${dungeonName}] success, loot => ${loot}`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);

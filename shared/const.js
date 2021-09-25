@@ -40,9 +40,9 @@ const liveTradingVar = process.env.LIVETRADING;
 const liveTrading = liveTradingVar === undefined ? false : parseBool(liveTradingVar);
 
 const mule = {
-    gold:process.env.GOLD_MULE,
-    rar:process.env.RAR_MULE,
-    materials1:process.env.MATERIALS_1_MULE
+    gold: parseInt(process.env.GOLD_MULE, 10),
+    rar: parseInt(process.env.RAR_MULE, 10),
+    materials1: parseInt(process.env.MATERIALS_1_MULE, 10)
 }
 const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
 const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar);

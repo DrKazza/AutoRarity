@@ -100,16 +100,16 @@ const getFTMBalance = async () => {
     return await constVal.account.getBalance();
 }
 
-const waitForTx = async (tokenID, approveResponse) => {
-    let transactionReceipt = await approveResponse.wait();
-    if (transactionReceipt.status === 1){
-        let actual_cost = (transactionReceipt.gasUsed * (approveResponse.gasPrice / 10**18)).toFixed(5);
-        logUtils.log(`${tokenID} => Tx success, actual cost ${actual_cost} FTM, id: ${approveResponse.hash}`);
-    } else {
-        logUtils.log(`${tokenID} => Tx failed, id: ${approveResponse.hash}`);
-    }
-    return transactionReceipt;
-}
+const slugify = (text, separator = "_") =>  {
+    return text
+        .toString()
+        .normalize('NFD')                   // split an accented letter in the base letter and the acent
+        .replace(/[\u0300-\u036f]/g, '')   // remove all previously split accents
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]/g, separator)   // remove all chars not letters, numbers and spaces (to be replaced)
+        .replace(/\s+/g, separator);
+};
 
 module.exports = {
     secsToText,
@@ -120,6 +120,6 @@ module.exports = {
     delay,
     saveTelegramChatId,
     getFTMBalance,
-    waitForTx,
+    slugify,
     web3
 }

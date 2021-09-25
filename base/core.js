@@ -5,6 +5,7 @@ const fileUtils = require("../shared/fileUtils");
 const constVal = require("../shared/const");
 const ethers = require("ethers");
 const tokenGetter = require("../shared/tokenIdGetter.js");
+const txUtils = require("../shared/txUtils");
 const abi =contractAddresses.manifestABI;
 const address = contractAddresses.rarityManifested;
 
@@ -42,7 +43,7 @@ const claimXp = async (tokenID)  => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'claim xp');
                 logUtils.log(`${tokenID} => xp claimed`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);
@@ -82,7 +83,7 @@ const levelUp = async (tokenID)  => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'level up');
                 logUtils.log(`${tokenID} => levelUp done`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);
@@ -122,7 +123,7 @@ const summon = async (classToSummon, i = 0) => {
                         gasPrice: utils.calculateGasPrice(),
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(i+1, approveResponse);
+                let receipt = await txUtils.waitForTx(i+1, approveResponse, 'summon');
                 return receipt.status === 1;
             } catch (e) {
                 logUtils.log(`summon error`);

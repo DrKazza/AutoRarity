@@ -6,6 +6,7 @@ const ethers = require("ethers");
 const core = require('./core');
 const fs = require("fs");
 const fileUtils = require("../shared/fileUtils");
+const txUtils = require("../shared/txUtils");
 const abi =contractAddresses.attributesABI;
 const address = contractAddresses.rarityAttributes;
 
@@ -68,7 +69,7 @@ const buyPoint = async (tokenID, point) => {
                         gasPrice: thisGas,
                         //nonce: await utils.getNonce(nonce)
                     });
-                let receipt = await utils.waitForTx(tokenID, approveResponse);
+                let receipt = await txUtils.waitForTx(tokenID, approveResponse, 'point buy');
                 logUtils.log(`${tokenID} => point bought => Str: ${point['str']}, Dex: ${point['dex']}, Const: ${point['const']}, Int: ${point['int']}, Wisdom: ${point['wis']}, Charisma: ${point['cha']}`);
                 if (constVal.debug){
                     logUtils.log(approveResponse);
