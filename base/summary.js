@@ -25,11 +25,11 @@ const charSummary = async () => {
         logUtils.log(`Str: ${attribs['strength']}, Dex: ${attribs['dexterity']}, Const: ${attribs['constitution']}, Int: ${attribs['intelligence']}, Wisdom: ${attribs['wisdom']}, Charisma: ${attribs['charisma']}`)
         let goldStats = await gold.getStats(tokenID);
         let goldtext = ''
-        if (goldStats[0] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}
-        if (goldStats[1] > 0) {goldtext +=`Gold to be claimed: ${goldStats[1]}`}
+        if (goldStats[0] > 0) {goldtext +=`Gold owned: ${(goldStats[0]).toLocaleString()}`}
+        if (goldStats[1] > 0) {goldtext +=`Gold to be claimed: ${(goldStats[1]).toLocaleString()}`}
         if (goldtext !== '') {logUtils.log(goldtext)}
         let inventory = await material1.getInventory(tokenID);
-        if (inventory > 0) {logUtils.log(`${inventory} Crafting Materials (I)`)}
+        if (inventory > 0) {logUtils.log(`${(parseInt(inventory,10)).toLocaleString()} Crafting Materials (I)`)}
     }
     logUtils.log(`*****************`)
 }
