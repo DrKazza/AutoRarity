@@ -54,6 +54,8 @@ const claimRarVar = process.env.ENABLE_CLAIM_RAR;
 const enableClaimRar = claimRarVar === undefined ? false : parseBool(claimRarVar);
 const autoDungeonVar = process.env.ENABLE_AUTO_DUNGEON;
 const enableAutoDungeon = autoDungeonVar === undefined ? true : parseBool(autoDungeonVar);
+const cellarThresholdVar = process.env.CELLAR_THRESHOLD;
+const cellarThreshold = cellarThresholdVar === undefined || cellarThresholdVar.length === 0 ? 5 : parseInt(cellarThresholdVar, 10);
 
 const goldTransferThresholdVar = process.env.GOLD_TRANSFER_THRESHOLD;
 const goldTransferThreshold = goldTransferThresholdVar === undefined || goldTransferThresholdVar.length === 0 ? 1000 : parseInt(goldTransferThresholdVar, 10);
@@ -110,5 +112,6 @@ module.exports = {
     enableAutoDungeon,
     goldTransferThreshold,
     rarTransferThreshold,
-    materials1TransferThreshold
+    materials1TransferThreshold,
+    cellarThreshold
 }

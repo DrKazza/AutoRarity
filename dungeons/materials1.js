@@ -17,7 +17,7 @@ let contractGetTimeUntilAvailable;
 const run = async (tokenID) => {
     let thisGas = await utils.calculateGasPrice()
     let loot;
-    if ((loot = await getLoot(tokenID)) < 1){
+    if ((loot = await getLoot(tokenID)) < constVal.cellarThreshold){
         logUtils.log(`${tokenID} => [${dungeonName}] no loot`);
         return [false, 'no loot']
     }
