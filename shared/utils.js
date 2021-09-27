@@ -8,6 +8,7 @@ const util = require("util");
 const rename = util.promisify(fs.rename);
 const unlink = util.promisify(fs.unlink);
 const logUtils = require("../shared/logUtils");
+const {contractAddresses} = require("./contractAddresses");
 
 let web3 = new Web3(constVal.fantomRpcUrl);
 
@@ -111,6 +112,37 @@ const slugify = (text, separator = "_") =>  {
         .replace(/\s+/g, separator);
 };
 
+const getContractFunctionHashList = () => {
+    let contracts = [[contractAddresses.manifestABI,contractAddresses.rarityManifested],
+        [contractAddresses.attributesABI,contractAddresses.rarityAttributes],
+        [contractAddresses.goldABI,contractAddresses.rarityGold],
+        [contractAddresses.materials1ABI,contractAddresses.rarityMaterials1],
+        [contractAddresses.crafting1ABI,contractAddresses.rarityCrafting1],
+        [contractAddresses.classSkillsABI,contractAddresses.rarityClassSkills],
+        [contractAddresses.nameABI,contractAddresses.rarityName],
+        [contractAddresses.rarABI,contractAddresses.rarityRAR],
+    ];
+    let contractFunctionList = []
+
+    for (let contract of contracts){
+        let contractInstance = new web3.eth.Contract(contract[0], contract[1]);
+        let entries = Object.entries(contractInstance.methods);
+        let i = 0;
+        while (i < entries.length){
+            if (entries[i][0].substring(0,2) === "0x"){
+                contractFunctionList[entries[i][0]] = entries[i-1][0];
+            }
+            i++;
+        }
+    }
+
+    return contractFunctionList;
+}
+
+const sliceDataTo32Bytes = (data, index = 0) => {
+    return '0x'+data.slice(2+64*index, 2+64*(index+1));
+}
+
 module.exports = {
     secsToText,
     timeLeft,
@@ -121,5 +153,7 @@ module.exports = {
     saveTelegramChatId,
     getFTMBalance,
     slugify,
+    getContractFunctionHashList,
+    sliceDataTo32Bytes,
     web3
 }

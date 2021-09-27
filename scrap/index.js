@@ -45,12 +45,6 @@ const scrapDataFromList = async (tokenList)=> {
     logUtils.log(`Start Scrap => ${startDate}`);
     let i = 0;
     let total = tokenList.length;
-    let lastId = i;
-    let request = 0;
-    let interval = setInterval(() => {
-        request = ((i-lastId)).toFixed(0);
-        lastId = i;
-    }, 1000);
     let tokenToScrap = [];
     for (let tokenID of tokenList){
         tokenToScrap.push(tokenID);
@@ -78,7 +72,6 @@ const scrapDataFromList = async (tokenList)=> {
         let goldClaimableCount = data[tokenIndex].gold.claimable;
         sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount);
     }
-    clearInterval(interval);
     logUtils.log(`Scrap finished => ${new Date()}`);
 }
 

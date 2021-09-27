@@ -144,7 +144,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
 }
 
 const checkTokens = async () => {
-    let delayToUse = constVal.xpRetryDelay;
+    let delayToUse = dataUtils.getNextAvailableTime();
     let dungeonList = dungeon.getAvailableDungeons();
     let checkGas = await utils.calculateGasPrice()
     if (checkGas < 0) {
@@ -254,8 +254,10 @@ const init = async () => {
     node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
     node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]
     node index.js tn/testNames <file>           - validate and check for availability of names in <file>  
-    node index.js gp                            - get current gas price
-    node index.js cn                            - get current nonce`)
+    node index.js lpt <block>                   - load transaction starting from <block> into the local database
+    node index.js df [token]                    - gives all fees incurred by tokens or for a specific [token] (based on tx in local db)
+    node index.js dtf                           - gives total fees incurred by all token (based on tx in local db)
+    node index.js gp                            - get current gas price`)
     } else {
         if (constVal.debug){
             logUtils.log(`/!\\DEBUG ON/!\\`);
@@ -371,10 +373,6 @@ const init = async () => {
                 logUtils.log(`current gasPrice => ${gas}`);
                 logUtils.log(`current maxGasPrice => ${constVal.maxGasPrice/(10**9)}`);
                 break;
-            case 'cn':
-                logUtils.log(`current nonce => ${await utils.nonceVal()}`);
-                logUtils.log(`current transaction count => ${await constVal.account.getTransactionCount()}`);
-                break;
             case 'testNames':
             case 'tn':
                 if (typeof args[1] === 'undefined'){
@@ -390,12 +388,26 @@ const init = async () => {
                     logUtils.log("Bot not enabled");
                 }
                 break;
-            case 'test':
-                let tokens = dataUtils.getAvailableToken();
-                for (let token of tokens) {
-                    let fees = dataUtils.getTotalFeesForToken(token);
-                    console.log(`${token} => ${typeof fees === 'number' ? fees.toFixed(5) : '0'} FTM`);
+            case 'lpt':
+                if (typeof args[1] === 'undefined') {
+                    logUtils.log(`You have to pass the starting block number`)
                 }
+                await dataUtils.updateAccountTransaction(parseInt(args[1], 10), null);
+                break;
+            case 'df':
+                if (typeof args[1] !== 'undefined') {
+                    let res = dataUtils.getTotalFeesForToken(args[1]);
+                    logUtils.log(`${args[1]} => ${typeof res.fees === 'number' ? res.fees.toFixed(5) : '0'} FTM (${typeof res.tx === 'number' ? res.tx : '0'} tx)`);
+                } else {
+                    for (let token of constVal.myTokenIds){
+                        let res = dataUtils.getTotalFeesForToken(token);
+                        logUtils.log(`${token} => ${typeof res.fees === 'number' ? res.fees.toFixed(5) : '0'} FTM (${typeof res.tx === 'number' ? res.tx : '0'} tx)`);
+                    }
+                }
+                break;
+            case 'dtf':
+                let res = dataUtils.getTotalFees();
+                logUtils.log(`${typeof res.fees === 'number' ? res.fees.toFixed(5) : '0'} FTM on ${res.tokens} tokens (${res.tx} tx)`);
                 break;
             default:
                 logUtils.log(`${args[0]} is not a valid command`)

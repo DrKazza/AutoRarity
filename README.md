@@ -15,9 +15,11 @@
         node index.js scout <name> [token]          - scout <name> dungeon with all characters or with a specific [token]
         node index.js dg <name> [token]             - go in <name> dungeon with all characters or with a specific [token]
         node index.js sm [class] [quantity]         - summon [quantity=1] of [class=all]
-        node index.js tn/testNames <file>           - validate and check for availability of names in <file>
+        node index.js tn/testNames <file>           - validate and check for availability of names in <file>  
+        node index.js lpt <block>                   - load transaction starting from <block> into the local database  
+        node index.js df [token]                    - gives all fees incurred by tokens or for a specific [token] (based on tx in local db)
+        node index.js dtf                           - gives total fees incurred by all token (based on tx in local db)
         node index.js gp                            - get current gas price
-        node index.js cn                            - get current nonce
 ```
 ## How to Use
 
