@@ -72,7 +72,7 @@ const getTotalFees = () => {
 const getNextAvailableTime = () => {
     initDb();
     let res = db.prepare(`SELECT next_available from token WHERE next_available > CURRENT_TIMESTAMP ORDER BY next_available ASC LIMIT 1`).get();
-    if (typeof res.next_available !== 'string'){
+    if (typeof res === 'undefined' || typeof res.next_available !== 'string'){
         return constVal.minimumDelay;
     }
     let date = (new Date(res.next_available + ' GMT'));
