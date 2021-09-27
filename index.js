@@ -53,7 +53,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     }
     let  goldStats = await gold.getStats(tokenID);
     if (constVal.enableClaimGold){
-        if (goldStats[1] > 0) {
+        if (goldStats[1] > 0 && goldStats[1] >= constVal.goldClaimThreshold) {
             somethingDone = true;
             let goldEarnAttempt = await gold.claim(tokenID)
             if (goldEarnAttempt[1] === 'high gas') {
@@ -79,7 +79,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     }
     let  rarStats = await rar.getStats(tokenID);
     if (constVal.enableClaimRar){
-        if (rarStats[1] > 0) {
+        if (rarStats[1] > 0 && rarStats[1] >= constVal.rarClaimThreshold) {
             somethingDone = true;
             let rarEarnAttempt = await rar.claim(tokenID)
             if (rarEarnAttempt[1] === 'high gas') {

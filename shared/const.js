@@ -60,8 +60,14 @@ const cellarThreshold = cellarThresholdVar === undefined || cellarThresholdVar.l
 const goldTransferThresholdVar = process.env.GOLD_TRANSFER_THRESHOLD;
 const goldTransferThreshold = goldTransferThresholdVar === undefined || goldTransferThresholdVar.length === 0 ? 1000 : parseInt(goldTransferThresholdVar, 10);
 
+const goldClaimThresholdVar = process.env.GOLD_CLAIM_THRESHOLD;
+const goldClaimThreshold = goldClaimThresholdVar === undefined || goldClaimThresholdVar.length === 0 ? 1000 : parseInt(goldClaimThresholdVar, 10);
+
 const rarTransferThresholdVar = process.env.RAR_TRANSFER_THRESHOLD;
 const rarTransferThreshold = rarTransferThresholdVar === undefined || rarTransferThresholdVar.length === 0 ? 1000 : parseInt(rarTransferThresholdVar, 10);
+
+const rarClaimThresholdVar = process.env.RAR_CLAIM_THRESHOLD;
+const rarClaimThreshold = rarClaimThresholdVar === undefined || rarClaimThresholdVar.length === 0 ? 1000 : parseInt(rarClaimThresholdVar, 10);
 
 const materials1TransferThresholdVar = process.env.MATERIALS_1_TRANSFER_THRESHOLD;
 const materials1TransferThreshold = materials1TransferThresholdVar === undefined || materials1TransferThresholdVar.length === 0 ? 100 : parseInt(materials1TransferThresholdVar, 10);
@@ -113,5 +119,7 @@ module.exports = {
     goldTransferThreshold,
     rarTransferThreshold,
     materials1TransferThreshold,
-    cellarThreshold
+    cellarThreshold,
+    goldClaimThreshold,
+    rarClaimThreshold
 }
