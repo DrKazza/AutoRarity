@@ -12,17 +12,7 @@ const scrapData = async (start = 0) => {
     while (tokenID < maxId){
         tokenToScrap.push(tokenID);
         if (tokenID%50 === 0 && tokenID > 0) {
-            let data = await scrapUtil.getTokensData(tokenToScrap);
-            for (let tokenIndex in tokenToScrap){
-                let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
-                sqliteUtils.insertAddress(ownerAddress);
-                let materials1Count = data[tokenIndex].materials[0].balance;
-                let goldCount = data[tokenIndex].gold.balance;
-                let goldClaimableCount = data[tokenIndex].gold.claimable;
-                let level = data[tokenIndex].base.level;
-                let classType = data[tokenIndex].base.class;
-                sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount, level, classType);
-            }
+            await getDataAndInsert(tokenToScrap);
             tokenToScrap = [];
         }
         if (tokenID%500 === 0){
@@ -30,17 +20,7 @@ const scrapData = async (start = 0) => {
         }
         tokenID++;
     }
-    let data = await scrapUtil.getTokensData(tokenToScrap);
-    for (let tokenIndex in tokenToScrap){
-        let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
-        sqliteUtils.insertAddress(ownerAddress);
-        let materials1Count = data[tokenIndex].materials[0].balance;
-        let goldCount = data[tokenIndex].gold.balance;
-        let goldClaimableCount = data[tokenIndex].gold.claimable;
-        let level = data[tokenIndex].base.level;
-        let classType = data[tokenIndex].base.class;
-        sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount, level, classType);
-    }
+    await getDataAndInsert(tokenToScrap);
     logUtils.log(`Scrap finished => ${new Date()}`);
 }
 
@@ -53,22 +33,17 @@ const scrapDataFromList = async (tokenList)=> {
     for (let tokenID of tokenList){
         tokenToScrap.push(tokenID);
         if (i%50 === 0 && i > 0){
-            let data = await scrapUtil.getTokensData(tokenToScrap);
-            for (let tokenIndex in tokenToScrap){
-                let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
-                sqliteUtils.insertAddress(ownerAddress);
-                let materials1Count = data[tokenIndex].materials[0].balance;
-                let goldCount = data[tokenIndex].gold.balance;
-                let goldClaimableCount = data[tokenIndex].gold.claimable;
-                let level = data[tokenIndex].base.level;
-                let classType = data[tokenIndex].base.class;
-                sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount, level, classType);
-            }
+            await getDataAndInsert(tokenToScrap);
             tokenToScrap = [];
             writePercentage(i, total, 0, startDate);
         }
         i++;
     }
+    await getDataAndInsert(tokenToScrap);
+    logUtils.log(`Scrap finished => ${new Date()}`);
+}
+
+const getDataAndInsert = async (tokenToScrap) => {
     let data = await scrapUtil.getTokensData(tokenToScrap);
     for (let tokenIndex in tokenToScrap){
         let ownerAddress = await scrapUtil.getOwnerOfToken(tokenToScrap[tokenIndex]);
@@ -80,7 +55,6 @@ const scrapDataFromList = async (tokenList)=> {
         let classType = data[tokenIndex].base.class;
         sqliteUtils.insertToken(tokenToScrap[tokenIndex], ownerAddress, materials1Count, goldCount, goldClaimableCount, level, classType);
     }
-    logUtils.log(`Scrap finished => ${new Date()}`);
 }
 
 const scrapDataFromAddress = async (address) => {

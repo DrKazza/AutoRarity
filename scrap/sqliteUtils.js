@@ -3,10 +3,7 @@ const db = require('better-sqlite3')('data.db', []);
 const initDb = () => {
     db.exec("CREATE TABLE IF NOT EXISTS `address` ( `id` VARCHAR(255) NOT NULL , PRIMARY KEY (`id`));");
     db.exec("CREATE TABLE IF NOT EXISTS `token` ( `id` INT NOT NULL , `owner` VARCHAR(255) NOT NULL , `xp` BIGINT UNSIGNED NOT NULL DEFAULT '0' , `class` TINYINT UNSIGNED NOT NULL DEFAULT '0' , `level` TINYINT UNSIGNED NOT NULL DEFAULT '1' , `gold` BIGINT UNSIGNED NOT NULL DEFAULT '0' , `material_1` BIGINT UNSIGNED NOT NULL DEFAULT '0' , `strength` INT UNSIGNED NOT NULL DEFAULT '0' , `dexterity` INT UNSIGNED NOT NULL DEFAULT '0' , `constitution` INT UNSIGNED NOT NULL DEFAULT '0' , `intelligence` INT UNSIGNED NOT NULL DEFAULT '0' , `wisdom` INT UNSIGNED NOT NULL DEFAULT '0' , `charisma` INT UNSIGNED NOT NULL DEFAULT '0' , PRIMARY KEY (`id`));");
-    try {
-        db.exec("ALTER TABLE `token` ADD COLUMN gold_claimable BIGINT UNSIGNED NOT NULL DEFAULT '0'")
-    } catch (e) {
-    }
+    try {db.exec("ALTER TABLE `token` ADD COLUMN gold_claimable BIGINT UNSIGNED NOT NULL DEFAULT '0'")} catch (e) {}
 }
 
 const insertAddress = (address) => {
