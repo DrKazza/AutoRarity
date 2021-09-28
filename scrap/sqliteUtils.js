@@ -14,9 +14,9 @@ const insertAddress = (address) => {
     db.exec(`INSERT INTO address (id) VALUES ('${address}') ON CONFLICT DO NOTHING;`);
 }
 
-const insertToken = (id, owner, materials1Count, goldCount, claimableGoldCount) => {
+const insertToken = (id, owner, materials1Count, goldCount, claimableGoldCount, level, classType) => {
     initDb();
-    db.exec(`INSERT INTO token (id, owner, material_1, gold, gold_claimable) VALUES ('${id}', '${owner}', ${materials1Count}, ${goldCount}, ${claimableGoldCount}) ON CONFLICT DO UPDATE SET owner=excluded.owner, material_1=excluded.material_1, gold=excluded.gold, gold_claimable=excluded.gold_claimable;`);
+    db.exec(`INSERT INTO token (id, owner, material_1, gold, gold_claimable, level, class) VALUES ('${id}', '${owner}', ${materials1Count}, ${goldCount}, ${claimableGoldCount}, ${level}, ${classType}) ON CONFLICT DO UPDATE SET owner=excluded.owner, material_1=excluded.material_1, gold=excluded.gold, gold_claimable=excluded.gold_claimable, level=excluded.level, class=excluded.class;`);
 }
 
 const getNumberOfTokenByAddress = (minCount = -1) => {
@@ -26,6 +26,16 @@ const getNumberOfTokenByAddress = (minCount = -1) => {
     }else {
         return db.prepare(`SELECT owner, SUM(gold)/POWER(10, 18) as 'gold', SUM(gold_claimable)/POWER(10, 18) as 'gold_claimable', SUM(material_1) as 'material_1', count(*) as 'token' FROM token GROUP BY owner ORDER BY count(*)`).all();
     }
+}
+
+const getTokenCountByLevelAndAddress =(address) => {
+    initDb();
+    return db.prepare(`SELECT level, count(*) as 'token' FROM token WHERE owner = '${address}' GROUP BY level`).all();
+}
+
+const getTokenCountByClassAndAddress =(address) => {
+    initDb();
+    return db.prepare(`SELECT class, count(*) as 'token' FROM token WHERE owner = '${address}' GROUP BY class`).all();
 }
 
 const getNumberOfTokenFromAddress = (address) => {
@@ -52,5 +62,7 @@ module.exports = {
     getNumberOfTokenByAddress,
     getMaxTokenId,
     getTokenListFromAddress,
-    getNumberOfTokenFromAddress
+    getNumberOfTokenFromAddress,
+    getTokenCountByLevelAndAddress,
+    getTokenCountByClassAndAddress
 };

@@ -328,15 +328,21 @@ const init = async () => {
                 let minCount = typeof args[1] === 'undefined' ? -1 : args[1];
                 let data = scrapSqliteUtils.getNumberOfTokenByAddress(minCount);
                 for (let dat of data){
+                    dat.class = scrapSqliteUtils.getTokenCountByClassAndAddress(dat.owner)
+                    dat.level = scrapSqliteUtils.getTokenCountByLevelAndAddress(dat.owner);
                     logUtils.log(dat);
                 }
                 break;
             case 'testDataAddress':
             case 'tda':
-                if (typeof args[1] === 'undefined'){
+                let address = args[1];
+                if (typeof address === 'undefined'){
                     logUtils.log("You must provide an address");
                 } else {
-                    console.log(await scrapSqliteUtils.getNumberOfTokenFromAddress(args[1]));
+                    let baseData = scrapSqliteUtils.getNumberOfTokenFromAddress(address)
+                    baseData.class = scrapSqliteUtils.getTokenCountByClassAndAddress(address)
+                    baseData.level = scrapSqliteUtils.getTokenCountByLevelAndAddress(address);
+                    logUtils.log(baseData);
                 }
                 break;
             case 'globalStats':
