@@ -23,8 +23,8 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     dataUtils.updateToken(tokenID, null, true);
     let somethingDone = false;
     let tokenStats = await core.getStats(tokenID);
-    let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
-    if (xpCountdown < 0) {
+    let xpCountdown = Math.floor(tokenStats[1] - (Date.now() / 1000))
+    if (xpCountdown < -5) {
         somethingDone = true;
         let xpEarnAttempt = await core.claimXp(tokenID)
         if (xpEarnAttempt[1] === 'high gas') {
@@ -34,7 +34,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
             return [false, delayToUse, 'error'];
         }
     } else {
-        dataUtils.updateToken(tokenID, new Date(Date.now() + xpCountdown * 1000));
+        dataUtils.updateToken(tokenID, new Date(Date.now() + (xpCountdown+5) * 1000));
         delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
     }
     if (constVal.autoLevelUp) {
