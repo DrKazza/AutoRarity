@@ -30,8 +30,12 @@ const insertToken = (tokenID) => {
     db.exec(`INSERT INTO token (id) VALUES (${tokenID}) ON CONFLICT DO NOTHING;`);
 }
 
-const updateToken = (tokenID, nextAvailable) => {
+const updateToken = (tokenID, nextAvailable, toNull = false) => {
     initDb();
+    if (toNull){
+        db.exec(`UPDATE token SET next_available=NULL WHERE id = ${tokenID};`);
+        return;
+    }
     let nextAvailableDateTime = dataUtils.dateToIsoDateTime(nextAvailable);
     db.exec(`UPDATE token SET next_available='${nextAvailableDateTime}' WHERE id = ${tokenID} AND (next_available > '${nextAvailableDateTime}' OR next_available IS NULL);`);
 }
@@ -76,7 +80,7 @@ const getNextAvailableTime = () => {
         return constVal.minimumDelay;
     }
     let date = (new Date(res.next_available + ' GMT'));
-    return date.getTime() - Date.now();
+    return (date.getTime() - Date.now())/1000;
 }
 
 const updateAccountTransaction = async (startBlockNumber, endBlockNumber) =>  {

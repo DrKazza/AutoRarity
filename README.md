@@ -45,6 +45,11 @@ The telegram bot only work when the script is started in auto mode
 For now the bot send warning when your FTM balance is low (the low balance is configurable in `.env` file)  
 And there is one command `/getStats` that will send you the same data as `node index gs`, you can test it by starting the bot in test mode `node index testBot`
 
+## Batch mode
+You can pass `--batch` to switch to batch mode that will not wait for every transaction but stack then and wait when the batch reach a certain amount 10 by default. You can also specify the batch size `--batch=15`  
+When it's activated you will see this warning `/!\BATCH MODE ON/!\` at start
+
+
 ## Debug mode
-You can pass `--debug=true` to switch to debug mode that will display real error instead of `xp error`/`point error`etc  
+You can pass `--debug` to switch to debug mode that will display real error instead of `xp error`/`point error`etc  
 When it's activated you will see this warning `/!\DEBUG ON/!\` at start

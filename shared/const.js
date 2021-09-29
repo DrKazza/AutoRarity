@@ -20,6 +20,10 @@ const rawArgs = parseArg(process.argv.slice(2));
 
 const debug = rawArgs.debug === undefined ? false : parseBool(rawArgs.debug);
 
+const batchThreshold = rawArgs.batch === undefined ? 0 : (typeof rawArgs.batch === 'number' ? rawArgs.batch : 10);
+
+const batchMode = batchThreshold > 0;
+
 let myTokenIds = [];
 const importedTokenIds = process.env.TOKENIDS;
 if (importedTokenIds === undefined) {
@@ -128,5 +132,7 @@ module.exports = {
     materials1TransferThreshold,
     cellarThreshold,
     goldClaimThreshold,
-    rarClaimThreshold
+    rarClaimThreshold,
+    batchThreshold,
+    batchMode
 }

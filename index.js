@@ -20,6 +20,7 @@ const txUtils = require('./shared/txUtils');
 
 
 const doStuff = async (tokenID, delayToUse, dungeonList) => {
+    dataUtils.updateToken(tokenID, null, true);
     let somethingDone = false;
     let tokenStats = await core.getStats(tokenID);
     let xpCountdown = Math.floor(tokenStats[1] - Date.now() / 1000)
@@ -159,6 +160,7 @@ const checkTokens = async () => {
         let res = await doStuff(tokenID, delayToUse, dungeonList);
         delayToUse = res[2];
     }
+    await txUtils.checkAndProcessLastPending();
     return [delayToUse];
 }
 
@@ -261,6 +263,10 @@ const init = async () => {
     } else {
         if (constVal.debug){
             logUtils.log(`/!\\DEBUG ON/!\\`);
+        }
+        if (constVal.batchMode){
+            logUtils.log(`/!\\BATCH MODE ON/!\\`);
+            logUtils.log(`/!\\BATCH size ${constVal.batchThreshold}/!\\`);
         }
         switch (args[0]) {
             case 'summary':
@@ -421,7 +427,6 @@ const init = async () => {
         }
     }
 }
-
 
 init();
 
