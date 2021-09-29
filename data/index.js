@@ -18,9 +18,7 @@ const insertTokenTx = (tokenID, hash, fees, type, status, createdAt = undefined)
     if (typeof createdAt !== 'undefined'){
         let createdAtDateTime = dataUtils.dateToIsoDateTime(createdAt);
         db.exec(`INSERT INTO token_tx (hash, token, fees, type, status, created_at) VALUES ('${hash}', ${tokenID}, ${fees}, '${type}', ${status}, '${createdAtDateTime}') ON CONFLICT DO NOTHING;`);
-
     } else {
-
         db.exec(`INSERT INTO token_tx (hash, token, fees, type, status) VALUES ('${hash}', ${tokenID}, ${fees}, '${type}', ${status}) ON CONFLICT DO NOTHING;`);
     }
 }

@@ -150,7 +150,7 @@ const checkTokens = async () => {
     let checkGas = await utils.calculateGasPrice()
     if (checkGas < 0) {
         logUtils.log(`Gas Price too high: ${-checkGas} max: ${constVal.maxGasPrice/(10**9)}`)
-        delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
+        delayToUse = constVal.gasRetryDelay;
 
         return [delayToUse]
     }
