@@ -145,7 +145,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
 }
 
 const checkTokens = async () => {
-    let delayToUse = dataUtils.getNextAvailableTime();
+    let delayToUse = Math.max(dataUtils.getNextAvailableTime(), constVal.minimumDelay);
     let dungeonList = dungeon.getAvailableDungeons();
     let checkGas = await utils.calculateGasPrice()
     if (checkGas < 0) {

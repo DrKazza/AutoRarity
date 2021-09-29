@@ -84,7 +84,8 @@ const getNextAvailableTime = () => {
         return constVal.minimumDelay;
     }
     let date = (new Date(res.next_available + ' GMT'));
-    return Math.max(date.getTime() - Date.now()/1000, constVal.minimumDelay);
+    let next = (date.getTime() - Date.now())/1000;
+    return next < 0 ? constVal.minimumDelay : next;
 }
 
 const updateAccountTransaction = async (startBlockNumber, endBlockNumber) =>  {
