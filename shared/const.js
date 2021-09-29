@@ -88,6 +88,14 @@ if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Numb
 const maxGasPrice = ethers.utils.parseUnits(maxGasPx.toString(), 9);
 
 let envFile = '.env';
+for (let args of rawArgs['_']){
+    let dotenvReg = /dotenv_config_path=(.*)/
+    let dotenvRegVal = dotenvReg.exec(args);
+    if (dotenvRegVal){
+        envFile = dotenvRegVal[1];
+        break;
+    }
+}
 
 const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
 

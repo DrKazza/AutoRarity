@@ -236,11 +236,7 @@ const init = async () => {
     const rawArgs = parseArgs(process.argv.slice(2));
     const args = rawArgs['_'].filter((value) => {
         let dotenvReg = /dotenv_config_path=(.*)/
-        let dotenvRegVal = dotenvReg.exec(value);
-        if (dotenvRegVal){
-            constVal.envFile = dotenvRegVal[1];
-        }
-        return !dotenvRegVal;
+        return !dotenvReg.exec(value);
     });
     if (typeof args[0] === 'undefined' || args[0] === 'help') {
         logUtils.log(`Rarity Autolevelling commands are:
