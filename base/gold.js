@@ -5,6 +5,7 @@ const ethers = require("ethers");
 const logUtils = require("../shared/logUtils");
 const fileUtils = require("../shared/fileUtils");
 const txUtils = require("../shared/txUtils");
+const { getOwnerOfToken } = require('./core');
 
 const abi = contractAddresses.goldABI;
 const address = contractAddresses.rarityGold;
@@ -118,6 +119,18 @@ const transferToMule = async (tokenID, amount) => {
     }
     if (tokenID === mule){
         return [false, 'same token as mule'];
+    }
+    if (constVal.mule.goldAddress.length > 0){
+        try {
+            let owner = await getOwnerOfToken(tokenID);
+            if (owner !== constVal.mule.goldAddress){
+                logUtils.log(`${tokenID} => can't transfer gold to mule, owner of mule does not match`);
+                return [false, 'owner of mule does not match'];
+            }
+        } catch (e) {
+            logUtils.log(`${tokenID} => can't transfer gold to mule, mule does not exist`);
+            return [false, 'token does not exist'];
+        }
     }
     return await transfer(tokenID, mule, amount);
 }

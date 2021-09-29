@@ -13,6 +13,7 @@ let contractGetStats;
 let contractClaimXp;
 let contractLevelUp;
 let contractSummon;
+let contractGetOwnerOfToken;
 
 const getStats = async (tokenID) => {
     if (typeof contractGetStats === 'undefined') {
@@ -209,10 +210,18 @@ const updateTokenList = async () => {
     await tokenGetter.updateDotEnvFile(tokens);
 }
 
+const getOwnerOfToken = async (tokenID) => {
+    if (typeof contractGetOwnerOfToken === 'undefined') {
+        contractGetOwnerOfToken = new utils.web3.eth.Contract(contractAddresses.manifestABI, contractAddresses.rarityManifested);
+    }
+    return await contractGetOwnerOfToken.methods.ownerOf(tokenID).call();
+}
+
 module.exports = {
     getStats,
     claimXp,
     levelUp,
     massSummon,
-    updateTokenList
+    updateTokenList,
+    getOwnerOfToken
 }

@@ -39,10 +39,17 @@ const nonceManager = new NonceManager(account);
 const liveTradingVar = process.env.LIVETRADING;
 const liveTrading = liveTradingVar === undefined ? false : parseBool(liveTradingVar);
 
+let muleGoldAddressVar = process.env.GOLD_MULE_ADDRESS;
+let muleRarAddressVar = process.env.RAR_MULE_ADDRESS;
+let muleMaterials1AddressVar = process.env.MATERIALS_1_MULE_ADDRESS;
+
 const mule = {
     gold: parseInt(process.env.GOLD_MULE, 10),
+    goldAddress: muleGoldAddressVar === undefined ? '' : muleGoldAddressVar,
     rar: parseInt(process.env.RAR_MULE, 10),
-    materials1: parseInt(process.env.MATERIALS_1_MULE, 10)
+    rarAddress: muleRarAddressVar === undefined ? '' : muleRarAddressVar,
+    materials1: parseInt(process.env.MATERIALS_1_MULE, 10),
+    materials1Address: muleMaterials1AddressVar === undefined ? '' : muleMaterials1AddressVar,
 }
 const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
 const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar);
@@ -58,19 +65,19 @@ const cellarThresholdVar = process.env.CELLAR_THRESHOLD;
 const cellarThreshold = cellarThresholdVar === undefined || cellarThresholdVar.length === 0 ? 5 : parseInt(cellarThresholdVar, 10);
 
 const goldTransferThresholdVar = process.env.GOLD_TRANSFER_THRESHOLD;
-const goldTransferThreshold = goldTransferThresholdVar === undefined || goldTransferThresholdVar.length === 0 ? 1000 : parseInt(goldTransferThresholdVar, 10);
+const goldTransferThreshold = goldTransferThresholdVar === undefined ? 1000 : parseInt(goldTransferThresholdVar, 10);
 
 const goldClaimThresholdVar = process.env.GOLD_CLAIM_THRESHOLD;
-const goldClaimThreshold = goldClaimThresholdVar === undefined || goldClaimThresholdVar.length === 0 ? 1000 : parseInt(goldClaimThresholdVar, 10);
+const goldClaimThreshold = goldClaimThresholdVar === undefined ? 1000 : parseInt(goldClaimThresholdVar, 10);
 
 const rarTransferThresholdVar = process.env.RAR_TRANSFER_THRESHOLD;
-const rarTransferThreshold = rarTransferThresholdVar === undefined || rarTransferThresholdVar.length === 0 ? 1000 : parseInt(rarTransferThresholdVar, 10);
+const rarTransferThreshold = rarTransferThresholdVar === undefined ? 1000 : parseInt(rarTransferThresholdVar, 10);
 
 const rarClaimThresholdVar = process.env.RAR_CLAIM_THRESHOLD;
-const rarClaimThreshold = rarClaimThresholdVar === undefined || rarClaimThresholdVar.length === 0 ? 1000 : parseInt(rarClaimThresholdVar, 10);
+const rarClaimThreshold = rarClaimThresholdVar === undefined ? 1000 : parseInt(rarClaimThresholdVar, 10);
 
 const materials1TransferThresholdVar = process.env.MATERIALS_1_TRANSFER_THRESHOLD;
-const materials1TransferThreshold = materials1TransferThresholdVar === undefined || materials1TransferThresholdVar.length === 0 ? 100 : parseInt(materials1TransferThresholdVar, 10);
+const materials1TransferThreshold = materials1TransferThresholdVar === undefined ? 100 : parseInt(materials1TransferThresholdVar, 10);
 
 const maxGasPxVar = process.env.MAXGAS;
 if (maxGasPxVar === undefined){maxGasPx = defaultMaxGasPx} else {maxGasPx = Number(maxGasPxVar)}

@@ -5,6 +5,7 @@ const {contractAddresses} = require('../shared/contractAddresses');
 const ethers = require("ethers");
 const fileUtils = require("../shared/fileUtils");
 const txUtils = require("../shared/txUtils");
+const {getOwnerOfToken} = require("./core");
 
 const abi = contractAddresses.rarABI;
 const address = contractAddresses.rarityRAR;
@@ -22,7 +23,7 @@ const getStats = async (tokenID) => {
     try {
         claimable = await contractGetStats.methods.claimable(tokenID).call();
     } catch (e) {
-        
+
     }
     return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18)), goldheld]
 }
@@ -119,6 +120,18 @@ const transferToMule = async (tokenID, amount) => {
     }
     if (tokenID === mule){
         return [false, 'same token as mule'];
+    }
+    if (constVal.mule.rarAddress.length > 0){
+        try {
+            let owner = await getOwnerOfToken(tokenID);
+            if (owner !== constVal.mule.rarAddress){
+                logUtils.log(`${tokenID} => can't transfer rar to mule, owner of mule does not match`);
+                return [false, 'owner of mule does not match'];
+            }
+        } catch (e) {
+            logUtils.log(`${tokenID} => can't transfer rar to mule, mule does not exist`);
+            return [false, 'token does not exist'];
+        }
     }
     return await transfer(tokenID, mule, amount);
 }
