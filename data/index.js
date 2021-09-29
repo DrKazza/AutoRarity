@@ -50,6 +50,12 @@ const getAllToken = () =>{
     return tokenList;
 }
 
+const getTokenCount = () =>{
+    initDb();
+    let res = db.prepare(`SELECT COUNT(*) as 'count' from token;`).get();
+    return res.count;
+}
+
 const getAvailableToken = () => {
     initDb();
     for (let token of constVal.myTokenIds){
@@ -185,5 +191,6 @@ module.exports = {
     getTotalFeesForToken,
     getTotalFees,
     getNextAvailableTime,
-    updateAccountTransaction
+    updateAccountTransaction,
+    getTokenCount
 }

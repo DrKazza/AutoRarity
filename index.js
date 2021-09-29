@@ -155,7 +155,8 @@ const checkTokens = async () => {
         return [delayToUse]
     }
     let tokenList = dataUtils.getAvailableToken();
-    console.log(`${tokenList.length} of ${constVal.myTokenIds.length} tokens ready to do somethings`);
+    let tokenCount = dataUtils.getTokenCount();
+    console.log(`${tokenList.length} of ${tokenCount} tokens ready to do somethings`);
     for (let tokenID of tokenList) {
         let res = await doStuff(tokenID, delayToUse, dungeonList);
         delayToUse = res[2];
