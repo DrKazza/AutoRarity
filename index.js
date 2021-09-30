@@ -24,7 +24,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     let somethingDone = false;
     let tokenStats = await core.getStats(tokenID);
     let xpCountdown = Math.floor(tokenStats[1] - (Date.now() / 1000))
-    if (xpCountdown < -5) {
+    if (xpCountdown < -30) {
         somethingDone = true;
         let xpEarnAttempt = await core.claimXp(tokenID)
         if (xpEarnAttempt[1] === 'high gas') {
@@ -34,7 +34,7 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
             return [false, delayToUse, 'error'];
         }
     } else {
-        dataUtils.updateToken(tokenID, new Date(Date.now() + (xpCountdown+5) * 1000));
+        dataUtils.updateToken(tokenID, new Date(Date.now() + (xpCountdown+30) * 1000));
         delayToUse = Math.max(Math.min(xpCountdown, delayToUse), constVal.minimumDelay)
     }
     if (constVal.autoLevelUp) {
@@ -108,14 +108,12 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
     if (constVal.enableAutoDungeon){
         for (let dungeonName of dungeonList){
             let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, true);
-            if (dungeonAttempt[0]) {
-                dataUtils.updateToken(tokenID, new Date(Date.now() + constVal.xpPendingDelay * 1000));
-                delayToUse = Math.max(Math.min(constVal.xpPendingDelay, delayToUse), constVal.minimumDelay)
-            } else if (dungeonAttempt[1] === 'high gas') {
+            if (dungeonAttempt[1] === 'high gas') {
                 // fail due to high gas price
                 delayToUse = Math.max(Math.min(constVal.gasRetryDelay, delayToUse), constVal.minimumDelay)
             } else if (dungeonAttempt[1] === 'time') {
                 // fail due to not time not available
+                dataUtils.updateToken(tokenID, new Date(Date.now() + (dungeonAttempt[2]+30) * 1000));
                 delayToUse = Math.max(Math.min(dungeonAttempt[2], delayToUse), constVal.minimumDelay)
             } else if (dungeonAttempt[1] === 'error'){
                 return [false, delayToUse, 'error'];

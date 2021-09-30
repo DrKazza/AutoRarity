@@ -27,6 +27,9 @@ const run = async (tokenID) => {
         logUtils.log(`${tokenID} => [${dungeonName}] not available => ${timeLeft[0]}h${timeLeft[1]}m`);
         return [false, 'time', timeLeft[2]]
     }
+    if (timeLeft[2] > -30){
+        return [false, 'time', timeLeft[2]];
+    }
     if (thisGas < 0) {
         logUtils.log(`${tokenID} => Gas Price too high: ${-thisGas}`)
         return [false, 'high gas']
@@ -98,5 +101,6 @@ const getTimeUntilAvailable = async (tokenID) => {
 module.exports = {
     dungeonName,
     run,
-    scout
+    scout,
+    getTimeUntilAvailable
 }

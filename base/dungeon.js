@@ -1,6 +1,5 @@
 const dungeons = require("../dungeons");
 const constVal = require("../shared/const");
-const utils = require('../shared/utils');
 const logUtils = require("../shared/logUtils");
 
 const displayAvailableDungeons = () => {

@@ -1,3 +1,4 @@
+const {dungeonName} = require("./materials1");
 
 const dungeons = {
     cellar: require('./materials1')
@@ -19,6 +20,10 @@ const runDungeon = async (dungeonName, token) => {
     return await dungeons[dungeonName].run(token);
 }
 
+const getTimeUntilAvailable = async (dungeonName, token) =>{
+    return await dungeons[dungeonName].getTimeUntilAvailable(token);
+}
+
 const scoutDungeon = async (dungeonName, token) => {
     await dungeons[dungeonName].scout(token);
 }
@@ -27,5 +32,6 @@ module.exports = {
     getAvailableDungeons,
     runDungeon,
     scoutDungeon,
-    isDungeonAvailable
+    isDungeonAvailable,
+    getTimeUntilAvailable
 }

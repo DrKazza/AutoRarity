@@ -16,7 +16,7 @@ const timeLeft = (timestamp) => {
     let rightNow = Date.now()/1000
     let timeleft = timestamp - rightNow
     if (timeleft < 0) {
-        return [-1,0]
+        return [-1, timeleft]
     } else {
         let [hrs, mins] = secsToText(timeleft)
         return [hrs, mins, timeleft]
