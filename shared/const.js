@@ -11,7 +11,6 @@ const xpRetryDelay = 24 * 60 * 60 // 1 day in seconds - try to level up every 24
 const gasRetryDelay = 5 * 60 // if gas is too expensive then try again in 5 mins
 const xpPendingDelay = 2 * 60 // if you're waiting for xp to be earned before levelling up then try again in 2 mins
 const minimumDelay = 60 // don't repeat too often
-const nonceDelay = 6 * 60 * 60 // wait 6 hour to see if all transaction have passed a percentage of this time will be use
 // Don't set the delays too short or you'll keep trying to XP up and just burn gas for no reason
 
 const classes = ['noClass', 'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Wizard'];
@@ -55,6 +54,13 @@ const mule = {
     materials1: parseInt(process.env.MATERIALS_1_MULE, 10),
     materials1Address: muleMaterials1AddressVar === undefined ? '' : muleMaterials1AddressVar,
 }
+
+const autoDungeonCellarVar = process.env.AUTO_DUNGEON_CELLAR;
+
+const autoDungeon = {
+    cellar: autoDungeonCellarVar === undefined ? true : parseBool(autoDungeonCellarVar)
+}
+
 const autoLevelUpVar = process.env.AUTO_LEVEL_UP;
 const autoLevelUp = autoLevelUpVar === undefined ? true : parseBool(autoLevelUpVar);
 const autoTransferToMuleVar = process.env.AUTO_TRANSFER_TO_MULE;
@@ -63,8 +69,6 @@ const claimGoldVar = process.env.ENABLE_CLAIM_GOLD;
 const enableClaimGold = claimGoldVar === undefined ? true : parseBool(claimGoldVar);
 const claimRarVar = process.env.ENABLE_CLAIM_RAR;
 const enableClaimRar = claimRarVar === undefined ? false : parseBool(claimRarVar);
-const autoDungeonVar = process.env.ENABLE_AUTO_DUNGEON;
-const enableAutoDungeon = autoDungeonVar === undefined ? true : parseBool(autoDungeonVar);
 const cellarThresholdVar = process.env.CELLAR_THRESHOLD;
 const cellarThreshold = cellarThresholdVar === undefined || cellarThresholdVar.length === 0 ? 5 : parseInt(cellarThresholdVar, 10);
 
@@ -134,7 +138,6 @@ module.exports = {
     lowFTM,
     enableClaimGold,
     enableClaimRar,
-    enableAutoDungeon,
     goldTransferThreshold,
     rarTransferThreshold,
     materials1TransferThreshold,
@@ -142,5 +145,6 @@ module.exports = {
     goldClaimThreshold,
     rarClaimThreshold,
     batchThreshold,
-    batchMode
+    batchMode,
+    autoDungeon
 }

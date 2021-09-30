@@ -105,8 +105,8 @@ const doStuff = async (tokenID, delayToUse, dungeonList) => {
             }
         }
     }
-    if (constVal.enableAutoDungeon){
-        for (let dungeonName of dungeonList){
+    for (let dungeonName of dungeonList){
+        if (typeof constVal.autoDungeon[dungeonName] !== 'undefined' && constVal.autoDungeon[dungeonName]){
             let dungeonAttempt = await dungeon.doDungeon(dungeonName, tokenID, true);
             if (dungeonAttempt[1] === 'high gas') {
                 // fail due to high gas price
