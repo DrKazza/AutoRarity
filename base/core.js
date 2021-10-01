@@ -6,6 +6,7 @@ const constVal = require("../shared/const");
 const ethers = require("ethers");
 const tokenGetter = require("../shared/tokenIdGetter.js");
 const txUtils = require("../shared/txUtils");
+const dataUtils = require('../data');
 const abi =contractAddresses.manifestABI;
 const address = contractAddresses.rarityManifested;
 
@@ -207,7 +208,9 @@ const massSummon = async (classToSummon = "all", quantity = 1, isMass = false) =
 
 const updateTokenList = async () => {
     let tokens = await tokenGetter.getTokenList(constVal.walletAddress);
-    await tokenGetter.updateDotEnvFile(tokens);
+    dataUtils.updateTokenList(tokens);
+    let tokenCount = dataUtils.getTokenCount();
+    logUtils.log(`The local database has been successfully updated with ${tokenCount} tokens`);
 }
 
 const getOwnerOfToken = async (tokenID) => {

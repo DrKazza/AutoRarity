@@ -23,15 +23,6 @@ const batchThreshold = rawArgs.batch === undefined ? 0 : (typeof rawArgs.batch =
 
 const batchMode = batchThreshold > 0;
 
-let myTokenIds = [];
-const importedTokenIds = process.env.TOKENIDS;
-if (importedTokenIds === undefined) {
-    console.log(`Did you forget to specify your tokens in the .env file?`)
-    process.exit(0)
-} else {
-    myTokenIds = importedTokenIds.split(",");
-}
-
 const secretKey = process.env.SECRETKEY;
 const walletAddress = process.env.WALLETADDRESS;
 const jsonRpcProvider = new ethers.providers.JsonRpcProvider(fantomRpcUrl, 250);
@@ -110,6 +101,8 @@ let chatId = chatIdVar === undefined ? '' : chatIdVar; // you may not want to au
 
 const lowFTMVar = process.env.LOW_FTM;
 const lowFTM = lowFTMVar === undefined ? 5 : parseInt(lowFTMVar, 10);
+
+let myTokenIds = [];
 
 module.exports = {
     fantomRpcUrl,

@@ -1,6 +1,6 @@
 const dungeons = require("../dungeons");
-const constVal = require("../shared/const");
 const logUtils = require("../shared/logUtils");
+const constVal = require("../shared/const");
 
 const displayAvailableDungeons = () => {
     logUtils.log('Available dungeon:');
@@ -39,7 +39,7 @@ const doDungeon = async (dungeonName, token, isAuto = false) => {
                 await dungeons.runDungeon(dungeonName, token);
             }
         } else {
-            if (!constVal.myTokenIds.includes(token.toString())){
+            if (!constVal.myTokenIds.includes(token)){
                 logUtils.log(`The token [${token}] is not part of your token list.\nmaybe update the token list'`)
                 return false;
             } else {

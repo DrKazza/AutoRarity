@@ -62,7 +62,7 @@ const scrapDataFromAddress = async (address) => {
     let rawTokenList = sqliteUtils.getTokenListFromAddress(address);
     let tokenList = [];
     for (let token of rawTokenList){
-        tokenList.push(token.token);
+        tokenList.push(token.id);
     }
     await scrapDataFromList(tokenList);
 }

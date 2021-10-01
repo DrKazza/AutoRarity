@@ -7,7 +7,7 @@
         node index.js gs/globalStats                - gives global stats (gold/materials1/number of token of each classes)
         node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
         node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
-        node index.js utl/updateTokenList           - update the token id list in .env file
+        node index.js utl/updateTokenList           - update the token list in local database
         node index.js dgl/dgList                    - get list of available dungeon
         node index.js cl/classList                  - get list of available class
         node index.js tl/templateList               - get list of available template
@@ -25,8 +25,8 @@
 
 1. run `npm install`
 2. Copy the `.env.dist` to `.env`
-3. Fill the variables with your data, you don't have to fill the `TOKENIDS` variable
-4. Run `node index utl` to update the `TOKENIDS` variable
+3. Fill the variables with your data
+4. Run `node index utl` to update the token list in local database
 5. Run `node index sum` or ` node index gl` to see if everything is setup correctly
 6. Run `node index xp` to launch one time or `node index auto` for automatic farming
 

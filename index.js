@@ -242,7 +242,7 @@ const init = async () => {
     node index.js gs/globalStats                - gives global stats (gold/materials1/number of token of each classes)
     node index.js xp                            - claim xp/level up/gold collection/dungeon/transferToMule - one off
     node index.js auto                          - automatic repeating xp/levelling/gold collection/dungeon/transferToMule
-    node index.js utl/updateTokenList           - update the token id list in .env file
+    node index.js utl/updateTokenList           - update the token list in local database
     node index.js dgl/dgList                    - get list of available dungeon
     node index.js cl/classList                  - get list of available class
     node index.js tl/templateList               - get list of available template
@@ -263,6 +263,7 @@ const init = async () => {
             logUtils.log(`/!\\BATCH MODE ON/!\\`);
             logUtils.log(`/!\\BATCH size ${constVal.batchThreshold}/!\\`);
         }
+        constVal.myTokenIds = dataUtils.getAllToken();
         switch (args[0]) {
             case 'summary':
             case 'sum':

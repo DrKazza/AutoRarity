@@ -43,7 +43,7 @@ const getNumberOfTokenFromAddress = (address) => {
 
 const getTokenListFromAddress = (address) => {
     initDb();
-    return db.prepare(`SELECT id as 'token' FROM token WHERE owner = '${address}'`).all();
+    return db.prepare(`SELECT id FROM token WHERE owner = '${address}'`).all();
 }
 
 const getMaxTokenId = () => {

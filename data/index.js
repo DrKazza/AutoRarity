@@ -8,34 +8,68 @@ const filename = `summoners${utils.slugify(constVal.envFile.replace(/^.*[\\\/]/,
 const sqlitePath = `./data/${filename}`;
 const db = require('better-sqlite3')(sqlitePath, []);
 
+let initDone = false;
+
 const initDb = () => {
+    if (initDone){
+        return;
+    }
     db.exec("CREATE TABLE IF NOT EXISTS `token` ( `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY, `next_available` DATETIME NULL);");
     db.exec("CREATE TABLE IF NOT EXISTS `token_tx` ( `hash` VARCHAR(255) NOT NULL PRIMARY KEY, `token` BIGINT UNSIGNED NOT NULL , `fees` DOUBLE NOT NULL , `type` VARCHAR(255) NOT NULL, `status` BOOLEAN NOT NULL, `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);");
+    initDone = true;
 }
 
 const insertTokenTx = (tokenID, hash, fees, type, status, createdAt = undefined) => {
     initDb();
     if (typeof createdAt !== 'undefined'){
         let createdAtDateTime = dataUtils.dateToIsoDateTime(createdAt);
-        db.exec(`INSERT INTO token_tx (hash, token, fees, type, status, created_at) VALUES ('${hash}', ${tokenID}, ${fees}, '${type}', ${status}, '${createdAtDateTime}') ON CONFLICT DO NOTHING;`);
+        db.prepare(`INSERT INTO token_tx (hash, token, fees, type, status, created_at) VALUES (@txHash, @tokenID, @fees, @txType, @status, @createdAtDateTime) ON CONFLICT DO NOTHING;`)
+            .run({
+                txHash:hash,
+                tokenID:tokenID,
+                fees:fees,
+                txType:type,
+                status:status,
+                createdAtDateTime:createdAtDateTime
+            });
     } else {
-        db.exec(`INSERT INTO token_tx (hash, token, fees, type, status) VALUES ('${hash}', ${tokenID}, ${fees}, '${type}', ${status}) ON CONFLICT DO NOTHING;`);
+        db.prepare(`INSERT INTO token_tx (hash, token, fees, type, status) VALUES (@txHash, @tokenID, @fees, @txType, @status) ON CONFLICT DO NOTHING;`)
+            .run({
+                txHash:hash,
+                tokenID:tokenID,
+                fees:fees,
+                txType:type,
+                status:status
+            });
     }
 }
 
-const insertToken = (tokenID) => {
+const insertToken = (tokenID, multiple = false) => {
     initDb();
-    db.exec(`INSERT INTO token (id) VALUES (${tokenID}) ON CONFLICT DO NOTHING;`);
+    let statement = db.prepare(`INSERT INTO token (id) VALUES (?) ON CONFLICT DO NOTHING;`)
+
+    if (multiple){
+        for (let token of tokenID){
+            statement.run(token);
+        }
+    } else{
+        statement.run(tokenID);
+    }
 }
 
 const updateToken = (tokenID, nextAvailable, toNull = false) => {
     initDb();
     if (toNull){
-        db.exec(`UPDATE token SET next_available=NULL WHERE id = ${tokenID};`);
+        db.prepare("UPDATE token SET next_available=NULL WHERE id = ?;")
+            .run(tokenID);
         return;
     }
     let nextAvailableDateTime = dataUtils.dateToIsoDateTime(nextAvailable);
-    db.exec(`UPDATE token SET next_available='${nextAvailableDateTime}' WHERE id = ${tokenID} AND (next_available > '${nextAvailableDateTime}' OR next_available IS NULL);`);
+    db.prepare("UPDATE token SET next_available=@nextAvailableDateTime WHERE id = @tokenID AND (next_available > @nextAvailableDateTime OR next_available IS NULL);")
+        .run({
+            nextAvailableDateTime:nextAvailableDateTime,
+            tokenID:tokenID
+        });
 }
 
 const getAllToken = () =>{
@@ -56,9 +90,6 @@ const getTokenCount = () =>{
 
 const getAvailableToken = () => {
     initDb();
-    for (let token of constVal.myTokenIds){
-        insertToken(token);
-    }
     let res = db.prepare(`SELECT id from token where next_available <= CURRENT_TIMESTAMP OR next_available IS NULL;`).all();
     let tokenList = []
     for (let data of res){
@@ -69,7 +100,7 @@ const getAvailableToken = () => {
 
 const getTotalFeesForToken = (tokenID) => {
     initDb();
-    return db.prepare(`SELECT SUM(fees) as 'fees', count(hash) as 'tx' from token_tx WHERE token = ${tokenID};`).get();
+    return db.prepare(`SELECT SUM(fees) as 'fees', count(hash) as 'tx' from token_tx WHERE token = ?`).get(tokenID);
 }
 
 const getTotalFees = () => {
@@ -181,6 +212,24 @@ const writePercentage = (current, max, start, startDate) => {
     logUtils.log(`progress => ${percentage}% (${current}/${max}) ~${perSecond}/s eta => ${eta[0]}h${eta[1]}m${sec}`);
 }
 
+
+const removeTokens = (tokens) => {
+    initDb();
+    let statement = db.prepare(`DELETE FROM token WHERE id = ?`);
+    for(let token of tokens){
+        statement.run(token);
+    }
+}
+const updateTokenList = (tokenList) => {
+    initDb();
+    let dbToken = getAllToken();
+    let tokenToRemove = dbToken.filter((token) => {
+        return !tokenList.includes(token)
+    });
+    removeTokens(tokenToRemove);
+    insertToken(tokenList, true);
+}
+
 module.exports = {
     insertTokenTx,
     insertToken,
@@ -191,5 +240,6 @@ module.exports = {
     getTotalFees,
     getNextAvailableTime,
     updateAccountTransaction,
-    getTokenCount
+    getTokenCount,
+    updateTokenList
 }

@@ -30,7 +30,6 @@ const getTokenList = async function (owner) {
                 data.summoners.forEach((elem) => {
                     let tokenID = parseInt(elem.id, 16);
                     tokenList.push(tokenID);
-                    dataDb.insertToken(tokenID);
                 })
                 currentResCount = data.summoners.length;
             });
