@@ -118,7 +118,6 @@ module.exports = {
     gasRetryDelay,
     xpPendingDelay,
     minimumDelay,
-    nonceDelay,
     maxGasPrice,
     jsonRpcProvider,
     walletAddress,
