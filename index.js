@@ -174,7 +174,7 @@ const autoRun = async (repeater) => {
             let retryDateTime = new Date((new Date()).getTime() + tokenCheck[0]*1000);
             let ftmBalance = (await utils.getFTMBalance())/10**18;
             if (ftmBalance <= constVal.lowFTM) {
-                logUtils.log(`WARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`, true);
+                logUtils.log(`${constVal.walletAddress}\nWARNING - Fantom Balance getting low : ${ftmBalance.toPrecision(4)}FTM`, true);
             }
             logUtils.log(`retrying in => ${textTimeleft[0]}h${textTimeleft[1]}m => ${retryDateTime}`);
             await utils.delay(tokenCheck[0]*1000);
