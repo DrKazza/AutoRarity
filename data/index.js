@@ -21,6 +21,7 @@ const initDb = () => {
 
 const insertTokenTx = (tokenID, hash, fees, type, status, createdAt = undefined) => {
     initDb();
+    status = status === true ? 1 : 0;
     if (typeof createdAt !== 'undefined'){
         let createdAtDateTime = dataUtils.dateToIsoDateTime(createdAt);
         db.prepare(`INSERT INTO token_tx (hash, token, fees, type, status, created_at) VALUES (@txHash, @tokenID, @fees, @txType, @status, @createdAtDateTime) ON CONFLICT DO NOTHING;`)
