@@ -20,8 +20,13 @@ const getAttributes = async (tokenIDvalue, abi, address) => {
 const getGoldStats = async (tokenIDvalue, abi, address) => {
     let contract = new web3.eth.Contract(abi, address);
     let goldheld = await contract.methods.balanceOf(tokenIDvalue).call();
-    let claimable = await contract.methods.claimable(tokenIDvalue).call();
-    return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18))]
+    try {
+        let claimable = await contract.methods.claimable(tokenIDvalue).call();
+        return [Math.floor(goldheld/(10**18)), Math.floor(claimable/(10**18))]
+    }
+    catch (error) {
+        return [Math.floor(goldheld/(10**18)), -1]
+    }
 }
 
 const getInventory = async (tokenIDvalue, abi, address) => {
@@ -75,6 +80,7 @@ const charSummary = async (tokenArray, contractAddresses) => {
         let goldtext = ''
         if (goldStats[0] > 0 || goldStats[1] > 0) {goldtext +=`Gold owned: ${goldStats[0]}`}
         if (goldStats[1] > 0) {goldtext +=` Gold to be claimed: ${goldStats[1]}`}
+        if (goldStats[1] < 0) {goldtext +=` *** Claimable gold function throws an error - CAUTION`}
         if (goldtext != '') {console.log(goldtext)}
         let inventory = await getInventory(tokenID, contractAddresses.materials1ABI, contractAddresses.rarityMaterials1);
         if (inventory > 0) {console.log(`${inventory} Crafting Materials (I)`)}

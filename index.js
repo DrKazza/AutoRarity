@@ -335,7 +335,8 @@ const checkTokens = async (dungeon) => {
                 // not ready to level up - do nothing
             }
         }
-        if ((await summary.getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold))[1] > 0) {
+        let goldData = await summary.getGoldStats(tokenID, contractAddresses.goldABI, contractAddresses.rarityGold);
+        if (goldData[1] > 0) {
             let goldEarnAttempt = await earnGold(tokenID, latestNonce)
             if (goldEarnAttempt[0]) {
                 goldGains.push(tokenID);
@@ -346,6 +347,8 @@ const checkTokens = async (dungeon) => {
             } else {
                 console.log(`Live trading off - token ${tokenID} did not claim gold`)
             }    
+        } else if (goldData[1] < 0) {
+            report(`Caution SummonerID: ${tokenID} throws an error when querying claimable gold`)
         }
         let lootgained = await scoutDungeon(tokenID, dungeonABI, dungeonAddress)
         if (lootgained[0] > 0) {
