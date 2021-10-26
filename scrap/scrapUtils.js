@@ -26,7 +26,11 @@ const getTokensData = async (tokenList) => {
     if (typeof libraryContract === 'undefined'){
         libraryContract = new web3.eth.Contract(contractAddresses.libraryABI, contractAddresses.rarityLibrary);
     }
-    return await libraryContract.methods.summoners_full(tokenList).call();
+    while (true){
+        try {
+            return await libraryContract.methods.summoners_full(tokenList).call();
+        } catch (e) {}
+    }
 }
 
 //TOKEN RELATED

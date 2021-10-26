@@ -12,7 +12,7 @@ const getGlobalStats = async () => {
     let tokenToScrap = []
     for (let tokenID of constVal.myTokenIds) {
         tokenToScrap.push(tokenID);
-        if (tokenToScrap.length > 0 && tokenToScrap.length%50 === 0){
+        if (tokenToScrap.length > 0 && tokenToScrap.length%constVal.scrapArraySize === 0){
             let data = await scrapUtil.getTokensData(tokenToScrap);
             for (let tokenIndex in tokenToScrap) {
                 totalMaterials1 += parseInt(data[tokenIndex].materials[0].balance, 10);

@@ -104,7 +104,10 @@ const lowFTM = lowFTMVar === undefined ? 5 : parseInt(lowFTMVar, 10);
 
 let myTokenIds = [];
 
+const scrapArraySize = 50;
+
 module.exports = {
+    scrapArraySize,
     fantomRpcUrl,
     totalGasLimit,
     xpRetryDelay,

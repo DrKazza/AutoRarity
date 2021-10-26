@@ -1,7 +1,8 @@
 const scrapUtil = require('./scrapUtils');
 const sqliteUtils = require('./sqliteUtils');
 const utils = require('../shared/utils');
-const logUtils = require("../shared/logUtils");
+const logUtils = require('../shared/logUtils');
+const constVal = require('../shared/const');
 
 const scrapData = async (start = 0) => {
     let startDate = new Date();
@@ -11,7 +12,7 @@ const scrapData = async (start = 0) => {
     let tokenToScrap = [];
     while (tokenID < maxId){
         tokenToScrap.push(tokenID);
-        if (tokenID%50 === 0 && tokenID > 0) {
+        if (tokenID%constVal.scrapArraySize === 0 && tokenID > 0) {
             await getDataAndInsert(tokenToScrap);
             tokenToScrap = [];
         }
@@ -32,7 +33,7 @@ const scrapDataFromList = async (tokenList)=> {
     let tokenToScrap = [];
     for (let tokenID of tokenList){
         tokenToScrap.push(tokenID);
-        if (i%50 === 0 && i > 0){
+        if (i > 0 && i%constVal.scrapArraySize === 0){
             await getDataAndInsert(tokenToScrap);
             tokenToScrap = [];
             writePercentage(i, total, 0, startDate);
