@@ -27,7 +27,12 @@ const waitForTx = async (tokenID, tx, type) => {
 }
 
 const processTx = async(tokenID, tx, type) => {
-    let transactionReceipt = await tx.wait();
+    let transactionReceipt
+    try {
+        transactionReceipt = await tx.wait();
+    } catch (e) {
+        transactionReceipt = e.receipt;
+    }
     let actual_cost = (transactionReceipt.gasUsed * (tx.gasPrice / 10**18));
     if (transactionReceipt.status === 1){
         logUtils.log(`${tokenID} => Tx success, cost: ${actual_cost.toFixed(5)} FTM, id: ${tx.hash}`);
