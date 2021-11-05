@@ -16,8 +16,9 @@ const waitForTx = async (tokenID, tx, type) => {
     });
     if (batchPendingWait.length >= constVal.batchThreshold){
         logUtils.log(`Batch threshold reach, starting wait of tx (${batchPendingWait.length}/${constVal.batchThreshold})`);
+        let i = 1;
         for (let batchItem of batchPendingWait){
-            await processTx(batchItem.tokenID, batchItem.tx, batchItem.type);
+            await processTx(batchItem.tokenID, batchItem.tx, batchItem.type, i++);
         }
         batchPendingWait = [];
     } else {
@@ -26,7 +27,7 @@ const waitForTx = async (tokenID, tx, type) => {
     return {status: 1};
 }
 
-const processTx = async(tokenID, tx, type) => {
+const processTx = async(tokenID, tx, type, i = 0) => {
     let transactionReceipt
     try {
         transactionReceipt = await tx.wait();
@@ -34,10 +35,14 @@ const processTx = async(tokenID, tx, type) => {
         transactionReceipt = e.receipt;
     }
     let actual_cost = (transactionReceipt.gasUsed * (tx.gasPrice / 10**18));
+    let iteratorText = '';
+    if (i > 0){
+        iteratorText = `(#${i}) `;
+    }
     if (transactionReceipt.status === 1){
-        logUtils.log(`${tokenID} => Tx success, cost: ${actual_cost.toFixed(5)} FTM, id: ${tx.hash}`);
+        logUtils.log(`${iteratorText}${tokenID} => Tx success, cost: ${actual_cost.toFixed(5)} FTM, id: ${tx.hash}`);
     } else {
-        logUtils.log(`${tokenID} => Tx failed, cost: ${actual_cost.toFixed(5)} FTM, id: ${tx.hash}`);
+        logUtils.log(`${iteratorText}${tokenID} => Tx failed, cost: ${actual_cost.toFixed(5)} FTM, id: ${tx.hash}`);
     }
 
     switch (type) {
