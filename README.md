@@ -56,6 +56,3 @@ When it's activated you will see this warning `/!\DEBUG ON/!\` at start
 
 ## Suggestion
 If you want new feature don't hesitate to open an issue and describe what you want to be implemented
-  
-## Support
-If you want to support the project you can donate here 0x587c75E725F7D2e00d603913E721ef019AB009d5
