@@ -7,9 +7,13 @@ if you get an error like this:
                   ^
 Error: error:0308010C:digital envelope routines::unsupported`
 
-go to a terminal and type:
+For Linux/MacOS go to a terminal and type:
 
 `export NODE_OPTIONS=--openssl-legacy-provider`
 
 then run as normal:
 node index.js
+
+For Windows setting the environment variables is a bit more annoying
+just do this instead:
+`node --openssl-legacy-provider index.js`
