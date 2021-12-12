@@ -25,7 +25,7 @@ const getTokenList = async function (owner) {
     let skip = 0;
     let currentResCount = 0;
     do {
-        await request('https://api.thegraph.com/subgraphs/name/rarity-adventure/rarity', SUMMONERS, {owner: owner, skip:skip})
+        await request('https://api.thegraph.com/subgraphs/name/rarity-adventure/rarity', SUMMONERS, {owner: owner.toLowerCase(), skip:skip})
             .then((data) => {
                 data.summoners.forEach((elem) => {
                     let tokenID = parseInt(elem.id, 16);
