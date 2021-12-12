@@ -13,9 +13,9 @@
   "author": "DrKazza",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DrKazza/AutoRarity/issues"
+    "url": "https://github.com/DUDU54/AutoRarity/issues"
   },
-  "homepage": "https://github.com/DrKazza/AutoRarity#readme",
+  "homepage": "https://github.com/DUDU54/AutoRarity#readme",
   "dependencies": {
     "@ethersproject/experimental": "^5.5.0",
     "@ethersproject/providers": "^5.4.5",
@@ -28,6 +28,7 @@
     "graphql-request": "^3.7.0",
     "mri": "^1.2.0",
     "readline": "^1.3.0",
-    "web3": "^1.6.1"
+    "web3": "^1.6.1",
+    "json-schema": ">=0.4.0"
   }
 }
